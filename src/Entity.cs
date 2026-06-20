@@ -2,6 +2,9 @@
 
 namespace ArturRios.Data;
 
+/// <summary>
+/// Abstract base class for all data entities. Provides a primary key identifier.
+/// </summary>
 public abstract class Entity
 {
     /// <summary>
