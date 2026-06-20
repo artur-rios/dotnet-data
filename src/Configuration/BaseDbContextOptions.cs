@@ -1,7 +1,7 @@
 ﻿namespace ArturRios.Data.Configuration;
 
 /// <summary>
-/// Base configuration options for a <see cref="Microsoft.EntityFrameworkCore.DbContext"/>.
+/// Base configuration options for an Entity Framework Core DbContext.
 /// </summary>
 public class BaseDbContextOptions
 {
