@@ -52,9 +52,9 @@ jobs:
       - name: Generate NuGet package
         run: |
           echo "Packing using csproj version"
-          dotnet pack src/ArturRios.Extensions.csproj \
+          dotnet pack src/ArturRios.Data.csproj \
             --configuration Release \
-            -p:RepositoryUrl=https://github.com/artur-rios/dotnet-extensions \
+            -p:RepositoryUrl=https://github.com/artur-rios/dotnet-data \
             -o packages
 
       - name: Publish to nuget.org
