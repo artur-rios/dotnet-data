@@ -1,4 +1,8 @@
-﻿# Dotnet Data
+﻿+++
+title = 'Dotnet Data'
++++
+
+# Dotnet Data
 
 Utilities for data access layer on .net projects
 

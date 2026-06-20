@@ -14,7 +14,7 @@
     <Nullable>enable</Nullable>
     <PackageId>ArturRios.Data</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/artur-rios/dotnet-data</PackageProjectUrl>
+    <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>utilities, data access, .net</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>

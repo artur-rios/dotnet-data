@@ -37,7 +37,7 @@ jobs:
           TAG_NAME="${GITHUB_REF##*/}"
           # Strip optional leading 'v' from tag, e.g., v1.2.3 -> 1.2.3
           TAG_VERSION="${TAG_NAME#v}"
-          CS_PROJ_VERSION=$(grep -oP '<Version>\K[^<]+' src/ArturRios.Extensions.csproj)
+          CS_PROJ_VERSION=$(grep -oP '<Version>\K[^<]+' src/ArturRios.Data.csproj)
           echo "Tag version: $TAG_VERSION"
           echo "csproj version: $CS_PROJ_VERSION"
           if [ "$TAG_VERSION" != "$CS_PROJ_VERSION" ]; then
@@ -47,7 +47,7 @@ jobs:
 
       - name: Restore
         run: |
-          dotnet restore src/ArturRios.Extensions.csproj
+          dotnet restore src/ArturRios.Data.csproj
 
       - name: Generate NuGet package
         run: |

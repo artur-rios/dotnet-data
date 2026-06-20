@@ -1,0 +1,30 @@
+baseURL = 'https://artur-rios.github.io/dotnet-data'
+locale = 'en-us'
+title = 'Dotnet Extensions'
+theme = 'hugo-theme-re-terminal'
+
+[module]
+[[module.mounts]]
+source = 'coverage-report'
+target = 'static/coverage-report'
+
+[params]
+author_email = 'arturdev@duck.com'
+name = 'Artur Rios'
+
+[params.logo]
+logoText = 'Dotnet Extensions'
+
+[menu]
+[[menu.main]]
+identifier = "author"
+name = "Author"
+url = "https://www.artur-rios.tech/"
+[[menu.main]]
+identifier = "github"
+name = "GitHub"
+url = "https://github.com/artur-rios/dotnet-data"
+[[menu.main]]
+identifier = "test-coverage"
+name = "Test Coverage"
+url = "https://artur-rios.github.io/dotnet-data/coverage-report"
