@@ -89,31 +89,71 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         return (IEnumerable<int>)matches.Select(e => e.Id).ToList();
     });
 
-    // Async members implemented in Task 8.
+    /// <inheritdoc />
+    public Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () => await Set.ToListAsync(ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T?>> GetByIdAsync(int id, CancellationToken ct = default) =>
+        GuardedAsync(async () => await Set.FirstOrDefaultAsync(e => e.Id == id, ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<T?>> GetByIdAsync(int id, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<int>> CreateAsync(T entity, CancellationToken ct = default) =>
+        GuardedAsync(async () =>
+        {
+            await Set.AddAsync(entity, ct);
+            await context.SaveChangesAsync(ct);
+            return entity.Id;
+        });
 
     /// <inheritdoc />
-    public Task<DataOutput<int>> CreateAsync(T entity, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<int>>> CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<int>>(async () =>
+        {
+            var list = entities.ToList();
+            await Set.AddRangeAsync(list, ct);
+            await context.SaveChangesAsync(ct);
+            return list.Select(e => e.Id).ToList();
+        });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<int>>> CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T>> UpdateAsync(T entity, CancellationToken ct = default) =>
+        GuardedAsync(async () =>
+        {
+            Set.Update(entity);
+            await context.SaveChangesAsync(ct);
+            return entity;
+        });
 
     /// <inheritdoc />
-    public Task<DataOutput<T>> UpdateAsync(T entity, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> UpdateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () =>
+        {
+            var list = entities.ToList();
+            Set.UpdateRange(list);
+            await context.SaveChangesAsync(ct);
+            return list;
+        });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> UpdateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<int>> DeleteAsync(T entity, CancellationToken ct = default) =>
+        GuardedAsync(async () =>
+        {
+            Set.Remove(entity);
+            await context.SaveChangesAsync(ct);
+            return entity.Id;
+        });
 
     /// <inheritdoc />
-    public Task<DataOutput<int>> DeleteAsync(T entity, CancellationToken ct = default) => throw new NotImplementedException();
-
-    /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<int>>> DeleteRangeAsync(IEnumerable<int> ids, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<int>>> DeleteRangeAsync(IEnumerable<int> ids, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<int>>(async () =>
+        {
+            var idList = ids.ToList();
+            var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct);
+            Set.RemoveRange(matches);
+            await context.SaveChangesAsync(ct);
+            return matches.Select(e => e.Id).ToList();
+        });
 
     /// <summary>Runs a synchronous data operation, converting failures to envelope errors.</summary>
     protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)
@@ -121,6 +161,27 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         try
         {
             return DataOutput<TResult>.New.WithData(operation());
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return DataOutput<TResult>.New.WithError(ConcurrencyMessage);
+        }
+        catch (DbUpdateException ex)
+        {
+            return DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}");
+        }
+        catch (DbException ex)
+        {
+            return DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.Message}");
+        }
+    }
+
+    /// <summary>Runs an asynchronous data operation, converting failures to envelope errors.</summary>
+    protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
+    {
+        try
+        {
+            return DataOutput<TResult>.New.WithData(await operation());
         }
         catch (DbUpdateConcurrencyException)
         {
