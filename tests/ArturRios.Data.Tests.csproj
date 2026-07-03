@@ -27,5 +27,6 @@
   <ItemGroup>
     <ProjectReference Include="..\src\ArturRios.Data.csproj" />
     <ProjectReference Include="..\src\ArturRios.Data.Sqlite\ArturRios.Data.Sqlite.csproj" />
+    <ProjectReference Include="..\src\ArturRios.Data.PostgreSql\ArturRios.Data.PostgreSql.csproj" />
   </ItemGroup>
 </Project>

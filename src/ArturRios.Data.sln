@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArturRios.Data.Tests", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArturRios.Data.Sqlite", "ArturRios.Data.Sqlite\ArturRios.Data.Sqlite.csproj", "{9EFA49BB-10C2-4E7E-8F8D-14DC6437A289}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArturRios.Data.PostgreSql", "ArturRios.Data.PostgreSql\ArturRios.Data.PostgreSql.csproj", "{ED419930-2720-4D37-9421-EE0423494E5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{9EFA49BB-10C2-4E7E-8F8D-14DC6437A289}.Release|x64.Build.0 = Release|Any CPU
 		{9EFA49BB-10C2-4E7E-8F8D-14DC6437A289}.Release|x86.ActiveCfg = Release|Any CPU
 		{9EFA49BB-10C2-4E7E-8F8D-14DC6437A289}.Release|x86.Build.0 = Release|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Debug|x64.Build.0 = Debug|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Debug|x86.Build.0 = Debug|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Release|x64.ActiveCfg = Release|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Release|x64.Build.0 = Release|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Release|x86.ActiveCfg = Release|Any CPU
+		{ED419930-2720-4D37-9421-EE0423494E5A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
