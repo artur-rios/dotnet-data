@@ -68,23 +68,36 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    // Best-effort eager check: only throws when it can prove no provider matches.
+    // Factory-registered providers (services.AddSingleton<IDatabaseProvider>(sp => ...)) expose
+    // neither ImplementationInstance nor ImplementationType, so TryGetProviderType cannot inspect
+    // them. Their presence means absence cannot be proven, so validation defers to ResolveProvider
+    // at first use instead of failing fast on a false negative.
     private static void EnsureProviderRegistered(IServiceCollection services, DatabaseType type)
     {
-        var available = services
+        var providerTypes = services
             .Where(d => d.ServiceType == typeof(IDatabaseProvider))
             .Select(TryGetProviderType)
-            .Where(t => t.HasValue)
-            .Select(t => t!.Value);
+            .ToList();
 
-        if (!available.Contains(type))
+        if (providerTypes.Any(t => t == type))
         {
-            throw new DataAccessException(
-            [
-                $"No IDatabaseProvider registered for DatabaseType '{type}'. " +
-                $"Install and register the matching provider package " +
-                $"(e.g. ArturRios.Data.{type}) by calling its Add{type}Provider() extension."
-            ]);
+            return;
         }
+
+        var hasUninspectableProvider = providerTypes.Any(t => t is null);
+
+        if (hasUninspectableProvider)
+        {
+            return;
+        }
+
+        throw new DataAccessException(
+        [
+            $"No IDatabaseProvider registered for DatabaseType '{type}'. " +
+            $"Install and register the matching provider package " +
+            $"(e.g. ArturRios.Data.{type}) by calling its Add{type}Provider() extension."
+        ]);
     }
 
     // Reads a registered provider's DatabaseType without building a ServiceProvider.

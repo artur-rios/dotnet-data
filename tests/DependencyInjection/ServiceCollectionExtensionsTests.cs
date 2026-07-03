@@ -59,4 +59,30 @@ public class ServiceCollectionExtensionsTests
                 DatabaseType = DatabaseType.SQLite
             }));
     }
+
+    [Fact]
+    public void AddArturRiosData_DoesNotThrow_WhenProviderRegisteredViaFactory()
+    {
+        var connection = new SqliteConnection("Filename=:memory:");
+        connection.Open();
+
+        var services = new ServiceCollection();
+        // Factory registration: ImplementationInstance and ImplementationType are both null,
+        // so the eager validation cannot inspect the descriptor and must defer to resolution time.
+        services.AddSingleton<IDatabaseProvider>(_ => new FakeSqliteProvider(connection));
+
+        var exception = Record.Exception(() =>
+            services.AddArturRiosData<TestDbContext>(new BaseDbContextOptions
+            {
+                DatabaseType = DatabaseType.SQLite,
+                ConnectionString = "Filename=:memory:"
+            }));
+
+        Assert.Null(exception);
+
+        using var provider = services.BuildServiceProvider();
+        provider.GetRequiredService<TestDbContext>().Database.EnsureCreated();
+
+        Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity>>());
+    }
 }
