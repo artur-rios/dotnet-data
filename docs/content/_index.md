@@ -23,10 +23,9 @@ Or search for `ArturRios.Data` in the NuGet Package Manager inside Visual Studio
 | Type | Description |
 |---|---|
 | `Entity` | Abstract base class for all domain entities. Exposes an `int Id` property mapped as the first column. |
-| `ICrudRepository<T>` | Interface for full create / read / update / delete operations on a single entity. |
-| `IReadOnlyRepository<T>` | Interface for read-only access — `GetAll()` and `GetById()`. |
-| `IRangeRepository<T>` | Interface for bulk update and bulk delete by id list. |
-| `BaseDbContextOptions` | Plain options class that carries a `ConnectionString` for configuring a `DbContext`. |
+| `IReadOnlyRepository<T>` / `IAsyncReadOnlyRepository<T>` | Read-only contracts — `Query()`, `GetAll()` and `GetById()` (sync and async). |
+| `IRepository<T>` / `IAsyncRepository<T>` | Full create / read / update / delete contracts, including range operations (sync and async). |
+| `BaseDbContextOptions` | Options class that carries a `DatabaseType` and `ConnectionString` for configuring a `DbContext`. |
 
 All repository interfaces are constrained to `T : Entity`, enforcing a consistent identity contract across the data layer.
 
@@ -50,7 +49,7 @@ public class Product : Entity
 using ArturRios.Data;
 using ArturRios.Data.Interfaces;
 
-public class ProductRepository : ICrudRepository<Product>
+public class ProductRepository : IRepository<Product>
 {
     private readonly AppDbContext _db;
 
@@ -75,7 +74,7 @@ var options = new BaseDbContextOptions
 };
 ```
 
-### 4. Use read-only or range interfaces when full CRUD is not needed
+### 4. Use read-only or async interfaces when full sync CRUD is not needed
 
 ```csharp
 // Expose only read access
@@ -84,10 +83,10 @@ public class ProductQueryService(IReadOnlyRepository<Product> repo)
     public IQueryable<Product> GetCatalog() => repo.GetAll();
 }
 
-// Bulk operations
-public class ProductBatchService(IRangeRepository<Product> repo)
+// Async, full CRUD
+public class ProductBatchService(IAsyncRepository<Product> repo)
 {
-    public void ArchiveMany(List<int> ids) => repo.DeleteRange(ids);
+    public Task<DataOutput<IEnumerable<int>>> ArchiveManyAsync(List<int> ids) => repo.DeleteRangeAsync(ids);
 }
 ```
 
