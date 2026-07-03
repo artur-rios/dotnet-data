@@ -31,10 +31,13 @@
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
+  <!-- Provider packages live in sibling subfolders under src/. Exclude them from the
+       core project's default compile glob so their sources and generated obj artifacts
+       are not swept in (would cause CS0579 duplicate-attribute errors). -->
   <ItemGroup>
-    <Compile Remove="ArturRios.Data.Sqlite\**" />
-    <EmbeddedResource Remove="ArturRios.Data.Sqlite\**" />
-    <None Remove="ArturRios.Data.Sqlite\**" />
+    <Compile Remove="ArturRios.Data.*\**" />
+    <EmbeddedResource Remove="ArturRios.Data.*\**" />
+    <None Remove="ArturRios.Data.*\**" />
   </ItemGroup>
 </Project>
 
