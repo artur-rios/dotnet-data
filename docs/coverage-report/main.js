@@ -211,10 +211,28 @@ for (i = 0, l = charts.length; i < l; i++) {
 
 var assemblies = [
   {
-    "name": "ArturRios.Data",
+    "name": "ArturRios.Data.Core",
     "classes": [
-      { "name": "ArturRios.Data.Configuration.BaseDbContextOptions", "rp": "ArturRios.Data_BaseDbContextOptions.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 12, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.Entity", "rp": "ArturRios.Data_Entity.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 14, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Core.Configuration.BaseDbContext", "rp": "ArturRios.Data.Core_BaseDbContext.html", "cl": 16, "ucl": 0, "cal": 16, "tl": 34, "cb": 2, "tb": 2, "cm": 4, "fcm": 4, "tm": 4, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Core.Configuration.BaseDbContextOptions", "rp": "ArturRios.Data.Core_BaseDbContextOptions.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Core.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.Core_ServiceCollectionExtensions.html", "cl": 47, "ucl": 13, "cal": 60, "tl": 134, "cb": 11, "tb": 16, "cm": 4, "fcm": 0, "tm": 5, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 6,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.Core.Entity", "rp": "ArturRios.Data.Core_Entity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 14, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Core.Exceptions.DataAccessException", "rp": "ArturRios.Data.Core_DataAccessException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 11, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Core.Repositories.EfRepository<T>", "rp": "ArturRios.Data.Core_EfRepository_1.html", "cl": 89, "ucl": 25, "cal": 114, "tl": 200, "cb": 7, "tb": 10, "cm": 20, "fcm": 17, "tm": 22, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 50.0 } },
+      { "name": "ArturRios.Data.Core.Transactions.EfUnitOfWork", "rp": "ArturRios.Data.Core_EfUnitOfWork.html", "cl": 19, "ucl": 35, "cal": 54, "tl": 99, "cb": 2, "tb": 4, "cm": 3, "fcm": 1, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 2,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.Core.VersionedEntity", "rp": "ArturRios.Data.Core_VersionedEntity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 17, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+    ]},
+  {
+    "name": "ArturRios.Data.PostgreSql",
+    "classes": [
+      { "name": "ArturRios.Data.PostgreSql.PostgreSqlProvider", "rp": "ArturRios.Data.PostgreSql_PostgreSqlProvider.html", "cl": 1, "ucl": 1, "cal": 2, "tl": 18, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.PostgreSql.ServiceCollectionExtensions", "rp": "ArturRios.Data.PostgreSql_ServiceCollectionExtensions.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
+    ]},
+  {
+    "name": "ArturRios.Data.Sqlite",
+    "classes": [
+      { "name": "ArturRios.Data.Sqlite.ServiceCollectionExtensions", "rp": "ArturRios.Data.Sqlite_ServiceCollectionExtensions.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Sqlite.SqliteProvider", "rp": "ArturRios.Data.Sqlite_SqliteProvider.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 18, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
 ];
 

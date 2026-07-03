@@ -1,67 +1,43 @@
 using System;
 using System.Linq;
-using System.Reflection;
-using ArturRios.Data;
-using ArturRios.Data.Interfaces;
+using ArturRios.Data.Core;
+using ArturRios.Data.Core.Interfaces;
+using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Interfaces;
 
 public class IReadOnlyRepositoryTests
 {
-    private static readonly Type InterfaceType = typeof(IReadOnlyRepository<>);
+    private static readonly Type Type = typeof(IReadOnlyRepository<>);
 
     [Fact]
-    public void IReadOnlyRepository_IsInterface()
+    public void IsInterface_ConstrainedToEntity()
     {
-        Assert.True(InterfaceType.IsInterface);
+        Assert.True(Type.IsInterface);
+        var param = Type.GetGenericArguments()[0];
+        Assert.Contains(typeof(Entity), param.GetGenericParameterConstraints());
     }
 
     [Fact]
-    public void IReadOnlyRepository_GenericParameter_IsCovariant()
+    public void Query_ReturnsIQueryableOfT()
     {
-        var param = InterfaceType.GetGenericArguments()[0];
-
-        Assert.True(param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant));
+        var m = Type.GetMethod("Query")!;
+        Assert.Empty(m.GetParameters());
+        Assert.Equal(typeof(IQueryable<>), m.ReturnType.GetGenericTypeDefinition());
     }
 
     [Fact]
-    public void IReadOnlyRepository_GenericParameter_IsConstrainedToEntity()
+    public void GetAll_ReturnsDataOutputOfEnumerable()
     {
-        var param = InterfaceType.GetGenericArguments()[0];
-        var constraints = param.GetGenericParameterConstraints();
-
-        Assert.Contains(typeof(Entity), constraints);
+        var m = Type.GetMethod("GetAll")!;
+        Assert.Equal(typeof(DataOutput<>), m.ReturnType.GetGenericTypeDefinition());
     }
 
     [Fact]
-    public void IReadOnlyRepository_HasGetAll_ReturningIQueryableOfT()
+    public void GetById_TakesInt_ReturnsDataOutput()
     {
-        var method = InterfaceType.GetMethod("GetAll");
-
-        Assert.NotNull(method);
-        Assert.Empty(method.GetParameters());
-        Assert.True(method.ReturnType.IsGenericType);
-        Assert.Equal(typeof(IQueryable<>), method.ReturnType.GetGenericTypeDefinition());
-    }
-
-    [Fact]
-    public void IReadOnlyRepository_HasGetById_WithIntParameter_Named_Id()
-    {
-        var method = InterfaceType.GetMethod("GetById");
-
-        Assert.NotNull(method);
-        var parameters = method.GetParameters();
-        Assert.Single(parameters);
-        Assert.Equal(typeof(int), parameters[0].ParameterType);
-        Assert.Equal("id", parameters[0].Name);
-    }
-
-    [Fact]
-    public void IReadOnlyRepository_GetById_ReturnsT()
-    {
-        var method = InterfaceType.GetMethod("GetById");
-        Assert.NotNull(method);
-
-        Assert.True(method.ReturnType.IsGenericParameter);
+        var m = Type.GetMethod("GetById")!;
+        Assert.Equal(typeof(int), m.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(DataOutput<>), m.ReturnType.GetGenericTypeDefinition());
     }
 }

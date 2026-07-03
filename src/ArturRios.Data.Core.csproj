@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Authors>Artur Rios</Authors>
+    <Company>Artur Rios</Company>
+    <Description>Utilities for data access layer on .net projects</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IncludeSymbols>false</IncludeSymbols>
+    <Nullable>enable</Nullable>
+    <PackageId>ArturRios.Data.Core</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>utilities, data access, .net</PackageTags>
+    <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
+    <Version>2.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ArturRios.Output" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+  <!-- Provider packages live in sibling subfolders under src/. Exclude them from the
+       core project's default compile glob so their sources and generated obj artifacts
+       are not swept in (would cause CS0579 duplicate-attribute errors). -->
+  <ItemGroup>
+    <Compile Remove="ArturRios.Data.*\**" />
+    <EmbeddedResource Remove="ArturRios.Data.*\**" />
+    <None Remove="ArturRios.Data.*\**" />
+  </ItemGroup>
+</Project>
+

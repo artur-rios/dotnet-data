@@ -18,17 +18,22 @@ Or search for `ArturRios.Data` in the NuGet Package Manager inside Visual Studio
 
 ## Overview
 
-`ArturRios.Data` provides a set of building blocks for the data access layer of .NET projects:
+`ArturRios.Data` provides a provider-agnostic relational data-access layer built on Entity Framework Core: repository and unit-of-work abstractions, DI wiring, and thin per-engine provider packages.
 
 | Type | Description |
 |---|---|
+| `IReadOnlyRepository<T>` | Synchronous read-only contract — `Query()`, `GetAll()`, `GetById()`. |
+| `IRepository<T>` | Synchronous read/write contract — adds `Create`, `CreateRange`, `Update`, `UpdateRange`, `Delete`, `DeleteRange`. |
+| `IAsyncReadOnlyRepository<T>` | Asynchronous mirror of `IReadOnlyRepository<T>`. |
+| `IAsyncRepository<T>` | Asynchronous mirror of `IRepository<T>`. |
 | `Entity` | Abstract base class for all domain entities. Exposes an `int Id` property mapped as the first column. |
-| `ICrudRepository<T>` | Interface for full create / read / update / delete operations on a single entity. |
-| `IReadOnlyRepository<T>` | Interface for read-only access — `GetAll()` and `GetById()`. |
-| `IRangeRepository<T>` | Interface for bulk update and bulk delete by id list. |
-| `BaseDbContextOptions` | Plain options class that carries a `ConnectionString` for configuring a `DbContext`. |
+| `VersionedEntity` | `Entity` plus a `ConcurrencyStamp` (`Guid`) used for optimistic concurrency checks. |
+| `BaseDbContext` | Abstract `DbContext` base class. Bumps the `ConcurrencyStamp` of modified `VersionedEntity` instances on every `SaveChanges`/`SaveChangesAsync`. |
+| `BaseDbContextOptions` | Options class carrying `DatabaseType` and `ConnectionString`, bindable from configuration. |
+| `IUnitOfWork` / `IAsyncUnitOfWork` | Coordinate repository operations within a single database transaction (sync and async). |
+| `EfRepository<T>` | Provider-agnostic EF Core implementation of all four repository interfaces. Registered automatically by DI. |
 
-All repository interfaces are constrained to `T : Entity`, enforcing a consistent identity contract across the data layer.
+Consumers do not hand-implement a repository. `ArturRios.Data` ships `EfRepository<T>`, which is wired up for you — you inject `IRepository<T>` / `IAsyncRepository<T>` (or the read-only variants) and `IUnitOfWork` / `IAsyncUnitOfWork` wherever you need them. All repository interfaces are constrained to `T : Entity`, enforcing a consistent identity contract across the data layer. Every read/write repository method returns a `DataOutput<T>` (or `Task<DataOutput<T>>`) envelope, so infrastructure failures surface as `.Errors` instead of unhandled exceptions. `Query()` is the one exception: it returns a plain `IQueryable<T>` for composable, deferred reads.
 
 ## Usage
 
@@ -37,63 +42,94 @@ All repository interfaces are constrained to `T : Entity`, enforcing a consisten
 ```csharp
 using ArturRios.Data;
 
-public class Product : Entity
+public class Product : Entity          // or : VersionedEntity for optimistic concurrency
 {
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
 }
 ```
 
-### 2. Implement a repository
-
-```csharp
-using ArturRios.Data;
-using ArturRios.Data.Interfaces;
-
-public class ProductRepository : ICrudRepository<Product>
-{
-    private readonly AppDbContext _db;
-
-    public ProductRepository(AppDbContext db) => _db = db;
-
-    public int    Create(Product entity)   { _db.Products.Add(entity); _db.SaveChanges(); return entity.Id; }
-    public IQueryable<Product> GetAll()    => _db.Products;
-    public Product? GetById(int id)        => _db.Products.Find(id);
-    public Product  Update(Product entity) { _db.Products.Update(entity); _db.SaveChanges(); return entity; }
-    public int    Delete(Product entity)   { _db.Products.Remove(entity); _db.SaveChanges(); return entity.Id; }
-}
-```
-
-### 3. Configure the DbContext
+### 2. Define your context and inject the repository
 
 ```csharp
 using ArturRios.Data.Configuration;
+using Microsoft.EntityFrameworkCore;
 
-var options = new BaseDbContextOptions
+public class AppDbContext(DbContextOptions options) : BaseDbContext(options)
 {
-    ConnectionString = "Server=localhost;Database=mydb;Trusted_Connection=True;"
-};
+    public DbSet<Product> Products => Set<Product>();
+}
 ```
 
-### 4. Use read-only or range interfaces when full CRUD is not needed
+```csharp
+using ArturRios.Data.Interfaces;
+using ArturRios.Output;
+
+public class ProductService(IAsyncRepository<Product> repo)
+{
+    public async Task<int> CreateAsync(Product product)
+    {
+        DataOutput<int> result = await repo.CreateAsync(product);
+
+        return result.Success ? result.Data : throw new InvalidOperationException(string.Join(", ", result.Errors));
+    }
+}
+```
+
+### 3. Configure the DbContext (appsettings.json)
+
+```json
+{
+  "ArturRios.Data": {
+    "DatabaseType": "PostgreSql",
+    "ConnectionString": "Host=localhost;Database=mydb;Username=app;Password=secret;"
+  }
+}
+```
+
+### 4. Register (Program.cs)
+
+```csharp
+using ArturRios.Data.DependencyInjection;
+using ArturRios.Data.PostgreSql;   // brings AddPostgreSqlProvider()
+
+builder.Services.AddPostgreSqlProvider();
+builder.Services.AddArturRiosData<AppDbContext>(builder.Configuration);
+```
+
+`AddArturRiosData<TContext>` registers `TContext`, all four repository interfaces (backed by `EfRepository<T>`), and `IUnitOfWork` / `IAsyncUnitOfWork`. It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails fast at registration time if no matching provider was registered.
+
+### 5. Use read-only or async interfaces when full CRUD is not needed
 
 ```csharp
 // Expose only read access
 public class ProductQueryService(IReadOnlyRepository<Product> repo)
 {
-    public IQueryable<Product> GetCatalog() => repo.GetAll();
+    public IEnumerable<Product> GetCatalog() => repo.GetAll().Data ?? [];
+
+    // Or, for a composable, deferred query:
+    public IQueryable<Product> QueryCatalog() => repo.Query();
 }
 
-// Bulk operations
-public class ProductBatchService(IRangeRepository<Product> repo)
+// Async, full CRUD
+public class ProductBatchService(IAsyncRepository<Product> repo)
 {
-    public void ArchiveMany(List<int> ids) => repo.DeleteRange(ids);
+    public Task<DataOutput<IEnumerable<int>>> ArchiveManyAsync(List<int> ids) => repo.DeleteRangeAsync(ids);
 }
 ```
 
 ## Requirements
 
 - .NET 10.0 or later
+- One provider package matching the `DatabaseType` configured above:
+
+| Provider package | `DatabaseType` | Status |
+|---|---|---|
+| `ArturRios.Data.Sqlite` | `SQLite` | Available |
+| `ArturRios.Data.PostgreSql` | `PostgreSql` | Available |
+| `ArturRios.Data.MySql` | `MySql` | Deferred — the package cannot ship until [Pomelo.EntityFrameworkCore.MySql](https://www.nuget.org/packages/Pomelo.EntityFrameworkCore.MySql) publishes a release supporting EF Core 10 |
+
+The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`, `AddPostgreSqlProvider()`) before `AddArturRiosData<TContext>(...)`, and its `DatabaseType` must match the one configured in `appsettings.json`.
 
 ## Versioning
 

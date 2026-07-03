@@ -1,27 +1,25 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Authors>Artur Rios</Authors>
     <Company>Artur Rios</Company>
-    <Description>Utilities for data access layer on .net projects</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <Description>SQLite provider for ArturRios.Data</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <ImplicitUsings>enable</ImplicitUsings>
-    <IncludeSymbols>false</IncludeSymbols>
     <Nullable>enable</Nullable>
-    <PackageId>ArturRios.Data</PackageId>
+    <PackageId>ArturRios.Data.Sqlite</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>utilities, data access, .net</PackageTags>
+    <PackageTags>utilities, data access, .net, sqlite</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
     <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\README.md" Pack="true" PackagePath="" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArturRios.Data.Core.csproj" />
   </ItemGroup>
 </Project>
-

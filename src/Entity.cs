@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ArturRios.Data;
+namespace ArturRios.Data.Core;
 
 /// <summary>
 /// Abstract base class for all data entities. Provides a primary key identifier.

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using ArturRios.Data;
+using ArturRios.Data.Core;
 
 namespace ArturRios.Data.Tests;
 
