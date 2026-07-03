@@ -87,7 +87,7 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 2: `VersionedEntity` concurrency base
 
 **Files:**
-- Create: `src/ArturRios.Data/VersionedEntity.cs`
+- Create: `src/VersionedEntity.cs`
 - Test: `tests/Entities/VersionedEntityTests.cs`
 
 **Interfaces:**
@@ -138,7 +138,7 @@ Expected: FAIL / compile error — `VersionedEntity` does not exist.
 
 - [ ] **Step 3: Write minimal implementation**
 
-Create `src/ArturRios.Data/VersionedEntity.cs`:
+Create `src/VersionedEntity.cs`:
 
 ```csharp
 using System.ComponentModel.DataAnnotations;
@@ -174,9 +174,9 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 3: Redesign the repository interfaces
 
 **Files:**
-- Rewrite: `src/ArturRios.Data/Interfaces/IReadOnlyRepository.cs`
-- Create: `src/ArturRios.Data/Interfaces/IRepository.cs`, `IAsyncReadOnlyRepository.cs`, `IAsyncRepository.cs`
-- Delete: `src/ArturRios.Data/Interfaces/ICrudRepository.cs`, `IRangeRepository.cs`
+- Rewrite: `src/Interfaces/IReadOnlyRepository.cs`
+- Create: `src/Interfaces/IRepository.cs`, `IAsyncReadOnlyRepository.cs`, `IAsyncRepository.cs`
+- Delete: `src/Interfaces/ICrudRepository.cs`, `IRangeRepository.cs`
 - Rewrite: `tests/Interfaces/IReadOnlyRepositoryTests.cs`
 - Create: `tests/Interfaces/IRepositoryTests.cs`, `IAsyncReadOnlyRepositoryTests.cs`, `IAsyncRepositoryTests.cs`
 - Delete: `tests/Interfaces/ICrudRepositoryTests.cs`, `IRangeRepositoryTests.cs`
@@ -354,9 +354,9 @@ Expected: compile failure — new interfaces do not exist yet.
 
 - [ ] **Step 3: Write the interfaces**
 
-Delete `src/ArturRios.Data/Interfaces/ICrudRepository.cs` and `IRangeRepository.cs`.
+Delete `src/Interfaces/ICrudRepository.cs` and `IRangeRepository.cs`.
 
-Rewrite `src/ArturRios.Data/Interfaces/IReadOnlyRepository.cs`:
+Rewrite `src/Interfaces/IReadOnlyRepository.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -387,7 +387,7 @@ public interface IReadOnlyRepository<T> where T : Entity
 }
 ```
 
-Create `src/ArturRios.Data/Interfaces/IRepository.cs`:
+Create `src/Interfaces/IRepository.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -420,7 +420,7 @@ public interface IRepository<T> : IReadOnlyRepository<T> where T : Entity
 }
 ```
 
-Create `src/ArturRios.Data/Interfaces/IAsyncReadOnlyRepository.cs`:
+Create `src/Interfaces/IAsyncReadOnlyRepository.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -449,7 +449,7 @@ public interface IAsyncReadOnlyRepository<T> where T : Entity
 }
 ```
 
-Create `src/ArturRios.Data/Interfaces/IAsyncRepository.cs`:
+Create `src/Interfaces/IAsyncRepository.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -496,8 +496,8 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 4: `DatabaseType` enum + `BaseDbContextOptions`
 
 **Files:**
-- Create: `src/ArturRios.Data/Configuration/DatabaseType.cs`
-- Modify: `src/ArturRios.Data/Configuration/BaseDbContextOptions.cs`
+- Create: `src/Configuration/DatabaseType.cs`
+- Modify: `src/Configuration/BaseDbContextOptions.cs`
 - Test: `tests/Configuration/BaseDbContextOptionsTests.cs` *(extend existing file)*
 
 **Interfaces:**
@@ -529,7 +529,7 @@ Expected: compile failure — `DatabaseType` unknown.
 
 - [ ] **Step 3: Implement**
 
-Create `src/ArturRios.Data/Configuration/DatabaseType.cs`:
+Create `src/Configuration/DatabaseType.cs`:
 
 ```csharp
 namespace ArturRios.Data.Configuration;
@@ -550,7 +550,7 @@ public enum DatabaseType
 }
 ```
 
-Modify `src/ArturRios.Data/Configuration/BaseDbContextOptions.cs` to add the property:
+Modify `src/Configuration/BaseDbContextOptions.cs` to add the property:
 
 ```csharp
 namespace ArturRios.Data.Configuration;
@@ -586,7 +586,7 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 5: `DataAccessException`
 
 **Files:**
-- Create: `src/ArturRios.Data/Exceptions/DataAccessException.cs`
+- Create: `src/Exceptions/DataAccessException.cs`
 - Test: `tests/Exceptions/DataAccessExceptionTests.cs`
 
 **Interfaces:**
@@ -622,7 +622,7 @@ Expected: compile failure.
 
 - [ ] **Step 3: Implement**
 
-Create `src/ArturRios.Data/Exceptions/DataAccessException.cs`:
+Create `src/Exceptions/DataAccessException.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -653,7 +653,7 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 
 **Files:**
 - Modify: `src/ArturRios.Data.csproj`
-- Create: `src/ArturRios.Data/Configuration/BaseDbContext.cs`
+- Create: `src/Configuration/BaseDbContext.cs`
 - Modify: `tests/ArturRios.Data.Tests.csproj`
 - Create: `tests/TestSupport/TestEntities.cs`, `tests/TestSupport/TestDbContext.cs`, `tests/TestSupport/SqliteTestContextFactory.cs`
 - Test: `tests/Configuration/BaseDbContextTests.cs`
@@ -792,7 +792,7 @@ public class BaseDbContextTests
 
 - [ ] **Step 4: Implement `BaseDbContext`**
 
-Create `src/ArturRios.Data/Configuration/BaseDbContext.cs`:
+Create `src/Configuration/BaseDbContext.cs`:
 
 ```csharp
 using Microsoft.EntityFrameworkCore;
@@ -845,7 +845,7 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 7: `EfRepository<T>` — synchronous CRUD + ranges + `Query`
 
 **Files:**
-- Create: `src/ArturRios.Data/Repositories/EfRepository.cs`
+- Create: `src/Repositories/EfRepository.cs`
 - Test: `tests/Repositories/EfRepositoryTests.cs`
 
 **Interfaces:**
@@ -981,7 +981,7 @@ Expected: compile failure — `EfRepository` does not exist.
 
 - [ ] **Step 3: Implement (sync members + async stubs)**
 
-Create `src/ArturRios.Data/Repositories/EfRepository.cs`:
+Create `src/Repositories/EfRepository.cs`:
 
 ```csharp
 using System.Data.Common;
@@ -1130,7 +1130,7 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 8: `EfRepository<T>` — asynchronous members
 
 **Files:**
-- Modify: `src/ArturRios.Data/Repositories/EfRepository.cs`
+- Modify: `src/Repositories/EfRepository.cs`
 - Test: `tests/Repositories/EfRepositoryAsyncTests.cs`
 
 **Interfaces:**
@@ -1232,7 +1232,7 @@ Expected: FAIL — methods throw `NotImplementedException`.
 
 - [ ] **Step 3: Replace the async stubs**
 
-In `src/ArturRios.Data/Repositories/EfRepository.cs`, replace the eight stub lines with:
+In `src/Repositories/EfRepository.cs`, replace the eight stub lines with:
 
 ```csharp
     /// <inheritdoc />
@@ -1341,7 +1341,7 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 9: Transactions — `IDbTransactionHandle`, `IUnitOfWork`, `IAsyncUnitOfWork`, `EfUnitOfWork`
 
 **Files:**
-- Create: `src/ArturRios.Data/Transactions/IDbTransactionHandle.cs`, `IUnitOfWork.cs`, `IAsyncUnitOfWork.cs`, `EfUnitOfWork.cs`
+- Create: `src/Transactions/IDbTransactionHandle.cs`, `IUnitOfWork.cs`, `IAsyncUnitOfWork.cs`, `EfUnitOfWork.cs`
 - Test: `tests/Transactions/EfUnitOfWorkTests.cs`
 
 **Interfaces:**
@@ -1430,7 +1430,7 @@ Expected: compile failure.
 
 - [ ] **Step 3: Implement**
 
-Create `src/ArturRios.Data/Transactions/IDbTransactionHandle.cs`:
+Create `src/Transactions/IDbTransactionHandle.cs`:
 
 ```csharp
 namespace ArturRios.Data.Transactions;
@@ -1454,7 +1454,7 @@ public interface IDbTransactionHandle : IDisposable, IAsyncDisposable
 }
 ```
 
-Create `src/ArturRios.Data/Transactions/IUnitOfWork.cs`:
+Create `src/Transactions/IUnitOfWork.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -1477,7 +1477,7 @@ public interface IUnitOfWork
 }
 ```
 
-Create `src/ArturRios.Data/Transactions/IAsyncUnitOfWork.cs`:
+Create `src/Transactions/IAsyncUnitOfWork.cs`:
 
 ```csharp
 using ArturRios.Output;
@@ -1500,7 +1500,7 @@ public interface IAsyncUnitOfWork
 }
 ```
 
-Create `src/ArturRios.Data/Transactions/EfUnitOfWork.cs`:
+Create `src/Transactions/EfUnitOfWork.cs`:
 
 ```csharp
 using ArturRios.Data.Configuration;
@@ -1677,8 +1677,8 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 ### Task 11: Provider seam + DI entry point (core)
 
 **Files:**
-- Create: `src/ArturRios.Data/Providers/IDatabaseProvider.cs`
-- Create: `src/ArturRios.Data/DependencyInjection/ServiceCollectionExtensions.cs`
+- Create: `src/Providers/IDatabaseProvider.cs`
+- Create: `src/DependencyInjection/ServiceCollectionExtensions.cs`
 - Test: `tests/DependencyInjection/ServiceCollectionExtensionsTests.cs`
 
 **Interfaces:**
@@ -1766,7 +1766,7 @@ Expected: compile failure.
 
 - [ ] **Step 3: Implement**
 
-Create `src/ArturRios.Data/Providers/IDatabaseProvider.cs`:
+Create `src/Providers/IDatabaseProvider.cs`:
 
 ```csharp
 using ArturRios.Data.Configuration;
@@ -1788,7 +1788,7 @@ public interface IDatabaseProvider
 }
 ```
 
-Create `src/ArturRios.Data/DependencyInjection/ServiceCollectionExtensions.cs`:
+Create `src/DependencyInjection/ServiceCollectionExtensions.cs`:
 
 ```csharp
 using ArturRios.Data.Configuration;
@@ -2436,6 +2436,8 @@ public class ProductService(
 ````
 
 Also update the "Requirements" section to note the provider packages (`ArturRios.Data.Sqlite` / `.PostgreSql` / `.MySql`) and that the installed provider must match the configured `DatabaseType`.
+
+Additionally, update the Hugo docs page `docs/content/_index.md`, which still references the removed `ICrudRepository`/`IRangeRepository`: replace those mentions with the v2 interface family (`IReadOnlyRepository`/`IRepository` + async mirrors) so the published docs match the code. Keep the edit minimal — just the stale type references and any old-usage snippet.
 
 - [ ] **Step 3: Final verification**
 
