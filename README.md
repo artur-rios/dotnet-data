@@ -80,7 +80,7 @@ using ArturRios.Data.DependencyInjection;
 using ArturRios.Data.PostgreSql;   // brings AddPostgreSqlProvider()
 
 builder.Services.AddPostgreSqlProvider();
-builder.Services.AddArturRiosData<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
 ```
 
 ### 5. Inject and use
@@ -106,7 +106,7 @@ public class ProductService(
 }
 ```
 
-`AddArturRiosData<TContext>` registers `TContext`, `BaseDbContext`, all four repository interfaces (backed by `EfRepository<T>`), and `IUnitOfWork`/`IAsyncUnitOfWork` (backed by `EfUnitOfWork`). It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails fast at registration time if no matching provider was registered.
+`AddDataConfig<TContext>` registers `TContext`, `BaseDbContext`, all four repository interfaces (backed by `EfRepository<T>`), and `IUnitOfWork`/`IAsyncUnitOfWork` (backed by `EfUnitOfWork`). It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails fast at registration time if no matching provider was registered.
 
 ## Requirements
 
@@ -119,7 +119,7 @@ public class ProductService(
 | `ArturRios.Data.PostgreSql` | `PostgreSql` | Available |
 | `ArturRios.Data.MySql` | `MySql` | Deferred — source is written, but the package cannot ship until [Pomelo.EntityFrameworkCore.MySql](https://www.nuget.org/packages/Pomelo.EntityFrameworkCore.MySql) publishes a release supporting EF Core 10 (the latest Pomelo release still targets EF Core 9) |
 
-The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`, `AddPostgreSqlProvider()`) before `AddArturRiosData<TContext>(...)`, and its `DatabaseType` must match the one configured in `appsettings.json`.
+The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`, `AddPostgreSqlProvider()`) before `AddDataConfig<TContext>(...)`, and its `DatabaseType` must match the one configured in `appsettings.json`.
 
 ## Dapper query path (optional)
 
