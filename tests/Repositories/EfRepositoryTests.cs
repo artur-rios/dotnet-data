@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ArturRios.Data;
 using ArturRios.Data.Repositories;
 using ArturRios.Data.Tests.TestSupport;
 
@@ -7,6 +8,20 @@ namespace ArturRios.Data.Tests.Repositories;
 
 public class EfRepositoryTests
 {
+    private sealed class UnmappedEntity : Entity;
+
+    [Fact]
+    public void GetAll_OnUnmappedEntity_ReturnsErrorEnvelope_DoesNotThrow()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<UnmappedEntity>(context);
+
+        var result = repo.GetAll();
+
+        Assert.False(result.Success);
+        Assert.NotEmpty(result.Errors);
+    }
+
     [Fact]
     public void Create_PersistsAndReturnsId()
     {

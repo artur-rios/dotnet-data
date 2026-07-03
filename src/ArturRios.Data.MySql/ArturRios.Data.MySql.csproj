@@ -16,7 +16,16 @@
     <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.*" />
+    <!--
+      This project is deferred until Pomelo.EntityFrameworkCore.MySql ships an EF Core
+      10-compatible release (Pomelo currently tops out at 9.0.0). The version below is
+      pinned to 10.* deliberately: no such Pomelo release exists yet, so a restore fails
+      loudly instead of silently resolving to the incompatible EF Core 9 v9.* line. When
+      re-enabling this project (re-adding it to the solution and restoring the tests
+      project's ProjectReference to it), bump this version to the actual EF Core
+      10-compatible release.
+    -->
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>

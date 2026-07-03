@@ -155,6 +155,15 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
             return matches.Select(e => e.Id).ToList();
         });
 
+    /// <summary>Maps an exception caught by a guard to an error envelope.</summary>
+    private static DataOutput<TResult> Fail<TResult>(Exception ex) => ex switch
+    {
+        DbUpdateConcurrencyException => DataOutput<TResult>.New.WithError(ConcurrencyMessage),
+        DbUpdateException => DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}"),
+        DbException => DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.Message}"),
+        _ => DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}")
+    };
+
     /// <summary>Runs a synchronous data operation, converting failures to envelope errors.</summary>
     protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)
     {
@@ -162,17 +171,13 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         {
             return DataOutput<TResult>.New.WithData(operation());
         }
-        catch (DbUpdateConcurrencyException)
+        catch (OperationCanceledException)
         {
-            return DataOutput<TResult>.New.WithError(ConcurrencyMessage);
+            throw;
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex)
         {
-            return DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}");
-        }
-        catch (DbException ex)
-        {
-            return DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.Message}");
+            return Fail<TResult>(ex);
         }
     }
 
@@ -183,17 +188,13 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         {
             return DataOutput<TResult>.New.WithData(await operation());
         }
-        catch (DbUpdateConcurrencyException)
+        catch (OperationCanceledException)
         {
-            return DataOutput<TResult>.New.WithError(ConcurrencyMessage);
+            throw;
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex)
         {
-            return DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}");
-        }
-        catch (DbException ex)
-        {
-            return DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.Message}");
+            return Fail<TResult>(ex);
         }
     }
 }
