@@ -29,4 +29,17 @@
     <ProjectReference Include="..\src\ArturRios.Data.Sqlite\ArturRios.Data.Sqlite.csproj" />
     <ProjectReference Include="..\src\ArturRios.Data.PostgreSql\ArturRios.Data.PostgreSql.csproj" />
   </ItemGroup>
+
+  <!--
+    ArturRios.Data.MySql is intentionally not referenced yet: as of implementation time,
+    Pomelo.EntityFrameworkCore.MySql tops out at 9.0.0, which hard-pins to
+    Microsoft.EntityFrameworkCore.Relational >= 9.0.0 && <= 9.0.999 (NU1107 conflict against
+    this solution's EF Core 10.0.1). The provider source and its test are written and ready;
+    Providers/MySqlProviderTests.cs is excluded from compilation until Pomelo publishes an
+    EF Core 10-compatible release and the ProjectReference below can be restored.
+  -->
+  <ItemGroup>
+    <Compile Remove="Providers\MySqlProviderTests.cs" />
+    <!-- <ProjectReference Include="..\src\ArturRios.Data.MySql\ArturRios.Data.MySql.csproj" /> -->
+  </ItemGroup>
 </Project>
