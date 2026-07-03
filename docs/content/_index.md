@@ -118,6 +118,38 @@ public class ProductBatchService(IAsyncRepository<Product> repo)
 }
 ```
 
+## Dapper query path (optional)
+
+For raw-SQL reads alongside EF-based persistence, install `ArturRios.Data.Dapper` and register it
+after `AddDataConfig`:
+
+```csharp
+using ArturRios.Data.Dapper;
+
+builder.Services.AddSqliteProvider();               // or AddPostgreSqlProvider()
+builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDapper();
+```
+
+Inject `IAsyncSqlQuery` (or the sync `ISqlQuery`) and run enveloped, parameterized queries:
+
+```csharp
+public class ReportService(IAsyncSqlQuery sql)
+{
+    public async Task<int> ActiveCountAsync()
+    {
+        var result = await sql.ExecuteScalarAsync<long>(
+            "SELECT COUNT(*) FROM Products WHERE IsActive = @active", new { active = true });
+
+        return result.Success ? (int)result.Data : 0;
+    }
+}
+```
+
+The Dapper path is **read-only** — all writes go through the EF repositories. It runs on the same
+`DbContext` connection and enlists in the active `IUnitOfWork` transaction, so a Dapper read inside a
+unit of work sees the not-yet-committed EF writes.
+
 ## Requirements
 
 - .NET 10.0 or later
