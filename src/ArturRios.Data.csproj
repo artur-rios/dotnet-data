@@ -31,5 +31,10 @@
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="ArturRios.Data.Sqlite\**" />
+    <EmbeddedResource Remove="ArturRios.Data.Sqlite\**" />
+    <None Remove="ArturRios.Data.Sqlite\**" />
+  </ItemGroup>
 </Project>
 
