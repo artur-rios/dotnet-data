@@ -7,7 +7,7 @@ namespace ArturRios.Data.Tests.Dapper;
 
 public class DapperSqlQueryTests
 {
-    private sealed record ItemRow(int Id, string Name);
+    private sealed record ItemRow(long Id, string Name);
 
     private static void Seed(TestDbContext context, params string[] names)
     {
