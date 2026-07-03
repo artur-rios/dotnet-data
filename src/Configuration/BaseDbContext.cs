@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace ArturRios.Data.Configuration;
+namespace ArturRios.Data.Core.Configuration;
 
 /// <summary>
 /// Base <see cref="DbContext"/> that applies shared conventions and refreshes the

@@ -1,7 +1,7 @@
-using ArturRios.Data.Configuration;
+using ArturRios.Data.Core.Configuration;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArturRios.Data.Providers;
+namespace ArturRios.Data.Core.Providers;
 
 /// <summary>
 /// Configures an EF Core <see cref="DbContextOptionsBuilder"/> for a specific database engine.

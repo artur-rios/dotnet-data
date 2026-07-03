@@ -12,7 +12,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IncludeSymbols>false</IncludeSymbols>
     <Nullable>enable</Nullable>
-    <PackageId>ArturRios.Data</PackageId>
+    <PackageId>ArturRios.Data.Core</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -1,4 +1,4 @@
-using ArturRios.Data.Providers;
+using ArturRios.Data.Core.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.Sqlite;

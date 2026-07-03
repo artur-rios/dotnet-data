@@ -1,4 +1,4 @@
-using ArturRios.Data.Repositories;
+using ArturRios.Data.Core.Repositories;
 using ArturRios.Data.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
 

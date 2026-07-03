@@ -1,4 +1,4 @@
-using ArturRios.Data.Exceptions;
+using ArturRios.Data.Core.Exceptions;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Exceptions;

@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ArturRios.Data.Repositories;
+using ArturRios.Data.Core.Repositories;
 using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Repositories;
@@ -11,7 +10,7 @@ public class EfRepositoryAsyncTests
     [Fact]
     public async Task CreateAsync_PersistsAndReturnsId()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
 
         var result = await repo.CreateAsync(new TestEntity { Name = "a" });
@@ -23,7 +22,7 @@ public class EfRepositoryAsyncTests
     [Fact]
     public async Task GetByIdAsync_ReturnsSuccessWithNull_WhenMissing()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
 
         var result = await repo.GetByIdAsync(123);
@@ -35,7 +34,7 @@ public class EfRepositoryAsyncTests
     [Fact]
     public async Task GetAllAsync_ReturnsAll()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
         await repo.CreateRangeAsync([new TestEntity { Name = "a" }, new TestEntity { Name = "b" }]);
 
@@ -48,7 +47,7 @@ public class EfRepositoryAsyncTests
     [Fact]
     public async Task UpdateAsync_And_DeleteAsync_Work()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
         var entity = new TestEntity { Name = "a" };
         await repo.CreateAsync(entity);
@@ -66,7 +65,7 @@ public class EfRepositoryAsyncTests
     [Fact]
     public async Task DeleteRangeAsync_RemovesByIds()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
         var a = new TestEntity { Name = "a" };
         var b = new TestEntity { Name = "b" };

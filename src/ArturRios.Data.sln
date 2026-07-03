@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArturRios.Data", "ArturRios.Data.csproj", "{35018464-16EE-44CE-9909-550F61D699B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArturRios.Data.Core", "ArturRios.Data.Core.csproj", "{35018464-16EE-44CE-9909-550F61D699B2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArturRios.Data.Tests", "..\tests\ArturRios.Data.Tests.csproj", "{4133DA13-F25E-4393-82E8-FD4C242CAF6E}"
 EndProject

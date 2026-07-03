@@ -1,4 +1,4 @@
-namespace ArturRios.Data.Transactions;
+namespace ArturRios.Data.Core.Transactions;
 
 /// <summary>
 /// A handle over an active database transaction with manual commit/rollback control.

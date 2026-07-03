@@ -20,6 +20,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ArturRios.Data.csproj" />
+    <ProjectReference Include="..\ArturRios.Data.Core.csproj" />
   </ItemGroup>
 </Project>

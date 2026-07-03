@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ArturRios.Data;
+namespace ArturRios.Data.Core;
 
 /// <summary>
 /// Base class for entities that participate in optimistic concurrency checks.

@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
-using ArturRios.Data;
-using ArturRios.Data.Repositories;
+using ArturRios.Data.Core;
+using ArturRios.Data.Core.Repositories;
 using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Repositories;

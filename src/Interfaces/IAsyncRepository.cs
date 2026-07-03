@@ -1,6 +1,6 @@
 using ArturRios.Output;
 
-namespace ArturRios.Data.Interfaces;
+namespace ArturRios.Data.Core.Interfaces;
 
 /// <summary>
 /// Full asynchronous read/write repository contract for entities of type <typeparamref name="T"/>.

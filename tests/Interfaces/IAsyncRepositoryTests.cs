@@ -2,9 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ArturRios.Data;
-using ArturRios.Data.Interfaces;
-using ArturRios.Output;
+using ArturRios.Data.Core.Interfaces;
 
 namespace ArturRios.Data.Tests.Interfaces;
 

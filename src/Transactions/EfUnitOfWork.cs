@@ -1,8 +1,8 @@
-using ArturRios.Data.Configuration;
+using ArturRios.Data.Core.Configuration;
 using ArturRios.Output;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace ArturRios.Data.Transactions;
+namespace ArturRios.Data.Core.Transactions;
 
 /// <summary>
 /// Entity Framework Core implementation of <see cref="IUnitOfWork"/> and <see cref="IAsyncUnitOfWork"/>.

@@ -1,6 +1,6 @@
 using ArturRios.Output;
 
-namespace ArturRios.Data.Transactions;
+namespace ArturRios.Data.Core.Transactions;
 
 /// <summary>
 /// Asynchronously coordinates repository operations within a single database transaction.

@@ -1,5 +1,4 @@
-using ArturRios.Data.Configuration;
-using ArturRios.Data.Providers;
+using ArturRios.Data.Core.Configuration;
 using ArturRios.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 

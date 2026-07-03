@@ -1,6 +1,5 @@
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using ArturRios.Data.Configuration;
+using ArturRios.Data.Core.Configuration;
 
 namespace ArturRios.Data.Tests.Configuration;
 
@@ -47,13 +46,13 @@ public class BaseDbContextOptionsTests
     [Fact]
     public void Options_CarryDatabaseTypeAndConnectionString()
     {
-        var options = new ArturRios.Data.Configuration.BaseDbContextOptions
+        var options = new Core.Configuration.BaseDbContextOptions
         {
-            DatabaseType = ArturRios.Data.Configuration.DatabaseType.SQLite,
+            DatabaseType = Core.Configuration.DatabaseType.SQLite,
             ConnectionString = "Filename=:memory:"
         };
 
-        Assert.Equal(ArturRios.Data.Configuration.DatabaseType.SQLite, options.DatabaseType);
+        Assert.Equal(Core.Configuration.DatabaseType.SQLite, options.DatabaseType);
         Assert.Equal("Filename=:memory:", options.ConnectionString);
     }
 }

@@ -1,71 +1,68 @@
-using ArturRios.Data.Configuration;
-using ArturRios.Data.Exceptions;
-using ArturRios.Data.Interfaces;
-using ArturRios.Data.Providers;
-using ArturRios.Data.Repositories;
-using ArturRios.Data.Transactions;
-using Microsoft.EntityFrameworkCore;
+using ArturRios.Data.Core.Configuration;
+using ArturRios.Data.Core.Exceptions;
+using ArturRios.Data.Core.Interfaces;
+using ArturRios.Data.Core.Providers;
+using ArturRios.Data.Core.Repositories;
+using ArturRios.Data.Core.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ArturRios.Data.DependencyInjection;
+namespace ArturRios.Data.Core.DependencyInjection;
 
 /// <summary>
-/// Dependency-injection registration for the ArturRios.Data relational stack.
+/// Dependency-injection registration for the ArturRios.Data.Core relational stack.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Registers the configured <typeparamref name="TContext"/>, repositories, and unit of work,
-    /// binding options from the given configuration section.
-    /// </summary>
     /// <param name="services">The service collection.</param>
-    /// <param name="configuration">Application configuration.</param>
-    /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data".</param>
-    /// <typeparam name="TContext">The application's context type.</typeparam>
-    public static IServiceCollection AddArturRiosData<TContext>(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        string sectionName = "ArturRios.Data")
-        where TContext : BaseDbContext
+    extension(IServiceCollection services)
     {
-        var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
-                      ?? new BaseDbContextOptions();
-        return services.AddArturRiosData<TContext>(options);
-    }
-
-    /// <summary>
-    /// Registers the configured <typeparamref name="TContext"/>, repositories, and unit of work
-    /// from an explicit options instance.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="options">The database options.</param>
-    /// <typeparam name="TContext">The application's context type.</typeparam>
-    public static IServiceCollection AddArturRiosData<TContext>(
-        this IServiceCollection services,
-        BaseDbContextOptions options)
-        where TContext : BaseDbContext
-    {
-        services.AddDbContext<TContext>((sp, builder) =>
+        /// <summary>
+        /// Registers the configured <typeparamref name="TContext"/>, repositories, and unit of work,
+        /// binding options from the given configuration section.
+        /// </summary>
+        /// <param name="configuration">Application configuration.</param>
+        /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data.Core".</param>
+        /// <typeparam name="TContext">The application's context type.</typeparam>
+        public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
+            string sectionName = "ArturRios.Data.Core")
+            where TContext : BaseDbContext
         {
-            var provider = ResolveProvider(sp.GetServices<IDatabaseProvider>(), options.DatabaseType);
-            provider.Configure(builder, options.ConnectionString);
-        });
+            var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
+                          ?? new BaseDbContextOptions();
+            return services.AddDataConfig<TContext>(options);
+        }
 
-        services.AddScoped<BaseDbContext>(sp => sp.GetRequiredService<TContext>());
+        /// <summary>
+        /// Registers the configured <typeparamref name="TContext"/>, repositories, and unit of work
+        /// from an explicit options instance.
+        /// </summary>
+        /// <param name="options">The database options.</param>
+        /// <typeparam name="TContext">The application's context type.</typeparam>
+        public IServiceCollection AddDataConfig<TContext>(BaseDbContextOptions options)
+            where TContext : BaseDbContext
+        {
+            services.AddDbContext<TContext>((sp, builder) =>
+            {
+                var provider = ResolveProvider(sp.GetServices<IDatabaseProvider>(), options.DatabaseType);
+                provider.Configure(builder, options.ConnectionString);
+            });
 
-        services.AddScoped(typeof(IReadOnlyRepository<>), typeof(EfRepository<>));
-        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-        services.AddScoped(typeof(IAsyncReadOnlyRepository<>), typeof(EfRepository<>));
-        services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+            services.AddScoped<BaseDbContext>(sp => sp.GetRequiredService<TContext>());
 
-        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        services.AddScoped<IAsyncUnitOfWork, EfUnitOfWork>();
+            services.AddScoped(typeof(IReadOnlyRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IAsyncReadOnlyRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
 
-        // Validate provider availability eagerly so misconfiguration fails at registration, not first use.
-        EnsureProviderRegistered(services, options.DatabaseType);
+            services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+            services.AddScoped<IAsyncUnitOfWork, EfUnitOfWork>();
 
-        return services;
+            // Validate provider availability eagerly so misconfiguration fails at registration, not first use.
+            EnsureProviderRegistered(services, options.DatabaseType);
+
+            return services;
+        }
     }
 
     // Best-effort eager check: only throws when it can prove no provider matches.
@@ -96,7 +93,7 @@ public static class ServiceCollectionExtensions
         [
             $"No IDatabaseProvider registered for DatabaseType '{type}'. " +
             $"Install and register the matching provider package " +
-            $"(e.g. ArturRios.Data.{type}) by calling its Add{type}Provider() extension."
+            $"(e.g. ArturRios.Data.Core.{type}) by calling its Add{type}Provider() extension."
         ]);
     }
 
@@ -128,7 +125,7 @@ public static class ServiceCollectionExtensions
             [
                 $"No IDatabaseProvider registered for DatabaseType '{type}'. " +
                 $"Install and register the matching provider package " +
-                $"(e.g. ArturRios.Data.{type}) by calling its Add{type}Provider() extension."
+                $"(e.g. ArturRios.Data.Core.{type}) by calling its Add{type}Provider() extension."
             ]);
         }
 

@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ArturRios.Data.Repositories;
+using ArturRios.Data.Core.Repositories;
+using ArturRios.Data.Core.Transactions;
 using ArturRios.Data.Tests.TestSupport;
-using ArturRios.Data.Transactions;
 
 namespace ArturRios.Data.Tests.Transactions;
 
@@ -47,7 +47,7 @@ public class EfUnitOfWorkTests
     [Fact]
     public async Task ExecuteInTransactionAsync_WithResult_CommitsAndReturnsData()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
         var uow = new EfUnitOfWork(context);
 
@@ -59,6 +59,6 @@ public class EfUnitOfWorkTests
 
         Assert.True(result.Success);
         Assert.True(result.Data > 0);
-        Assert.Single(repo.GetAll().Data!);
+        Assert.Single((await repo.GetAllAsync()).Data!);
     }
 }
