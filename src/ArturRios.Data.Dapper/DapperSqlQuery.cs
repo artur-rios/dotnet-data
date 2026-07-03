@@ -40,15 +40,21 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
     public DataOutput<T?> ExecuteScalar<T>(string sql, object? parameters = null) =>
         Guarded(() => Connection.ExecuteScalar<T?>(sql, parameters, Transaction));
 
-    // Async members implemented in Task 3.
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> QueryAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> QueryAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) =>
+        GuardedAsync(async () => await Connection.QueryAsync<T>(Command(sql, parameters, ct)));
+
     /// <inheritdoc />
-    public Task<DataOutput<T?>> QueryFirstOrDefaultAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T?>> QueryFirstOrDefaultAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) =>
+        GuardedAsync(async () => await Connection.QueryFirstOrDefaultAsync<T?>(Command(sql, parameters, ct)));
+
     /// <inheritdoc />
-    public Task<DataOutput<T?>> QuerySingleOrDefaultAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T?>> QuerySingleOrDefaultAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) =>
+        GuardedAsync(async () => await Connection.QuerySingleOrDefaultAsync<T?>(Command(sql, parameters, ct)));
+
     /// <inheritdoc />
-    public Task<DataOutput<T?>> ExecuteScalarAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T?>> ExecuteScalarAsync<T>(string sql, object? parameters = null, CancellationToken ct = default) =>
+        GuardedAsync(async () => await Connection.ExecuteScalarAsync<T?>(Command(sql, parameters, ct)));
 
     /// <summary>Runs a synchronous query, converting failures to envelope errors.</summary>
     protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)
@@ -56,6 +62,27 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
         try
         {
             return DataOutput<TResult>.New.WithData(operation());
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            return DataOutput<TResult>.New.WithError($"{QueryFailedMessage} {ex.GetBaseException().Message}");
+        }
+    }
+
+    /// <summary>Builds a Dapper command carrying the ambient transaction and cancellation token.</summary>
+    private CommandDefinition Command(string sql, object? parameters, CancellationToken ct) =>
+        new(sql, parameters, Transaction, cancellationToken: ct);
+
+    /// <summary>Runs an asynchronous query, converting failures to envelope errors.</summary>
+    protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
+    {
+        try
+        {
+            return DataOutput<TResult>.New.WithData(await operation());
         }
         catch (OperationCanceledException)
         {
