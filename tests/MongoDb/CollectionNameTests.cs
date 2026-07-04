@@ -6,7 +6,7 @@ public class CollectionNameTests
 {
     private sealed class Plain : Document { }
 
-    [ArturRios.Data.MongoDb.Collection("custom_things")]
+    [MongoCollection("custom_things")]
     private sealed class Annotated : Document { }
 
     [Fact]
