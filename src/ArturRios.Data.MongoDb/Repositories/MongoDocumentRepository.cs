@@ -91,25 +91,70 @@ public class MongoDocumentRepository<T>(MongoContext context)
         return (IEnumerable<string>)idList;
     });
 
-    // Async members implemented in Task 5.
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () => await FindFluent(FilterDefinition<T>.Empty).ToListAsync(ct));
+
     /// <inheritdoc />
-    public Task<DataOutput<T?>> GetByIdAsync(string id, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T?>> GetByIdAsync(string id, CancellationToken ct = default) =>
+        GuardedAsync<T?>(async () => await FindFluent(IdFilter(id)).FirstOrDefaultAsync(ct));
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () => await FindFluent(Builders<T>.Filter.Where(predicate)).ToListAsync(ct));
+
     /// <inheritdoc />
-    public Task<DataOutput<string>> CreateAsync(T document, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<string>> CreateAsync(T document, CancellationToken ct = default) =>
+        GuardedAsync(async () =>
+        {
+            EnsureId(document);
+            await InsertOneAsync(document, ct);
+            return document.Id;
+        });
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<string>>> CreateRangeAsync(IEnumerable<T> documents, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<string>>> CreateRangeAsync(IEnumerable<T> documents, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<string>>(async () =>
+        {
+            var list = documents.ToList();
+            foreach (var d in list) EnsureId(d);
+            await InsertManyAsync(list, ct);
+            return list.Select(d => d.Id).ToList();
+        });
+
     /// <inheritdoc />
-    public Task<DataOutput<T>> UpdateAsync(T document, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<T>> UpdateAsync(T document, CancellationToken ct = default) =>
+        GuardedAsync(async () =>
+        {
+            await ReplaceAsync(document, ct);
+            return document;
+        });
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> UpdateRangeAsync(IEnumerable<T> documents, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> UpdateRangeAsync(IEnumerable<T> documents, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () =>
+        {
+            var list = documents.ToList();
+            foreach (var d in list) await ReplaceAsync(d, ct);
+            return list;
+        });
+
     /// <inheritdoc />
-    public Task<DataOutput<string>> DeleteAsync(T document, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<string>> DeleteAsync(T document, CancellationToken ct = default) =>
+        GuardedAsync(async () =>
+        {
+            await DeleteManyAsync(IdFilter(document.Id), ct);
+            return document.Id;
+        });
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<string>>> DeleteRangeAsync(IEnumerable<string> ids, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<string>>> DeleteRangeAsync(IEnumerable<string> ids, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<string>>(async () =>
+        {
+            var idList = ids.ToList();
+            await DeleteManyAsync(Builders<T>.Filter.In(d => d.Id, idList), ct);
+            return idList;
+        });
 
     // --- session-aware driver helpers (sync) ---
     private static FilterDefinition<T> IdFilter(string id) => Builders<T>.Filter.Eq(d => d.Id, id);
@@ -170,6 +215,58 @@ public class MongoDocumentRepository<T>(MongoContext context)
         try
         {
             return DataOutput<TResult>.New.WithData(operation());
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            return Fail<TResult>(ex);
+        }
+    }
+
+    // --- session-aware driver helpers (async) ---
+    private Task InsertOneAsync(T document, CancellationToken ct) =>
+        Session is { } s ? Collection.InsertOneAsync(s, document, null, ct) : Collection.InsertOneAsync(document, null, ct);
+
+    private Task InsertManyAsync(IEnumerable<T> documents, CancellationToken ct) =>
+        Session is { } s ? Collection.InsertManyAsync(s, documents, null, ct) : Collection.InsertManyAsync(documents, null, ct);
+
+    private Task DeleteManyAsync(FilterDefinition<T> filter, CancellationToken ct) =>
+        Session is { } s ? Collection.DeleteManyAsync(s, filter, null, ct) : Collection.DeleteManyAsync(filter, ct);
+
+    private async Task ReplaceAsync(T document, CancellationToken ct)
+    {
+        if (document is VersionedDocument versioned)
+        {
+            var expected = versioned.Version;
+            versioned.Version = expected + 1;
+            var filter = Builders<T>.Filter.And(IdFilter(document.Id), Builders<T>.Filter.Eq("Version", expected));
+            var result = Session is { } s
+                ? await Collection.ReplaceOneAsync(s, filter, document, cancellationToken: ct)
+                : await Collection.ReplaceOneAsync(filter, document, cancellationToken: ct);
+            if (result.MatchedCount == 0)
+            {
+                versioned.Version = expected; // roll back the in-memory bump on a failed (stale) update
+                throw new MongoConcurrencyException();
+            }
+            return;
+        }
+
+        var idFilter = IdFilter(document.Id);
+        if (Session is { } session)
+            await Collection.ReplaceOneAsync(session, idFilter, document, cancellationToken: ct);
+        else
+            await Collection.ReplaceOneAsync(idFilter, document, cancellationToken: ct);
+    }
+
+    /// <summary>Runs an asynchronous operation, converting failures to envelope errors.</summary>
+    protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
+    {
+        try
+        {
+            return DataOutput<TResult>.New.WithData(await operation());
         }
         catch (OperationCanceledException)
         {
