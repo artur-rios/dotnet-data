@@ -150,7 +150,11 @@ public class MongoDocumentRepository<T>(MongoContext context)
             var filter = Builders<T>.Filter.And(IdFilter(document.Id),
                 Builders<T>.Filter.Eq("Version", expected));
             var result = ReplaceOne(filter, document);
-            if (result.MatchedCount == 0) throw new MongoConcurrencyException();
+            if (result.MatchedCount == 0)
+            {
+                versioned.Version = expected; // roll back the in-memory bump on a failed (stale) update
+                throw new MongoConcurrencyException();
+            }
             return;
         }
 

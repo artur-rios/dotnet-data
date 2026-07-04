@@ -104,8 +104,10 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
 
         // The original 'doc' still holds the old Version -> stale.
         doc.Name = "late";
+        var versionBeforeStaleUpdate = doc.Version;
         var stale = repo.Update(doc);
         Assert.False(stale.Success);
         Assert.Contains(stale.Errors, e => e.Contains("Concurrency conflict"));
+        Assert.Equal(versionBeforeStaleUpdate, doc.Version); // in-memory version rolled back, not left bumped
     }
 }
