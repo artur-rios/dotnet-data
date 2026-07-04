@@ -219,8 +219,14 @@ var assemblies = [
       { "name": "ArturRios.Data.Core.Entity", "rp": "ArturRios.Data.Core_Entity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 14, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
       { "name": "ArturRios.Data.Core.Exceptions.DataAccessException", "rp": "ArturRios.Data.Core_DataAccessException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 11, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
       { "name": "ArturRios.Data.Core.Repositories.EfRepository<T>", "rp": "ArturRios.Data.Core_EfRepository_1.html", "cl": 89, "ucl": 25, "cal": 114, "tl": 200, "cb": 7, "tb": 10, "cm": 20, "fcm": 17, "tm": 22, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 50.0 } },
-      { "name": "ArturRios.Data.Core.Transactions.EfUnitOfWork", "rp": "ArturRios.Data.Core_EfUnitOfWork.html", "cl": 19, "ucl": 35, "cal": 54, "tl": 99, "cb": 2, "tb": 4, "cm": 3, "fcm": 1, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 2,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.Core.Transactions.EfUnitOfWork", "rp": "ArturRios.Data.Core_EfUnitOfWork.html", "cl": 28, "ucl": 26, "cal": 54, "tl": 99, "cb": 4, "tb": 4, "cm": 4, "fcm": 1, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 0,  "bcov": 100 } },
       { "name": "ArturRios.Data.Core.VersionedEntity", "rp": "ArturRios.Data.Core_VersionedEntity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 17, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+    ]},
+  {
+    "name": "ArturRios.Data.Dapper",
+    "classes": [
+      { "name": "ArturRios.Data.Dapper.DapperSqlQuery", "rp": "ArturRios.Data.Dapper_DapperSqlQuery.html", "cl": 26, "ucl": 6, "cal": 32, "tl": 96, "cb": 2, "tb": 2, "cm": 14, "fcm": 12, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 70.0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Dapper.ServiceCollectionExtensions", "rp": "ArturRios.Data.Dapper_ServiceCollectionExtensions.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 20, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
   {
     "name": "ArturRios.Data.PostgreSql",

@@ -94,10 +94,10 @@ using ArturRios.Data.DependencyInjection;
 using ArturRios.Data.PostgreSql;   // brings AddPostgreSqlProvider()
 
 builder.Services.AddPostgreSqlProvider();
-builder.Services.AddArturRiosData<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
 ```
 
-`AddArturRiosData<TContext>` registers `TContext`, all four repository interfaces (backed by `EfRepository<T>`), and `IUnitOfWork` / `IAsyncUnitOfWork`. It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails fast at registration time if no matching provider was registered.
+`AddDataConfig<TContext>` registers `TContext`, all four repository interfaces (backed by `EfRepository<T>`), and `IUnitOfWork` / `IAsyncUnitOfWork`. It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails fast at registration time if no matching provider was registered.
 
 ### 5. Use read-only or async interfaces when full CRUD is not needed
 
@@ -118,6 +118,38 @@ public class ProductBatchService(IAsyncRepository<Product> repo)
 }
 ```
 
+## Dapper query path (optional)
+
+For raw-SQL reads alongside EF-based persistence, install `ArturRios.Data.Dapper` and register it
+after `AddDataConfig`:
+
+```csharp
+using ArturRios.Data.Dapper;
+
+builder.Services.AddSqliteProvider();               // or AddPostgreSqlProvider()
+builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDapper();
+```
+
+Inject `IAsyncSqlQuery` (or the sync `ISqlQuery`) and run enveloped, parameterized queries:
+
+```csharp
+public class ReportService(IAsyncSqlQuery sql)
+{
+    public async Task<int> ActiveCountAsync()
+    {
+        var result = await sql.ExecuteScalarAsync<long>(
+            "SELECT COUNT(*) FROM Products WHERE IsActive = @active", new { active = true });
+
+        return result.Success ? (int)result.Data : 0;
+    }
+}
+```
+
+The Dapper path is **read-only** — all writes go through the EF repositories. It runs on the same
+`DbContext` connection and enlists in the active `IUnitOfWork` transaction, so a Dapper read inside a
+unit of work sees the not-yet-committed EF writes.
+
 ## Requirements
 
 - .NET 10.0 or later
@@ -129,7 +161,7 @@ public class ProductBatchService(IAsyncRepository<Product> repo)
 | `ArturRios.Data.PostgreSql` | `PostgreSql` | Available |
 | `ArturRios.Data.MySql` | `MySql` | Deferred — the package cannot ship until [Pomelo.EntityFrameworkCore.MySql](https://www.nuget.org/packages/Pomelo.EntityFrameworkCore.MySql) publishes a release supporting EF Core 10 |
 
-The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`, `AddPostgreSqlProvider()`) before `AddArturRiosData<TContext>(...)`, and its `DatabaseType` must match the one configured in `appsettings.json`.
+The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`, `AddPostgreSqlProvider()`) before `AddDataConfig<TContext>(...)`, and its `DatabaseType` must match the one configured in `appsettings.json`.
 
 ## Versioning
 
