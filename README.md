@@ -153,6 +153,60 @@ The Dapper path is **read-only** — all writes go through the EF repositories. 
 `DbContext` connection and enlists in the active `IUnitOfWork` transaction, so a Dapper read inside a
 unit of work sees the not-yet-committed EF writes.
 
+## MongoDB document store (optional)
+
+Install `ArturRios.Data.MongoDb` and register it from configuration:
+
+```csharp
+using ArturRios.Data.MongoDb.DependencyInjection;
+
+builder.Services.AddMongoData(builder.Configuration); // binds "ArturRios.Data.MongoDb"
+```
+
+```json
+{
+  "ArturRios.Data.MongoDb": {
+    "ConnectionString": "mongodb://localhost:27017/?replicaSet=rs0",
+    "DatabaseName": "mydb"
+  }
+}
+```
+
+Define a document and inject an enveloped repository:
+
+```csharp
+using ArturRios.Data.MongoDb;
+
+public class Product : Document          // or : VersionedDocument for optimistic concurrency
+{
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+}
+
+public class CatalogService(
+    IAsyncDocumentRepository<Product> repo,
+    IAsyncMongoUnitOfWork unitOfWork)
+{
+    public async Task<string> AddAsync(Product p)
+    {
+        var result = await repo.CreateAsync(p);          // DataOutput<string> (the new id)
+        return result.Success ? result.Data! : throw new InvalidOperationException(string.Join(", ", result.Errors));
+    }
+
+    public Task<DataOutput<string>> AddTwoAtomicallyAsync(Product a, Product b) =>
+        unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var first = await repo.CreateAsync(a);
+            await repo.CreateAsync(b);
+            return first.Data!;
+        });
+}
+```
+
+All methods return `DataOutput` envelopes. `Find(predicate)` runs a server-side filter and `Query()`
+exposes a composable `IQueryable<T>`. Multi-document transactions via `IMongoUnitOfWork` require the
+server to be a **replica set**; optimistic concurrency is opt-in by deriving from `VersionedDocument`.
+
 ## Versioning
 
 Semantic Versioning (SemVer). Breaking changes result in a new major version. New methods or non-breaking behavior
