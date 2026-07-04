@@ -1,16 +1,49 @@
 using System.Collections.Generic;
 using System.Linq;
+using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Data.Tests.MongoDb.TestSupport;
+using MongoDB.Bson.Serialization.Conventions;
 using Xunit;
 
 namespace ArturRios.Data.Tests.MongoDb;
 
+/// <summary>A versioned document type scoped to a non-default (camelCase) element-name convention,
+/// used to prove the optimistic-concurrency filter resolves the real serialized element name.</summary>
+public class CamelVersionedDoc : VersionedDocument
+{
+    public string Name { get; set; } = string.Empty;
+}
+
 [Collection(MongoTestCollection.Name)]
 public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
 {
+    private static readonly object ConventionLock = new();
+    private static bool _camelConventionRegistered;
+
     private MongoDocumentRepository<TestDoc> NewRepo() => new(fixture.NewContext());
     private MongoDocumentRepository<VersionedTestDoc> NewVersionedRepo() => new(fixture.NewContext());
+
+    private MongoDocumentRepository<CamelVersionedDoc> NewCamelVersionedRepo()
+    {
+        EnsureCamelConventionRegistered();
+        return new(fixture.NewContext());
+    }
+
+    private static void EnsureCamelConventionRegistered()
+    {
+        lock (ConventionLock)
+        {
+            if (_camelConventionRegistered) return;
+
+            ConventionRegistry.Register(
+                "camelCase_" + nameof(CamelVersionedDoc),
+                new ConventionPack { new CamelCaseElementNameConvention() },
+                t => t == typeof(CamelVersionedDoc) || t == typeof(VersionedDocument));
+
+            _camelConventionRegistered = true;
+        }
+    }
 
     [Fact]
     public void Create_AssignsAndReturnsId()
@@ -109,5 +142,29 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
         Assert.False(stale.Success);
         Assert.Contains(stale.Errors, e => e.Contains("Concurrency conflict"));
         Assert.Equal(versionBeforeStaleUpdate, doc.Version); // in-memory version rolled back, not left bumped
+    }
+
+    [Fact]
+    public void VersionedUpdate_WithNonDefaultElementNameConvention_SucceedsAndStillDetectsStaleness()
+    {
+        var repo = NewCamelVersionedRepo();
+        var doc = new CamelVersionedDoc { Name = "a" };
+        repo.Create(doc);
+
+        // Keep a stale in-memory copy (same Version as originally created) for the later stale-update check.
+        var staleCopy = new CamelVersionedDoc { Id = doc.Id, Name = "late", Version = doc.Version };
+
+        // A normal versioned update must succeed even though the document is stored with a camelCase
+        // "version" element: the concurrency filter must resolve the real serialized element name
+        // instead of hard-coding "Version", or this update will spuriously report a conflict.
+        doc.Name = "updated";
+        var result = repo.Update(doc);
+        Assert.True(result.Success, string.Join(";", result.Errors));
+        Assert.Equal("updated", repo.GetById(doc.Id).Data!.Name);
+
+        // A genuinely stale update (reusing the pre-update in-memory copy) must still be rejected.
+        var stale = repo.Update(staleCopy);
+        Assert.False(stale.Success);
+        Assert.Contains(stale.Errors, e => e.Contains("Concurrency conflict"));
     }
 }

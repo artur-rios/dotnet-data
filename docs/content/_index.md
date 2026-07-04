@@ -201,8 +201,10 @@ public class CatalogService(
 ```
 
 All methods return `DataOutput` envelopes. `Find(predicate)` runs a server-side filter and `Query()`
-exposes a composable `IQueryable<T>`. Multi-document transactions via `IMongoUnitOfWork` require the
-server to be a **replica set**; optimistic concurrency is opt-in by deriving from `VersionedDocument`.
+exposes a composable `IQueryable<T>`. Note that `Query()` bypasses the ambient unit-of-work transaction
+(it does not use the session), whereas `Find`/`GetAll` are transaction-aware. Multi-document transactions
+via `IMongoUnitOfWork` require the server to be a **replica set**; optimistic concurrency is opt-in by
+deriving from `VersionedDocument`.
 
 ## Requirements
 

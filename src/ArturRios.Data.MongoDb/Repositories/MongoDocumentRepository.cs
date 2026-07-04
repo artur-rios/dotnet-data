@@ -3,6 +3,7 @@ using ArturRios.Data.MongoDb.Exceptions;
 using ArturRios.Data.MongoDb.Interfaces;
 using ArturRios.Output;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace ArturRios.Data.MongoDb.Repositories;
@@ -28,6 +29,13 @@ public class MongoDocumentRepository<T>(MongoContext context)
     protected IMongoCollection<T> Collection => context.GetCollection<T>();
 
     private IClientSessionHandle? Session => context.Session;
+
+    // Cached: the serialized BSON element name for VersionedDocument.Version on T
+    // (respects any element-name convention the consumer registered).
+    private static readonly string VersionElementName =
+        BsonClassMap.LookupClassMap(typeof(T)).AllMemberMaps
+            .FirstOrDefault(m => m.MemberName == nameof(VersionedDocument.Version))?.ElementName
+        ?? nameof(VersionedDocument.Version);
 
     /// <inheritdoc />
     public IQueryable<T> Query() => Collection.AsQueryable();
@@ -193,7 +201,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
             var expected = versioned.Version;
             versioned.Version = expected + 1;
             var filter = Builders<T>.Filter.And(IdFilter(document.Id),
-                Builders<T>.Filter.Eq("Version", expected));
+                Builders<T>.Filter.Eq(VersionElementName, expected));
             var result = ReplaceOne(filter, document);
             if (result.MatchedCount == 0)
             {
@@ -242,7 +250,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
         {
             var expected = versioned.Version;
             versioned.Version = expected + 1;
-            var filter = Builders<T>.Filter.And(IdFilter(document.Id), Builders<T>.Filter.Eq("Version", expected));
+            var filter = Builders<T>.Filter.And(IdFilter(document.Id), Builders<T>.Filter.Eq(VersionElementName, expected));
             var result = Session is { } s
                 ? await Collection.ReplaceOneAsync(s, filter, document, cancellationToken: ct)
                 : await Collection.ReplaceOneAsync(filter, document, cancellationToken: ct);

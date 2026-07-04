@@ -8,6 +8,11 @@ namespace ArturRios.Data.MongoDb.Interfaces;
 public interface IDocumentReadOnlyRepository<T> where T : Document
 {
     /// <summary>Deferred, composable query over the collection.</summary>
+    /// <remarks>
+    /// Runs OUTSIDE any ambient unit-of-work transaction (the driver's LINQ provider does not use the
+    /// session), so it will not see uncommitted writes made earlier in the same transaction — use
+    /// <see cref="GetAll"/>/<see cref="Find"/> for transaction-aware reads.
+    /// </remarks>
     IQueryable<T> Query();
 
     /// <summary>Returns all documents.</summary>
