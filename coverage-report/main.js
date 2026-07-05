@@ -229,6 +229,20 @@ var assemblies = [
       { "name": "ArturRios.Data.Dapper.ServiceCollectionExtensions", "rp": "ArturRios.Data.Dapper_ServiceCollectionExtensions.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 20, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
   {
+    "name": "ArturRios.Data.MongoDb",
+    "classes": [
+      { "name": "ArturRios.Data.MongoDb.CollectionName", "rp": "ArturRios.Data.MongoDb_CollectionName.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 4, "tb": 4, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 4,  "cc": 4,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.Configuration.MongoOptions", "rp": "ArturRios.Data.MongoDb_MongoOptions.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 11, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.MongoDb_ServiceCollectionExtensions.html", "cl": 11, "ucl": 3, "cal": 14, "tl": 45, "cb": 0, "tb": 2, "cm": 1, "fcm": 0, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 2,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.MongoDb.Document", "rp": "ArturRios.Data.MongoDb_Document.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 13, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.Exceptions.MongoConcurrencyException", "rp": "ArturRios.Data.MongoDb_MongoConcurrencyException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 7, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.MongoCollectionAttribute", "rp": "ArturRios.Data.MongoDb_MongoCollectionAttribute.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 10, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.MongoContext", "rp": "ArturRios.Data.MongoDb_MongoContext.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 19, "cb": 0, "tb": 0, "cm": 3, "fcm": 3, "tm": 3, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.Repositories.MongoDocumentRepository<T>", "rp": "ArturRios.Data.MongoDb_MongoDocumentRepository_1.html", "cl": 129, "ucl": 35, "cal": 164, "tl": 295, "cb": 26, "tb": 42, "cm": 36, "fcm": 32, "tm": 38, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 29,  "cc": 8,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.MongoDb.Transactions.MongoUnitOfWork", "rp": "ArturRios.Data.MongoDb_MongoUnitOfWork.html", "cl": 29, "ucl": 36, "cal": 65, "tl": 105, "cb": 12, "tb": 12, "cm": 3, "fcm": 1, "tm": 5, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.VersionedDocument", "rp": "ArturRios.Data.MongoDb_VersionedDocument.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 8, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+    ]},
+  {
     "name": "ArturRios.Data.PostgreSql",
     "classes": [
       { "name": "ArturRios.Data.PostgreSql.PostgreSqlProvider", "rp": "ArturRios.Data.PostgreSql_PostgreSqlProvider.html", "cl": 1, "ucl": 1, "cal": 2, "tl": 18, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
