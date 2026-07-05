@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Data.Tests.MongoDb.TestSupport;
-using Xunit;
 
 namespace ArturRios.Data.Tests.MongoDb;
 

@@ -1,12 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Data.MongoDb.Transactions;
 using ArturRios.Data.Tests.MongoDb.TestSupport;
-using MongoDB.Driver;
-using Xunit;
 
 namespace ArturRios.Data.Tests.MongoDb;
 

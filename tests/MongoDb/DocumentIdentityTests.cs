@@ -1,4 +1,3 @@
-using System;
 using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Configuration;
 using MongoDB.Bson.Serialization.Attributes;

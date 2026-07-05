@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using System.Linq;
 using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Data.Tests.MongoDb.TestSupport;
 using MongoDB.Bson.Serialization.Conventions;
-using Xunit;
 
 namespace ArturRios.Data.Tests.MongoDb;
 
