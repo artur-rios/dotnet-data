@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ArturRios.Data.DynamoDb.Repositories;
 using ArturRios.Data.Tests.DynamoDb.TestSupport;
-using Xunit;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 
@@ -23,13 +21,13 @@ public class DynamoBatchTests(DynamoLocalFixture fixture) : IAsyncLifetime
         var a = new VersionedTestItem { Id = "a", Name = "A" };
         var b = new VersionedTestItem { Id = "b", Name = "B" };
 
-        Assert.True((await repo.SaveManyAsync(new[] { a, b })).Success);
+        Assert.True((await repo.SaveManyAsync([a, b])).Success);
 
-        var loaded = await repo.LoadManyAsync(new object[] { "a", "b" });
+        var loaded = await repo.LoadManyAsync(["a", "b"]);
         Assert.True(loaded.Success);
         Assert.Equal(2, loaded.Data!.Count());
 
-        Assert.True((await repo.DeleteManyAsync(new[] { a, b })).Success);
-        Assert.Empty((await repo.LoadManyAsync(new object[] { "a", "b" })).Data!);
+        Assert.True((await repo.DeleteManyAsync([a, b])).Success);
+        Assert.Empty((await repo.LoadManyAsync(["a", "b"])).Data!);
     }
 }

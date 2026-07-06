@@ -28,7 +28,7 @@ public class DapperSqlQueryAsyncTests
         var result = await sut.QueryAsync<ItemRow>("SELECT Id, Name FROM Items ORDER BY Id");
 
         Assert.True(result.Success);
-        Assert.Equal(new[] { "a", "b" }, result.Data!.Select(r => r.Name));
+        Assert.Equal(["a", "b"], result.Data!.Select(r => r.Name));
     }
 
     [Fact]

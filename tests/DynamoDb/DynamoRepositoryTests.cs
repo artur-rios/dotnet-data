@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using ArturRios.Data.DynamoDb.Repositories;
 using ArturRios.Data.Tests.DynamoDb.TestSupport;
-using Xunit;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 

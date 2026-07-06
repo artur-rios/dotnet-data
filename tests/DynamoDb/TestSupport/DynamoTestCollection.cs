@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace ArturRios.Data.Tests.DynamoDb.TestSupport;
 
 /// <summary>xUnit collection so all DynamoDB integration tests share one DynamoDB Local instance.</summary>

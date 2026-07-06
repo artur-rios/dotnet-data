@@ -1,11 +1,9 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using ArturRios.Data.DynamoDb.Repositories;
 using ArturRios.Data.Tests.DynamoDb.TestSupport;
-using Xunit;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 
@@ -37,7 +35,7 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
         await repo.SaveAsync(new TestItem { Category = "q2", Sku = "a", Name = "A" });
         await repo.SaveAsync(new TestItem { Category = "q2", Sku = "z", Name = "Z" });
 
-        var result = await repo.QueryAsync("q2", QueryOperator.BeginsWith, new object[] { "a" });
+        var result = await repo.QueryAsync("q2", QueryOperator.BeginsWith, ["a"]);
         Assert.True(result.Success);
         Assert.Single(result.Data!);
         Assert.Equal("A", result.Data!.Single().Name);
@@ -50,7 +48,7 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
         await repo.SaveAsync(new TestItem { Category = "s", Sku = "a", Name = "keep" });
         await repo.SaveAsync(new TestItem { Category = "s", Sku = "b", Name = "drop" });
 
-        var result = await repo.ScanAsync(new[] { new ScanCondition("Name", ScanOperator.Equal, "keep") });
+        var result = await repo.ScanAsync([new ScanCondition("Name", ScanOperator.Equal, "keep")]);
         Assert.True(result.Success);
         Assert.Single(result.Data!);
     }
