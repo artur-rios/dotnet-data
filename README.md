@@ -209,6 +209,61 @@ exposes a composable `IQueryable<T>`. Note that `Query()` bypasses the ambient u
 via `IMongoUnitOfWork` require the server to be a **replica set**; optimistic concurrency is opt-in by
 deriving from `VersionedDocument`.
 
+## DynamoDB store (optional)
+
+Install `ArturRios.Data.DynamoDb` and register it from configuration:
+
+```csharp
+using ArturRios.Data.DynamoDb.DependencyInjection;
+
+builder.Services.AddDynamoData(builder.Configuration); // binds "ArturRios.Data.DynamoDb"
+```
+
+```json
+{
+  "ArturRios.Data.DynamoDb": {
+    "Region": "us-east-1",
+    "ServiceUrl": "http://localhost:8000"
+  }
+}
+```
+
+`ServiceUrl` is optional — set it for DynamoDB Local / LocalStack; omit it to use real AWS (region +
+the default credential chain or explicit keys). Annotate your item POCOs with the AWS attributes and
+inject an enveloped repository:
+
+```csharp
+using Amazon.DynamoDBv2.DataModel;
+using ArturRios.Data.DynamoDb.Interfaces;
+
+[DynamoDBTable("Products")]
+public class Product
+{
+    [DynamoDBHashKey]  public string Category { get; set; } = string.Empty;
+    [DynamoDBRangeKey] public string Sku { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    [DynamoDBVersion]  public int? Version { get; set; } // opt-in optimistic concurrency
+}
+
+public class CatalogService(IAsyncDynamoRepository<Product> repo)
+{
+    public async Task<Product?> GetAsync(string category, string sku)
+    {
+        var result = await repo.LoadAsync(category, sku);   // DataOutput<Product?>
+        return result.Success ? result.Data : null;
+    }
+
+    public Task<DataOutput<Product>> AddAsync(Product p) => repo.SaveAsync(p);
+}
+```
+
+The repository is **async-only** (the AWS SDK is). All methods return `DataOutput`/`ProcessOutput`
+envelopes; a stale write on a `[DynamoDBVersion]` item surfaces as a concurrency error. `Query` targets
+a partition key (optionally with a sort-key condition); `Scan` is a full-table scan — use sparingly.
+Batch writes (`SaveManyAsync`/`DeleteManyAsync`) bypass `[DynamoDBVersion]` optimistic concurrency, since
+DynamoDB's batch API has no conditional-write support — single-item `SaveAsync`/`DeleteAsync` still
+enforce it. Atomic multi-item transactions are a planned future addition.
+
 ## Versioning
 
 Semantic Versioning (SemVer). Breaking changes result in a new major version. New methods or non-breaking behavior
