@@ -42,13 +42,19 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
     public Task<ProcessOutput> DeleteAsync(T item, CancellationToken ct = default) =>
         GuardedProcessAsync(async () => await context.DeleteAsync(item, ct));
 
-    // Query/Scan/batch implemented in Tasks 4-5.
+    // Batch implemented in Task 5.
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey).GetRemainingAsync(ct));
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op, IEnumerable<object> sortKeyValues, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op, IEnumerable<object> sortKeyValues, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey, op, sortKeyValues).GetRemainingAsync(ct));
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () => await context.ScanAsync<T>(conditions).GetRemainingAsync(ct));
+
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default) => throw new NotImplementedException();
     /// <inheritdoc />
