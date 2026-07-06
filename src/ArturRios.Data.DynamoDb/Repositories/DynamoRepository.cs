@@ -22,6 +22,14 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
     /// <summary>Message returned on an optimistic-concurrency conflict.</summary>
     protected const string ConcurrencyMessage = "Concurrency conflict: the item was modified by another process.";
 
+    /// <summary>
+    /// The DynamoDB batch-write API rejects types with a <c>[DynamoDBVersion]</c> property unless
+    /// version checking is explicitly skipped (batch writes have no per-item conditional-check
+    /// support). Optimistic concurrency remains enforced on the single-item <see cref="SaveAsync"/>/
+    /// <see cref="DeleteAsync"/> paths.
+    /// </summary>
+    private static readonly BatchWriteConfig BatchSkipVersionCheckConfig = new() { SkipVersionCheck = true };
+
     /// <inheritdoc />
     public Task<DataOutput<T>> SaveAsync(T item, CancellationToken ct = default) =>
         GuardedAsync(async () =>
@@ -42,7 +50,6 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
     public Task<ProcessOutput> DeleteAsync(T item, CancellationToken ct = default) =>
         GuardedProcessAsync(async () => await context.DeleteAsync(item, ct));
 
-    // Batch implemented in Task 5.
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, CancellationToken ct = default) =>
         GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey).GetRemainingAsync(ct));
@@ -56,11 +63,34 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         GuardedAsync<IEnumerable<T>>(async () => await context.ScanAsync<T>(conditions).GetRemainingAsync(ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () =>
+        {
+            var list = items.ToList();
+            var batch = context.CreateBatchWrite<T>(BatchSkipVersionCheckConfig);
+            batch.AddPutItems(list);
+            await batch.ExecuteAsync(ct);
+            return list;
+        });
+
     /// <inheritdoc />
-    public Task<ProcessOutput> DeleteManyAsync(IEnumerable<T> items, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<ProcessOutput> DeleteManyAsync(IEnumerable<T> items, CancellationToken ct = default) =>
+        GuardedProcessAsync(async () =>
+        {
+            var batch = context.CreateBatchWrite<T>(BatchSkipVersionCheckConfig);
+            batch.AddDeleteItems(items.ToList());
+            await batch.ExecuteAsync(ct);
+        });
+
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> LoadManyAsync(IEnumerable<object> hashKeys, CancellationToken ct = default) => throw new NotImplementedException();
+    public Task<DataOutput<IEnumerable<T>>> LoadManyAsync(IEnumerable<object> hashKeys, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () =>
+        {
+            var batch = context.CreateBatchGet<T>();
+            foreach (var key in hashKeys) batch.AddKey(key);
+            await batch.ExecuteAsync(ct);
+            return (IEnumerable<T>)batch.Results;
+        });
 
     /// <summary>Runs an operation returning data, converting failures to envelope errors.</summary>
     protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
