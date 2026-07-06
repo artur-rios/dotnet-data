@@ -13,6 +13,7 @@
     <PackageReference Include="EphemeralMongo" Version="*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
     <PackageReference Include="MongoDB.Driver" Version="3.*" />
     <PackageReference Include="xunit" Version="*" />
@@ -32,6 +33,7 @@
     <ProjectReference Include="..\src\ArturRios.Data.PostgreSql\ArturRios.Data.PostgreSql.csproj" />
     <ProjectReference Include="..\src\ArturRios.Data.Dapper\ArturRios.Data.Dapper.csproj" />
     <ProjectReference Include="..\src\ArturRios.Data.MongoDb\ArturRios.Data.MongoDb.csproj" />
+    <ProjectReference Include="..\src\ArturRios.Data.DynamoDb\ArturRios.Data.DynamoDb.csproj" />
   </ItemGroup>
 
   <!--
