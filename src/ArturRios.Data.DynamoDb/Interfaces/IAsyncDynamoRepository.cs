@@ -33,9 +33,11 @@ public interface IAsyncDynamoRepository<T> where T : class
     Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions, CancellationToken ct = default);
 
     /// <summary>Batch-writes (puts) multiple items and returns them.</summary>
+    /// <remarks>Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no conditional-write support; single-item <see cref="SaveAsync"/> still enforces it.</remarks>
     Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default);
 
     /// <summary>Batch-deletes multiple items (idempotent).</summary>
+    /// <remarks>Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no conditional-write support; single-item <see cref="DeleteAsync"/> still enforces it.</remarks>
     Task<ProcessOutput> DeleteManyAsync(IEnumerable<T> items, CancellationToken ct = default);
 
     /// <summary>Batch-gets items by partition key (hash-key-only tables).</summary>

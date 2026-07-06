@@ -44,12 +44,10 @@ public static class ServiceCollectionExtensions
     private static IAmazonDynamoDB CreateClient(DynamoOptions options)
     {
         var hasKeys = !string.IsNullOrEmpty(options.AccessKey) && !string.IsNullOrEmpty(options.SecretKey);
+        var credentials = hasKeys ? new BasicAWSCredentials(options.AccessKey, options.SecretKey) : null;
 
         if (!string.IsNullOrEmpty(options.ServiceUrl))
         {
-            var credentials = hasKeys
-                ? new BasicAWSCredentials(options.AccessKey, options.SecretKey)
-                : new BasicAWSCredentials("dummy", "dummy");
             var config = new AmazonDynamoDBConfig { ServiceURL = options.ServiceUrl };
 
             if (!string.IsNullOrEmpty(options.Region))
@@ -57,13 +55,17 @@ public static class ServiceCollectionExtensions
                 config.AuthenticationRegion = options.Region;
             }
 
-            return new AmazonDynamoDBClient(credentials, config);
+            return new AmazonDynamoDBClient(credentials ?? new BasicAWSCredentials("dummy", "dummy"), config);
+        }
+
+        // no ServiceUrl -> real AWS
+        if (string.IsNullOrEmpty(options.Region))
+        {
+            // Defer region resolution to the SDK's default chain (env / profile / instance metadata).
+            return credentials is null ? new AmazonDynamoDBClient() : new AmazonDynamoDBClient(credentials);
         }
 
         var region = RegionEndpoint.GetBySystemName(options.Region);
-
-        return hasKeys
-            ? new AmazonDynamoDBClient(new BasicAWSCredentials(options.AccessKey, options.SecretKey), region)
-            : new AmazonDynamoDBClient(region);
+        return credentials is null ? new AmazonDynamoDBClient(region) : new AmazonDynamoDBClient(credentials, region);
     }
 }

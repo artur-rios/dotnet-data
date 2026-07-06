@@ -28,4 +28,13 @@ public class AddDynamoDataTests
         Assert.NotNull(sp.GetRequiredService<IDynamoDBContext>());
         Assert.NotNull(sp.GetRequiredService<IAsyncDynamoRepository<TestItem>>());
     }
+
+    [Fact]
+    public void AddDynamoData_WithRegionAndNoServiceUrl_ResolvesClient()
+    {
+        var services = new ServiceCollection();
+        services.AddDynamoData(new DynamoOptions { Region = "us-east-1" });
+        using var provider = services.BuildServiceProvider();
+        Assert.NotNull(provider.GetRequiredService<IAmazonDynamoDB>());
+    }
 }

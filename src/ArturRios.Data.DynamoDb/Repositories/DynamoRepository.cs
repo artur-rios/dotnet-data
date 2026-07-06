@@ -89,7 +89,7 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
             var batch = context.CreateBatchGet<T>();
             foreach (var key in hashKeys) batch.AddKey(key);
             await batch.ExecuteAsync(ct);
-            return (IEnumerable<T>)batch.Results;
+            return batch.Results;
         });
 
     /// <summary>Runs an operation returning data, converting failures to envelope errors.</summary>
