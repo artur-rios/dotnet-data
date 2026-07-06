@@ -229,6 +229,13 @@ var assemblies = [
       { "name": "ArturRios.Data.Dapper.ServiceCollectionExtensions", "rp": "ArturRios.Data.Dapper_ServiceCollectionExtensions.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 20, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
   {
+    "name": "ArturRios.Data.DynamoDb",
+    "classes": [
+      { "name": "ArturRios.Data.DynamoDb.Configuration.DynamoOptions", "rp": "ArturRios.Data.DynamoDb_DynamoOptions.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 17, "cb": 0, "tb": 0, "cm": 4, "fcm": 4, "tm": 4, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.DynamoDb.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.DynamoDb_ServiceCollectionExtensions.html", "cl": 23, "ucl": 5, "cal": 28, "tl": 71, "cb": 8, "tb": 18, "cm": 2, "fcm": 1, "tm": 3, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 16,  "cc": 16,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.DynamoDb.Repositories.DynamoRepository<T>", "rp": "ArturRios.Data.DynamoDb_DynamoRepository_1.html", "cl": 51, "ucl": 11, "cal": 62, "tl": 138, "cb": 2, "tb": 4, "cm": 15, "fcm": 13, "tm": 15, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 3,  "cc": 2,  "cov": 38.46,  "bcov": 0 } },
+    ]},
+  {
     "name": "ArturRios.Data.MongoDb",
     "classes": [
       { "name": "ArturRios.Data.MongoDb.CollectionName", "rp": "ArturRios.Data.MongoDb_CollectionName.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 4, "tb": 4, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 4,  "cc": 4,  "cov": 100,  "bcov": 100 } },
@@ -261,9 +268,17 @@ var metrics = [{ "name": "Crap Score", "abbreviation": "crp", "explanationUrl": 
 var historicCoverageExecutionTimes = [];
 
 var riskHotspotMetrics = [
+      { "name": "Crap Score", "explanationUrl": "https://googletesting.blogspot.de/2011/02/this-code-is-crap.html" },
+      { "name": "Cyclomatic complexity", "explanationUrl": "https://en.wikipedia.org/wiki/Cyclomatic_complexity" },
 ];
 
 var riskHotspots = [
+  {
+    "assembly": "ArturRios.Data.DynamoDb", "class": "ArturRios.Data.DynamoDb.DependencyInjection.ServiceCollectionExtensions", "reportPath": "ArturRios.Data.DynamoDb_ServiceCollectionExtensions.html", "methodName": "CreateClient(ArturRios.Data.DynamoDb.Configuration.DynamoOptions)", "methodShortName": "CreateClient(...)", "fileIndex": 0, "line": 45,
+    "metrics": [
+      { "value": 16, "exceeded": false },
+      { "value": 16, "exceeded": true },
+    ]},
 ];
 
 var branchCoverageAvailable = true;
