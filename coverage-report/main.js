@@ -211,42 +211,30 @@ for (i = 0, l = charts.length; i < l; i++) {
 
 var assemblies = [
   {
-    "name": "ArturRios.Data.Core",
-    "classes": [
-      { "name": "ArturRios.Data.Core.Configuration.BaseDbContext", "rp": "ArturRios.Data.Core_BaseDbContext.html", "cl": 16, "ucl": 0, "cal": 16, "tl": 34, "cb": 2, "tb": 2, "cm": 4, "fcm": 4, "tm": 4, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.Core.Configuration.BaseDbContextOptions", "rp": "ArturRios.Data.Core_BaseDbContextOptions.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.Core.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.Core_ServiceCollectionExtensions.html", "cl": 47, "ucl": 13, "cal": 60, "tl": 134, "cb": 11, "tb": 16, "cm": 4, "fcm": 0, "tm": 5, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 6,  "cov": 0,  "bcov": 0 } },
-      { "name": "ArturRios.Data.Core.Entity", "rp": "ArturRios.Data.Core_Entity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 14, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.Core.Exceptions.DataAccessException", "rp": "ArturRios.Data.Core_DataAccessException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 11, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.Core.Repositories.EfRepository<T>", "rp": "ArturRios.Data.Core_EfRepository_1.html", "cl": 89, "ucl": 25, "cal": 114, "tl": 200, "cb": 7, "tb": 10, "cm": 20, "fcm": 17, "tm": 22, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 50.0 } },
-      { "name": "ArturRios.Data.Core.Transactions.EfUnitOfWork", "rp": "ArturRios.Data.Core_EfUnitOfWork.html", "cl": 28, "ucl": 26, "cal": 54, "tl": 99, "cb": 4, "tb": 4, "cm": 4, "fcm": 1, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 0,  "bcov": 100 } },
-      { "name": "ArturRios.Data.Core.VersionedEntity", "rp": "ArturRios.Data.Core_VersionedEntity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 17, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-    ]},
-  {
     "name": "ArturRios.Data.Dapper",
     "classes": [
-      { "name": "ArturRios.Data.Dapper.DapperSqlQuery", "rp": "ArturRios.Data.Dapper_DapperSqlQuery.html", "cl": 26, "ucl": 6, "cal": 32, "tl": 96, "cb": 2, "tb": 2, "cm": 14, "fcm": 12, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 70.0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Dapper.DapperSqlQuery", "rp": "ArturRios.Data.Dapper_DapperSqlQuery.html", "cl": 26, "ucl": 6, "cal": 32, "tl": 100, "cb": 2, "tb": 2, "cm": 14, "fcm": 12, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 70.0,  "bcov": 100 } },
       { "name": "ArturRios.Data.Dapper.ServiceCollectionExtensions", "rp": "ArturRios.Data.Dapper_ServiceCollectionExtensions.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 20, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
   {
     "name": "ArturRios.Data.DynamoDb",
     "classes": [
       { "name": "ArturRios.Data.DynamoDb.Configuration.DynamoOptions", "rp": "ArturRios.Data.DynamoDb_DynamoOptions.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 17, "cb": 0, "tb": 0, "cm": 4, "fcm": 4, "tm": 4, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.DynamoDb.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.DynamoDb_ServiceCollectionExtensions.html", "cl": 23, "ucl": 5, "cal": 28, "tl": 71, "cb": 8, "tb": 18, "cm": 2, "fcm": 1, "tm": 3, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 16,  "cc": 16,  "cov": 0,  "bcov": 0 } },
-      { "name": "ArturRios.Data.DynamoDb.Repositories.DynamoRepository<T>", "rp": "ArturRios.Data.DynamoDb_DynamoRepository_1.html", "cl": 51, "ucl": 11, "cal": 62, "tl": 138, "cb": 2, "tb": 4, "cm": 15, "fcm": 13, "tm": 15, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 3,  "cc": 2,  "cov": 38.46,  "bcov": 0 } },
+      { "name": "ArturRios.Data.DynamoDb.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.DynamoDb_ServiceCollectionExtensions.html", "cl": 23, "ucl": 5, "cal": 28, "tl": 72, "cb": 8, "tb": 18, "cm": 2, "fcm": 1, "tm": 3, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 16,  "cc": 16,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.DynamoDb.Repositories.DynamoRepository<T>", "rp": "ArturRios.Data.DynamoDb_DynamoRepository_1.html", "cl": 56, "ucl": 11, "cal": 67, "tl": 146, "cb": 2, "tb": 4, "cm": 15, "fcm": 13, "tm": 15, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 3,  "cc": 2,  "cov": 38.46,  "bcov": 0 } },
     ]},
   {
     "name": "ArturRios.Data.MongoDb",
     "classes": [
       { "name": "ArturRios.Data.MongoDb.CollectionName", "rp": "ArturRios.Data.MongoDb_CollectionName.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 4, "tb": 4, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 4,  "cc": 4,  "cov": 100,  "bcov": 100 } },
       { "name": "ArturRios.Data.MongoDb.Configuration.MongoOptions", "rp": "ArturRios.Data.MongoDb_MongoOptions.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 11, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.MongoDb.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.MongoDb_ServiceCollectionExtensions.html", "cl": 11, "ucl": 3, "cal": 14, "tl": 45, "cb": 0, "tb": 2, "cm": 1, "fcm": 0, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 2,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.MongoDb.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.MongoDb_ServiceCollectionExtensions.html", "cl": 12, "ucl": 3, "cal": 15, "tl": 47, "cb": 0, "tb": 2, "cm": 1, "fcm": 0, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 2,  "cov": 0,  "bcov": 0 } },
       { "name": "ArturRios.Data.MongoDb.Document", "rp": "ArturRios.Data.MongoDb_Document.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 13, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
       { "name": "ArturRios.Data.MongoDb.Exceptions.MongoConcurrencyException", "rp": "ArturRios.Data.MongoDb_MongoConcurrencyException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 7, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
       { "name": "ArturRios.Data.MongoDb.MongoCollectionAttribute", "rp": "ArturRios.Data.MongoDb_MongoCollectionAttribute.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 10, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
       { "name": "ArturRios.Data.MongoDb.MongoContext", "rp": "ArturRios.Data.MongoDb_MongoContext.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 19, "cb": 0, "tb": 0, "cm": 3, "fcm": 3, "tm": 3, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
-      { "name": "ArturRios.Data.MongoDb.Repositories.MongoDocumentRepository<T>", "rp": "ArturRios.Data.MongoDb_MongoDocumentRepository_1.html", "cl": 129, "ucl": 35, "cal": 164, "tl": 295, "cb": 26, "tb": 42, "cm": 36, "fcm": 32, "tm": 38, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 29,  "cc": 8,  "cov": 0,  "bcov": 0 } },
-      { "name": "ArturRios.Data.MongoDb.Transactions.MongoUnitOfWork", "rp": "ArturRios.Data.MongoDb_MongoUnitOfWork.html", "cl": 29, "ucl": 36, "cal": 65, "tl": 105, "cb": 12, "tb": 12, "cm": 3, "fcm": 1, "tm": 5, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.MongoDb.Repositories.MongoDocumentRepository<T>", "rp": "ArturRios.Data.MongoDb_MongoDocumentRepository_1.html", "cl": 152, "ucl": 55, "cal": 207, "tl": 347, "cb": 26, "tb": 42, "cm": 36, "fcm": 29, "tm": 38, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 27,  "cc": 8,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.MongoDb.Transactions.MongoUnitOfWork", "rp": "ArturRios.Data.MongoDb_MongoUnitOfWork.html", "cl": 29, "ucl": 36, "cal": 65, "tl": 106, "cb": 12, "tb": 12, "cm": 3, "fcm": 1, "tm": 5, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 100 } },
       { "name": "ArturRios.Data.MongoDb.VersionedDocument", "rp": "ArturRios.Data.MongoDb_VersionedDocument.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 8, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
   {
@@ -254,6 +242,18 @@ var assemblies = [
     "classes": [
       { "name": "ArturRios.Data.PostgreSql.PostgreSqlProvider", "rp": "ArturRios.Data.PostgreSql_PostgreSqlProvider.html", "cl": 1, "ucl": 1, "cal": 2, "tl": 18, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
       { "name": "ArturRios.Data.PostgreSql.ServiceCollectionExtensions", "rp": "ArturRios.Data.PostgreSql_ServiceCollectionExtensions.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 1,  "cov": 0,  "bcov": 100 } },
+    ]},
+  {
+    "name": "ArturRios.Data.Relational.Core",
+    "classes": [
+      { "name": "ArturRios.Data.Relational.Core.Configuration.BaseDbContext", "rp": "ArturRios.Data.Relational.Core_BaseDbContext.html", "cl": 16, "ucl": 0, "cal": 16, "tl": 34, "cb": 2, "tb": 2, "cm": 4, "fcm": 4, "tm": 4, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Relational.Core.Configuration.BaseDbContextOptions", "rp": "ArturRios.Data.Relational.Core_BaseDbContextOptions.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 17, "cb": 0, "tb": 0, "cm": 2, "fcm": 2, "tm": 2, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Relational.Core.DependencyInjection.ServiceCollectionExtensions", "rp": "ArturRios.Data.Relational.Core_ServiceCollectionExtensions.html", "cl": 47, "ucl": 13, "cal": 60, "tl": 134, "cb": 11, "tb": 16, "cm": 4, "fcm": 0, "tm": 5, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 6,  "cc": 6,  "cov": 0,  "bcov": 0 } },
+      { "name": "ArturRios.Data.Relational.Core.Entity", "rp": "ArturRios.Data.Relational.Core_Entity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 15, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Relational.Core.Exceptions.DataAccessException", "rp": "ArturRios.Data.Relational.Core_DataAccessException.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 11, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Relational.Core.Repositories.EfRepository<T>", "rp": "ArturRios.Data.Relational.Core_EfRepository_1.html", "cl": 89, "ucl": 25, "cal": 114, "tl": 201, "cb": 7, "tb": 10, "cm": 20, "fcm": 17, "tm": 22, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 7,  "cc": 6,  "cov": 0,  "bcov": 50.0 } },
+      { "name": "ArturRios.Data.Relational.Core.Transactions.EfUnitOfWork", "rp": "ArturRios.Data.Relational.Core_EfUnitOfWork.html", "cl": 28, "ucl": 26, "cal": 54, "tl": 100, "cb": 4, "tb": 4, "cm": 4, "fcm": 1, "tm": 14, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 2,  "cc": 2,  "cov": 0,  "bcov": 100 } },
+      { "name": "ArturRios.Data.Relational.Core.VersionedEntity", "rp": "ArturRios.Data.Relational.Core_VersionedEntity.html", "cl": 1, "ucl": 0, "cal": 1, "tl": 17, "cb": 0, "tb": 0, "cm": 1, "fcm": 1, "tm": 1, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { "crp": 1,  "cc": 1,  "cov": 100,  "bcov": 100 } },
     ]},
   {
     "name": "ArturRios.Data.Sqlite",
@@ -274,7 +274,7 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "ArturRios.Data.DynamoDb", "class": "ArturRios.Data.DynamoDb.DependencyInjection.ServiceCollectionExtensions", "reportPath": "ArturRios.Data.DynamoDb_ServiceCollectionExtensions.html", "methodName": "CreateClient(ArturRios.Data.DynamoDb.Configuration.DynamoOptions)", "methodShortName": "CreateClient(...)", "fileIndex": 0, "line": 45,
+    "assembly": "ArturRios.Data.DynamoDb", "class": "ArturRios.Data.DynamoDb.DependencyInjection.ServiceCollectionExtensions", "reportPath": "ArturRios.Data.DynamoDb_ServiceCollectionExtensions.html", "methodName": "CreateClient(ArturRios.Data.DynamoDb.Configuration.DynamoOptions)", "methodShortName": "CreateClient(...)", "fileIndex": 0, "line": 19,
     "metrics": [
       { "value": 16, "exceeded": false },
       { "value": 16, "exceeded": true },
