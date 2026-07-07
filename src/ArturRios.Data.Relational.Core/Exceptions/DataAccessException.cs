@@ -1,6 +1,6 @@
 using ArturRios.Output;
 
-namespace ArturRios.Data.Core.Exceptions;
+namespace ArturRios.Data.Relational.Core.Exceptions;
 
 /// <summary>
 /// Internal typed exception for data-access failures. Repositories catch this (and

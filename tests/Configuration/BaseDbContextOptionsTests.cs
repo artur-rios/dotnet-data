@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using ArturRios.Data.Core.Configuration;
+using ArturRios.Data.Relational.Core.Configuration;
 
 namespace ArturRios.Data.Tests.Configuration;
 
@@ -31,7 +31,9 @@ public class BaseDbContextOptionsTests
         var setter = prop.GetSetMethod();
         Assert.NotNull(setter);
 
-        var modifiers = setter.ReturnParameter.GetRequiredCustomModifiers();
+        var modifiers = setter.ReturnParameter?.GetRequiredCustomModifiers();
+
+        Assert.NotNull(modifiers);
         Assert.Contains(typeof(IsExternalInit), modifiers);
     }
 
@@ -46,13 +48,13 @@ public class BaseDbContextOptionsTests
     [Fact]
     public void Options_CarryDatabaseTypeAndConnectionString()
     {
-        var options = new Core.Configuration.BaseDbContextOptions
+        var options = new BaseDbContextOptions
         {
-            DatabaseType = Core.Configuration.DatabaseType.SQLite,
+            DatabaseType = DatabaseType.SQLite,
             ConnectionString = "Filename=:memory:"
         };
 
-        Assert.Equal(Core.Configuration.DatabaseType.SQLite, options.DatabaseType);
+        Assert.Equal(DatabaseType.SQLite, options.DatabaseType);
         Assert.Equal("Filename=:memory:", options.ConnectionString);
     }
 }

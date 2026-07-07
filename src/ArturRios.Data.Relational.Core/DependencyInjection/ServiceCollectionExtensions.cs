@@ -1,16 +1,16 @@
-using ArturRios.Data.Core.Configuration;
-using ArturRios.Data.Core.Exceptions;
-using ArturRios.Data.Core.Interfaces;
-using ArturRios.Data.Core.Providers;
-using ArturRios.Data.Core.Repositories;
-using ArturRios.Data.Core.Transactions;
+using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Exceptions;
+using ArturRios.Data.Relational.Core.Interfaces;
+using ArturRios.Data.Relational.Core.Providers;
+using ArturRios.Data.Relational.Core.Repositories;
+using ArturRios.Data.Relational.Core.Transactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ArturRios.Data.Core.DependencyInjection;
+namespace ArturRios.Data.Relational.Core.DependencyInjection;
 
 /// <summary>
-/// Dependency-injection registration for the ArturRios.Data.Core relational stack.
+/// Dependency-injection registration for the ArturRios.Data.Relational.Core relational stack.
 /// </summary>
 public static class ServiceCollectionExtensions
 {

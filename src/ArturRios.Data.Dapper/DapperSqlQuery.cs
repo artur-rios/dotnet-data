@@ -1,5 +1,5 @@
 using System.Data.Common;
-using ArturRios.Data.Core.Configuration;
+using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Output;
 using Dapper;
 using Microsoft.EntityFrameworkCore;

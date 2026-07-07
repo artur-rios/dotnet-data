@@ -1,4 +1,4 @@
-﻿namespace ArturRios.Data.Core.Configuration;
+﻿namespace ArturRios.Data.Relational.Core.Configuration;
 
 /// <summary>
 /// Base configuration options for an Entity Framework Core DbContext.

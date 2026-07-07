@@ -1,4 +1,4 @@
-namespace ArturRios.Data.Core.Configuration;
+namespace ArturRios.Data.Relational.Core.Configuration;
 
 /// <summary>
 /// Supported relational database engines for provider selection.

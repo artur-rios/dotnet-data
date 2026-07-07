@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ArturRios.Data.Core.Interfaces;
+using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Interfaces;

@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ArturRios.Data.Core.Repositories;
-using ArturRios.Data.Core.Transactions;
+using ArturRios.Data.Relational.Core.Repositories;
+using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Transactions;

@@ -12,7 +12,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IncludeSymbols>false</IncludeSymbols>
     <Nullable>enable</Nullable>
-    <PackageId>ArturRios.Data.Core</PackageId>
+    <PackageId>ArturRios.Data.Relational.Core</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <!-- Provider packages live in sibling subfolders under src/. Exclude them from the
        core project's default compile glob so their sources and generated obj artifacts

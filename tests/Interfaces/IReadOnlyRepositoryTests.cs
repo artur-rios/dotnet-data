@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using ArturRios.Data.Core;
-using ArturRios.Data.Core.Interfaces;
+using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Interfaces;

@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using ArturRios.Data.Core.Repositories;
-using ArturRios.Data.Core.Transactions;
 using ArturRios.Data.Dapper;
+using ArturRios.Data.Relational.Core.Repositories;
+using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Dapper;
@@ -15,7 +15,7 @@ public class DapperTransactionSharingTests
     [Fact]
     public async Task DapperRead_SeesUncommittedEfWrite_WithinUnitOfWorkTransaction()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
         var uow = new EfUnitOfWork(context);
         var dapper = new DapperSqlQuery(context);
@@ -34,7 +34,7 @@ public class DapperTransactionSharingTests
     [Fact]
     public async Task Rollback_LeavesNothingVisibleToDapperAfterwards()
     {
-        using var context = SqliteTestContextFactory.Create();
+        await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
         var uow = new EfUnitOfWork(context);
         var dapper = new DapperSqlQuery(context);

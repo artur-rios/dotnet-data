@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using ArturRios.Data.Core;
+using ArturRios.Data.Relational.Core;
 
 namespace ArturRios.Data.Tests.Entities;
 

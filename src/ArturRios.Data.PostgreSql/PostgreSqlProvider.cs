@@ -1,5 +1,5 @@
-using ArturRios.Data.Core.Configuration;
-using ArturRios.Data.Core.Providers;
+using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArturRios.Data.PostgreSql;

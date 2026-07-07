@@ -1,4 +1,4 @@
-using ArturRios.Data.Core.Providers;
+using ArturRios.Data.Relational.Core.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.PostgreSql;

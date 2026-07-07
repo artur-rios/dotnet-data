@@ -1,9 +1,9 @@
-using ArturRios.Data.Core.Configuration;
-using ArturRios.Data.Core.DependencyInjection;
-using ArturRios.Data.Core.Exceptions;
-using ArturRios.Data.Core.Interfaces;
-using ArturRios.Data.Core.Providers;
-using ArturRios.Data.Core.Transactions;
+using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.DependencyInjection;
+using ArturRios.Data.Relational.Core.Exceptions;
+using ArturRios.Data.Relational.Core.Interfaces;
+using ArturRios.Data.Relational.Core.Providers;
+using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Data.Tests.TestSupport;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

@@ -1,10 +1,10 @@
 using System.Data.Common;
-using ArturRios.Data.Core.Configuration;
-using ArturRios.Data.Core.Interfaces;
+using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Output;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArturRios.Data.Core.Repositories;
+namespace ArturRios.Data.Relational.Core.Repositories;
 
 /// <summary>
 /// Provider-agnostic Entity Framework Core implementation of the repository contracts.

@@ -1,5 +1,5 @@
-using ArturRios.Data.Core.Configuration;
 using ArturRios.Data.PostgreSql;
+using ArturRios.Data.Relational.Core.Configuration;
 
 namespace ArturRios.Data.Tests.Providers;
 

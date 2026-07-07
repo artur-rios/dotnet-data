@@ -1,5 +1,5 @@
-using ArturRios.Data.Core.Configuration;
 using ArturRios.Data.Dapper;
+using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.Tests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 
