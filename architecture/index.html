@@ -1,0 +1,162 @@
+<!doctype html><html lang=en><head><title>Architecture :: Dotnet Data</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content='Architecture ArturRios.Data is a family of small, focused NuGet packages. This page shows how they fit together, the key types in each, and the design principles they share.
+Package dependencies flowchart TB Output["ArturRios.Output<br/><i>DataOutput / ProcessOutput envelopes</i>"] subgraph Relational["Relational stack — EF Core"] direction TB Core["ArturRios.Data.Relational.Core<br/><i>interfaces, EfRepository, EfUnitOfWork,<br/>BaseDbContext, IDatabaseProvider seam</i>"] Sqlite["ArturRios.Data.Sqlite<br/><i>AddSqliteProvider()</i>"] Postgres["ArturRios.Data.PostgreSql<br/><i>AddPostgreSqlProvider()</i>"] MySql["ArturRios.Data.MySql<br/><i>(deferred)</i>"] Dapper["ArturRios.Data.Dapper<br/><i>read-only raw SQL</i>"] end subgraph NoSQL["NoSQL stores — standalone"] direction TB Mongo["ArturRios.Data.MongoDb<br/><i>document repository + transactions</i>"] Dynamo["ArturRios.Data.DynamoDb<br/><i>async repository over IDynamoDBContext</i>"] end Sqlite --> Core Postgres --> Core MySql --> Core Dapper --> Core Core --> Output Mongo --> Output Dynamo --> Output EF["Microsoft.EntityFrameworkCore"]:::ext Npgsql["Npgsql / Pomelo / Sqlite provider"]:::ext DapperLib["Dapper"]:::ext MongoLib["MongoDB.Driver"]:::ext Aws["AWSSDK.DynamoDBv2"]:::ext Core --> EF Sqlite --> Npgsql Postgres --> Npgsql Dapper --> DapperLib Mongo --> MongoLib Dynamo --> Aws classDef ext fill:#8882,stroke-dasharray:3 3; The two families are deliberately separate. The relational providers and the Dapper read path build on ArturRios.Data.Relational.Core (EF Core). The NoSQL packages do not depend on the relational core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on ArturRios.Output and their native driver. MongoDB and DynamoDB are also separate from each other: their data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.
+'><meta name=keywords content><meta name=robots content="noodp"><link rel=canonical href=https://artur-rios.github.io/dotnet-data/architecture/><link rel=stylesheet href=https://artur-rios.github.io/dotnet-data/styles.css><link rel="shortcut icon" href=https://artur-rios.github.io/dotnet-data/img/theme-colors/orange.png><link rel=apple-touch-icon href=https://artur-rios.github.io/dotnet-data/img/theme-colors/orange.png><meta name=twitter:card content="summary"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="og:title" content="Architecture"><meta property="og:description" content='Architecture ArturRios.Data is a family of small, focused NuGet packages. This page shows how they fit together, the key types in each, and the design principles they share.
+Package dependencies flowchart TB Output["ArturRios.Output<br/><i>DataOutput / ProcessOutput envelopes</i>"] subgraph Relational["Relational stack — EF Core"] direction TB Core["ArturRios.Data.Relational.Core<br/><i>interfaces, EfRepository, EfUnitOfWork,<br/>BaseDbContext, IDatabaseProvider seam</i>"] Sqlite["ArturRios.Data.Sqlite<br/><i>AddSqliteProvider()</i>"] Postgres["ArturRios.Data.PostgreSql<br/><i>AddPostgreSqlProvider()</i>"] MySql["ArturRios.Data.MySql<br/><i>(deferred)</i>"] Dapper["ArturRios.Data.Dapper<br/><i>read-only raw SQL</i>"] end subgraph NoSQL["NoSQL stores — standalone"] direction TB Mongo["ArturRios.Data.MongoDb<br/><i>document repository + transactions</i>"] Dynamo["ArturRios.Data.DynamoDb<br/><i>async repository over IDynamoDBContext</i>"] end Sqlite --> Core Postgres --> Core MySql --> Core Dapper --> Core Core --> Output Mongo --> Output Dynamo --> Output EF["Microsoft.EntityFrameworkCore"]:::ext Npgsql["Npgsql / Pomelo / Sqlite provider"]:::ext DapperLib["Dapper"]:::ext MongoLib["MongoDB.Driver"]:::ext Aws["AWSSDK.DynamoDBv2"]:::ext Core --> EF Sqlite --> Npgsql Postgres --> Npgsql Dapper --> DapperLib Mongo --> MongoLib Dynamo --> Aws classDef ext fill:#8882,stroke-dasharray:3 3; The two families are deliberately separate. The relational providers and the Dapper read path build on ArturRios.Data.Relational.Core (EF Core). The NoSQL packages do not depend on the relational core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on ArturRios.Output and their native driver. MongoDB and DynamoDB are also separate from each other: their data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.
+'><meta property="og:url" content="https://artur-rios.github.io/dotnet-data/architecture/"><meta property="og:site_name" content="Dotnet Data"><meta property="og:image" content="img/favicon/%!s(<nil>).png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="627"></head><body><div class="container center headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=https://artur-rios.github.io/dotnet-data/><div class=logo>Dotnet Data</div></a></div><ul class="menu menu--mobile"><li class=menu__trigger>Menu&nbsp;▾</li><li><ul class=menu__dropdown><li><a href=/dotnet-data/architecture/>Architecture</a></li><li><a href=/dotnet-data/relational/>Relational</a></li><li><a href=/dotnet-data/mongodb/>MongoDB</a></li><li><a href=/dotnet-data/dynamodb/>DynamoDB</a></li><li><a href=https://www.artur-rios.tech/>Author</a></li><li><a href=https://github.com/artur-rios/dotnet-data>GitHub</a></li><li><a href=https://artur-rios.github.io/dotnet-data/coverage-report>Test Coverage</a></li></ul></li></ul></div><nav class=navigation-menu><ul class="navigation-menu__inner menu--desktop"><li><a href=/dotnet-data/architecture/>Architecture</a></li><li><a href=/dotnet-data/relational/>Relational</a></li><li><a href=/dotnet-data/mongodb/>MongoDB</a></li><li><a href=/dotnet-data/dynamodb/>DynamoDB</a></li><li><a href=https://www.artur-rios.tech/>Author</a></li><li><a href=https://github.com/artur-rios/dotnet-data>GitHub</a></li><li><a href=https://artur-rios.github.io/dotnet-data/coverage-report>Test Coverage</a></li></ul></nav></header><div class=content><article class=post><h1 class=post-title><a href=https://artur-rios.github.io/dotnet-data/architecture/>Architecture</a></h1><div class=post-meta></div><div class=post-content><div><h1 id=architecture>Architecture<a href=#architecture class=hanchor arialabel=Anchor>&#8983;</a></h1><p><code>ArturRios.Data</code> is a family of small, focused NuGet packages. This page shows how they fit together,
+the key types in each, and the design principles they share.</p><h2 id=package-dependencies>Package dependencies<a href=#package-dependencies class=hanchor arialabel=Anchor>&#8983;</a></h2><pre class=mermaid>flowchart TB
+    Output[&#34;ArturRios.Output&lt;br/&gt;&lt;i&gt;DataOutput / ProcessOutput envelopes&lt;/i&gt;&#34;]
+
+    subgraph Relational[&#34;Relational stack — EF Core&#34;]
+        direction TB
+        Core[&#34;ArturRios.Data.Relational.Core&lt;br/&gt;&lt;i&gt;interfaces, EfRepository, EfUnitOfWork,&lt;br/&gt;BaseDbContext, IDatabaseProvider seam&lt;/i&gt;&#34;]
+        Sqlite[&#34;ArturRios.Data.Sqlite&lt;br/&gt;&lt;i&gt;AddSqliteProvider()&lt;/i&gt;&#34;]
+        Postgres[&#34;ArturRios.Data.PostgreSql&lt;br/&gt;&lt;i&gt;AddPostgreSqlProvider()&lt;/i&gt;&#34;]
+        MySql[&#34;ArturRios.Data.MySql&lt;br/&gt;&lt;i&gt;(deferred)&lt;/i&gt;&#34;]
+        Dapper[&#34;ArturRios.Data.Dapper&lt;br/&gt;&lt;i&gt;read-only raw SQL&lt;/i&gt;&#34;]
+    end
+
+    subgraph NoSQL[&#34;NoSQL stores — standalone&#34;]
+        direction TB
+        Mongo[&#34;ArturRios.Data.MongoDb&lt;br/&gt;&lt;i&gt;document repository + transactions&lt;/i&gt;&#34;]
+        Dynamo[&#34;ArturRios.Data.DynamoDb&lt;br/&gt;&lt;i&gt;async repository over IDynamoDBContext&lt;/i&gt;&#34;]
+    end
+
+    Sqlite --&gt; Core
+    Postgres --&gt; Core
+    MySql --&gt; Core
+    Dapper --&gt; Core
+    Core --&gt; Output
+    Mongo --&gt; Output
+    Dynamo --&gt; Output
+
+    EF[&#34;Microsoft.EntityFrameworkCore&#34;]:::ext
+    Npgsql[&#34;Npgsql / Pomelo / Sqlite provider&#34;]:::ext
+    DapperLib[&#34;Dapper&#34;]:::ext
+    MongoLib[&#34;MongoDB.Driver&#34;]:::ext
+    Aws[&#34;AWSSDK.DynamoDBv2&#34;]:::ext
+    Core --&gt; EF
+    Sqlite --&gt; Npgsql
+    Postgres --&gt; Npgsql
+    Dapper --&gt; DapperLib
+    Mongo --&gt; MongoLib
+    Dynamo --&gt; Aws
+
+    classDef ext fill:#8882,stroke-dasharray:3 3;
+</pre><p><strong>The two families are deliberately separate.</strong> The relational providers and the Dapper read path build
+on <code>ArturRios.Data.Relational.Core</code> (EF Core). The NoSQL packages do <strong>not</strong> depend on the relational
+core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on
+<code>ArturRios.Output</code> and their native driver. MongoDB and DynamoDB are also separate from each other: their
+data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with
+LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.</p><h2 id=the-result-envelope>The result envelope<a href=#the-result-envelope class=hanchor arialabel=Anchor>&#8983;</a></h2><p>Every backend returns the same envelope types from <code>ArturRios.Output</code>. A <code>ProcessOutput</code> carries success
+state, error messages, and info messages; <code>DataOutput&lt;T></code> adds a typed payload.</p><pre class=mermaid>classDiagram
+    class ProcessOutput {
+        +bool Success
+        +List~string~ Messages
+        +List~string~ Errors
+        +WithError(string) ProcessOutput
+    }
+    class DataOutput~T~ {
+        +T Data
+        +WithData(T) DataOutput~T~
+    }
+    ProcessOutput &lt;|-- DataOutput
+</pre><h2 id=relational-model>Relational model<a href=#relational-model class=hanchor arialabel=Anchor>&#8983;</a></h2><p>The relational core exposes four repository interfaces (a read-only tier and a full read/write tier,
+each in a sync and an async flavour), all constrained to <code>T : Entity</code>. <code>EfRepository&lt;T></code> implements all
+four; <code>EfUnitOfWork</code> implements both unit-of-work interfaces. Consumers derive their entities from
+<code>Entity</code> (or <code>VersionedEntity</code> for optimistic concurrency) and their <code>DbContext</code> from <code>BaseDbContext</code>.</p><pre class=mermaid>classDiagram
+    class Entity { +int Id }
+    class VersionedEntity { +Guid ConcurrencyStamp }
+    Entity &lt;|-- VersionedEntity
+
+    class IReadOnlyRepository~T~ {
+        +Query() IQueryable~T~
+        +GetAll() DataOutput
+        +GetById(int) DataOutput
+    }
+    class IRepository~T~ {
+        +Create(T) DataOutput
+        +CreateRange(items) DataOutput
+        +Update(T) DataOutput
+        +UpdateRange(items) DataOutput
+        +Delete(T) DataOutput
+        +DeleteRange(ids) DataOutput
+    }
+    class IAsyncReadOnlyRepository~T~
+    class IAsyncRepository~T~
+    class EfRepository~T~
+
+    IReadOnlyRepository &lt;|-- IRepository
+    IAsyncReadOnlyRepository &lt;|-- IAsyncRepository
+    IRepository &lt;|.. EfRepository
+    IAsyncRepository &lt;|.. EfRepository
+
+    class IUnitOfWork {
+        +ExecuteInTransaction(work) ProcessOutput
+    }
+    class IAsyncUnitOfWork {
+        +ExecuteInTransactionAsync(work) Task
+    }
+    class EfUnitOfWork
+    IUnitOfWork &lt;|.. EfUnitOfWork
+    IAsyncUnitOfWork &lt;|.. EfUnitOfWork
+</pre><h3 id=the-provider-seam>The provider seam<a href=#the-provider-seam class=hanchor arialabel=Anchor>&#8983;</a></h3><p>The core never references a specific EF provider. Each provider package implements <code>IDatabaseProvider</code>
+and registers it (keyed by <code>DatabaseType</code>); <code>AddDataConfig&lt;TContext></code> reads the configured <code>DatabaseType</code>
+and resolves the matching provider to configure the <code>DbContext</code>. This is why you call both
+<code>AddXProvider()</code> and <code>AddDataConfig&lt;TContext>()</code>.</p><pre class=mermaid>classDiagram
+    class IDatabaseProvider {
+        +DatabaseType Type
+        +Configure(builder, connectionString)
+    }
+    class SqliteProvider
+    class PostgreSqlProvider
+    class MySqlProvider
+    IDatabaseProvider &lt;|.. SqliteProvider
+    IDatabaseProvider &lt;|.. PostgreSqlProvider
+    IDatabaseProvider &lt;|.. MySqlProvider
+</pre><h2 id=mongodb-model>MongoDB model<a href=#mongodb-model class=hanchor arialabel=Anchor>&#8983;</a></h2><p>MongoDB uses a distinct interface family (<code>IDocumentRepository&lt;T></code> / <code>IAsyncDocumentRepository&lt;T></code> plus
+read-only tiers) with string/<code>ObjectId</code> identity. <code>MongoDocumentRepository&lt;T></code> implements them over a
+<code>MongoContext</code> that carries the ambient session used by <code>MongoUnitOfWork</code> transactions.</p><pre class=mermaid>classDiagram
+    class Document { +string Id }
+    class VersionedDocument { +long Version }
+    Document &lt;|-- VersionedDocument
+
+    class IDocumentRepository~T~
+    class IAsyncDocumentRepository~T~
+    class MongoDocumentRepository~T~
+    IDocumentRepository &lt;|.. MongoDocumentRepository
+    IAsyncDocumentRepository &lt;|.. MongoDocumentRepository
+
+    class IMongoUnitOfWork
+    class IAsyncMongoUnitOfWork
+    class MongoUnitOfWork
+    IMongoUnitOfWork &lt;|.. MongoUnitOfWork
+    IAsyncMongoUnitOfWork &lt;|.. MongoUnitOfWork
+</pre><h2 id=dynamodb-model>DynamoDB model<a href=#dynamodb-model class=hanchor arialabel=Anchor>&#8983;</a></h2><p>DynamoDB has no shared base class — items are plain POCOs annotated with AWS attributes. The single
+async repository interface maps to DynamoDB&rsquo;s real access model (key-based load, partition-key query,
+scan, batch).</p><pre class=mermaid>classDiagram
+    class IAsyncDynamoRepository~T~ {
+        +SaveAsync(T) DataOutput
+        +LoadAsync(hashKey) DataOutput
+        +LoadAsync(hashKey, rangeKey) DataOutput
+        +QueryAsync(hashKey) DataOutput
+        +ScanAsync(conditions) DataOutput
+        +SaveManyAsync(items) DataOutput
+        +LoadManyAsync(hashKeys) DataOutput
+    }
+    class DynamoRepository~T~
+    IAsyncDynamoRepository &lt;|.. DynamoRepository
+</pre><h2 id=design-principles>Design principles<a href=#design-principles class=hanchor arialabel=Anchor>&#8983;</a></h2><ul><li><strong>Modular packaging.</strong> One package per backend; install only what you use. NoSQL packages don&rsquo;t drag
+in EF Core.</li><li><strong>Envelopes, not exceptions.</strong> Every public repository/unit-of-work method catches infrastructure
+exceptions and returns them as <code>DataOutput</code>/<code>ProcessOutput</code> errors. Optimistic-concurrency conflicts
+become a friendly &ldquo;concurrency conflict&rdquo; error. The one intentional exception is
+<code>OperationCanceledException</code>, which propagates so cooperative cancellation stays idiomatic.</li><li><strong>Opt-in optimistic concurrency.</strong> Derive from <code>VersionedEntity</code> / <code>VersionedDocument</code>, or add
+<code>[DynamoDBVersion]</code>, to get conditional writes; without it, writes are last-writer-wins.</li><li><strong>Transactions where the engine supports them.</strong> Relational and MongoDB expose a delegate-based unit
+of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
+planned addition.)</li><li><strong>Consistent naming.</strong> <code>AddDataConfig</code> / <code>AddMongoData</code> / <code>AddDynamoData</code> for DI; <code>DataOutput&lt;T></code> /
+<code>ProcessOutput</code> everywhere; <code>Async</code> suffix + <code>CancellationToken</code> on async members.</li></ul><p>See the <a href=/relational/>Relational</a>, <a href=/mongodb/>MongoDB</a>, and <a href=/dynamodb/>DynamoDB</a> guides for full
+usage.</p></div></div></article></div><footer class=footer><div class=footer__inner><div class=copyright><span>© 2026 Powered by <a href=https://gohugo.io>Hugo</a></span>
+<span><a href=https://github.com/mirus-ua/hugo-theme-re-terminal target=_blank>Original theme</a> made by <a href=https://github.com/mirus-ua target=_blank>Mirus</a></span>
+<span><a href=https://github.com/artur-rios/hugo-theme-re-terminal target=_blank>This version</a> is made by <a href=https://github.com/artur-rios target=_blank>Artur Rios</a></span></div></div></footer><script type=text/javascript src=/dotnet-data/bundle.min.js></script></div><script type=module>
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script></body></html>

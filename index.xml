@@ -1,1 +1,656 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dotnet Data on Dotnet Extensions</title><link>https://artur-rios.github.io/dotnet-data/</link><description>Recent content in Dotnet Data on Dotnet Extensions</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>arturdev@duck.com (Artur Rios)</managingEditor><webMaster>arturdev@duck.com (Artur Rios)</webMaster><atom:link href="https://artur-rios.github.io/dotnet-data/index.xml" rel="self" type="application/rss+xml"/></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Dotnet Data</title><link>https://artur-rios.github.io/dotnet-data/</link><description>Recent content on Dotnet Data</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><managingEditor>arturdev@duck.com (Artur Rios)</managingEditor><webMaster>arturdev@duck.com (Artur Rios)</webMaster><atom:link href="https://artur-rios.github.io/dotnet-data/index.xml" rel="self" type="application/rss+xml"/><item><title>Architecture</title><link>https://artur-rios.github.io/dotnet-data/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/architecture/</guid><description>&lt;h1 id="architecture"&gt;Architecture&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data&lt;/code&gt; is a family of small, focused NuGet packages. This page shows how they fit together,
+the key types in each, and the design principles they share.&lt;/p&gt;
+&lt;h2 id="package-dependencies"&gt;Package dependencies&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;flowchart TB
+Output[&amp;#34;ArturRios.Output&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;DataOutput / ProcessOutput envelopes&amp;lt;/i&amp;gt;&amp;#34;]
+subgraph Relational[&amp;#34;Relational stack — EF Core&amp;#34;]
+direction TB
+Core[&amp;#34;ArturRios.Data.Relational.Core&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;interfaces, EfRepository, EfUnitOfWork,&amp;lt;br/&amp;gt;BaseDbContext, IDatabaseProvider seam&amp;lt;/i&amp;gt;&amp;#34;]
+Sqlite[&amp;#34;ArturRios.Data.Sqlite&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;AddSqliteProvider()&amp;lt;/i&amp;gt;&amp;#34;]
+Postgres[&amp;#34;ArturRios.Data.PostgreSql&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;AddPostgreSqlProvider()&amp;lt;/i&amp;gt;&amp;#34;]
+MySql[&amp;#34;ArturRios.Data.MySql&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;(deferred)&amp;lt;/i&amp;gt;&amp;#34;]
+Dapper[&amp;#34;ArturRios.Data.Dapper&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;read-only raw SQL&amp;lt;/i&amp;gt;&amp;#34;]
+end
+subgraph NoSQL[&amp;#34;NoSQL stores — standalone&amp;#34;]
+direction TB
+Mongo[&amp;#34;ArturRios.Data.MongoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;document repository + transactions&amp;lt;/i&amp;gt;&amp;#34;]
+Dynamo[&amp;#34;ArturRios.Data.DynamoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;async repository over IDynamoDBContext&amp;lt;/i&amp;gt;&amp;#34;]
+end
+Sqlite --&amp;gt; Core
+Postgres --&amp;gt; Core
+MySql --&amp;gt; Core
+Dapper --&amp;gt; Core
+Core --&amp;gt; Output
+Mongo --&amp;gt; Output
+Dynamo --&amp;gt; Output
+EF[&amp;#34;Microsoft.EntityFrameworkCore&amp;#34;]:::ext
+Npgsql[&amp;#34;Npgsql / Pomelo / Sqlite provider&amp;#34;]:::ext
+DapperLib[&amp;#34;Dapper&amp;#34;]:::ext
+MongoLib[&amp;#34;MongoDB.Driver&amp;#34;]:::ext
+Aws[&amp;#34;AWSSDK.DynamoDBv2&amp;#34;]:::ext
+Core --&amp;gt; EF
+Sqlite --&amp;gt; Npgsql
+Postgres --&amp;gt; Npgsql
+Dapper --&amp;gt; DapperLib
+Mongo --&amp;gt; MongoLib
+Dynamo --&amp;gt; Aws
+classDef ext fill:#8882,stroke-dasharray:3 3;
+&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;The two families are deliberately separate.&lt;/strong&gt; The relational providers and the Dapper read path build
+on &lt;code&gt;ArturRios.Data.Relational.Core&lt;/code&gt; (EF Core). The NoSQL packages do &lt;strong&gt;not&lt;/strong&gt; depend on the relational
+core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on
+&lt;code&gt;ArturRios.Output&lt;/code&gt; and their native driver. MongoDB and DynamoDB are also separate from each other: their
+data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with
+LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.&lt;/p&gt;</description><content>&lt;h1 id="architecture"&gt;Architecture&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data&lt;/code&gt; is a family of small, focused NuGet packages. This page shows how they fit together,
+the key types in each, and the design principles they share.&lt;/p&gt;
+&lt;h2 id="package-dependencies"&gt;Package dependencies&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;flowchart TB
+Output[&amp;#34;ArturRios.Output&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;DataOutput / ProcessOutput envelopes&amp;lt;/i&amp;gt;&amp;#34;]
+subgraph Relational[&amp;#34;Relational stack — EF Core&amp;#34;]
+direction TB
+Core[&amp;#34;ArturRios.Data.Relational.Core&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;interfaces, EfRepository, EfUnitOfWork,&amp;lt;br/&amp;gt;BaseDbContext, IDatabaseProvider seam&amp;lt;/i&amp;gt;&amp;#34;]
+Sqlite[&amp;#34;ArturRios.Data.Sqlite&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;AddSqliteProvider()&amp;lt;/i&amp;gt;&amp;#34;]
+Postgres[&amp;#34;ArturRios.Data.PostgreSql&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;AddPostgreSqlProvider()&amp;lt;/i&amp;gt;&amp;#34;]
+MySql[&amp;#34;ArturRios.Data.MySql&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;(deferred)&amp;lt;/i&amp;gt;&amp;#34;]
+Dapper[&amp;#34;ArturRios.Data.Dapper&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;read-only raw SQL&amp;lt;/i&amp;gt;&amp;#34;]
+end
+subgraph NoSQL[&amp;#34;NoSQL stores — standalone&amp;#34;]
+direction TB
+Mongo[&amp;#34;ArturRios.Data.MongoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;document repository + transactions&amp;lt;/i&amp;gt;&amp;#34;]
+Dynamo[&amp;#34;ArturRios.Data.DynamoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;async repository over IDynamoDBContext&amp;lt;/i&amp;gt;&amp;#34;]
+end
+Sqlite --&amp;gt; Core
+Postgres --&amp;gt; Core
+MySql --&amp;gt; Core
+Dapper --&amp;gt; Core
+Core --&amp;gt; Output
+Mongo --&amp;gt; Output
+Dynamo --&amp;gt; Output
+EF[&amp;#34;Microsoft.EntityFrameworkCore&amp;#34;]:::ext
+Npgsql[&amp;#34;Npgsql / Pomelo / Sqlite provider&amp;#34;]:::ext
+DapperLib[&amp;#34;Dapper&amp;#34;]:::ext
+MongoLib[&amp;#34;MongoDB.Driver&amp;#34;]:::ext
+Aws[&amp;#34;AWSSDK.DynamoDBv2&amp;#34;]:::ext
+Core --&amp;gt; EF
+Sqlite --&amp;gt; Npgsql
+Postgres --&amp;gt; Npgsql
+Dapper --&amp;gt; DapperLib
+Mongo --&amp;gt; MongoLib
+Dynamo --&amp;gt; Aws
+classDef ext fill:#8882,stroke-dasharray:3 3;
+&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;The two families are deliberately separate.&lt;/strong&gt; The relational providers and the Dapper read path build
+on &lt;code&gt;ArturRios.Data.Relational.Core&lt;/code&gt; (EF Core). The NoSQL packages do &lt;strong&gt;not&lt;/strong&gt; depend on the relational
+core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on
+&lt;code&gt;ArturRios.Output&lt;/code&gt; and their native driver. MongoDB and DynamoDB are also separate from each other: their
+data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with
+LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.&lt;/p&gt;
+&lt;h2 id="the-result-envelope"&gt;The result envelope&lt;/h2&gt;
+&lt;p&gt;Every backend returns the same envelope types from &lt;code&gt;ArturRios.Output&lt;/code&gt;. A &lt;code&gt;ProcessOutput&lt;/code&gt; carries success
+state, error messages, and info messages; &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; adds a typed payload.&lt;/p&gt;
+&lt;pre class="mermaid"&gt;classDiagram
+class ProcessOutput {
++bool Success
++List~string~ Messages
++List~string~ Errors
++WithError(string) ProcessOutput
+}
+class DataOutput~T~ {
++T Data
++WithData(T) DataOutput~T~
+}
+ProcessOutput &amp;lt;|-- DataOutput
+&lt;/pre&gt;
+&lt;h2 id="relational-model"&gt;Relational model&lt;/h2&gt;
+&lt;p&gt;The relational core exposes four repository interfaces (a read-only tier and a full read/write tier,
+each in a sync and an async flavour), all constrained to &lt;code&gt;T : Entity&lt;/code&gt;. &lt;code&gt;EfRepository&amp;lt;T&amp;gt;&lt;/code&gt; implements all
+four; &lt;code&gt;EfUnitOfWork&lt;/code&gt; implements both unit-of-work interfaces. Consumers derive their entities from
+&lt;code&gt;Entity&lt;/code&gt; (or &lt;code&gt;VersionedEntity&lt;/code&gt; for optimistic concurrency) and their &lt;code&gt;DbContext&lt;/code&gt; from &lt;code&gt;BaseDbContext&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class="mermaid"&gt;classDiagram
+class Entity { +int Id }
+class VersionedEntity { +Guid ConcurrencyStamp }
+Entity &amp;lt;|-- VersionedEntity
+class IReadOnlyRepository~T~ {
++Query() IQueryable~T~
++GetAll() DataOutput
++GetById(int) DataOutput
+}
+class IRepository~T~ {
++Create(T) DataOutput
++CreateRange(items) DataOutput
++Update(T) DataOutput
++UpdateRange(items) DataOutput
++Delete(T) DataOutput
++DeleteRange(ids) DataOutput
+}
+class IAsyncReadOnlyRepository~T~
+class IAsyncRepository~T~
+class EfRepository~T~
+IReadOnlyRepository &amp;lt;|-- IRepository
+IAsyncReadOnlyRepository &amp;lt;|-- IAsyncRepository
+IRepository &amp;lt;|.. EfRepository
+IAsyncRepository &amp;lt;|.. EfRepository
+class IUnitOfWork {
++ExecuteInTransaction(work) ProcessOutput
+}
+class IAsyncUnitOfWork {
++ExecuteInTransactionAsync(work) Task
+}
+class EfUnitOfWork
+IUnitOfWork &amp;lt;|.. EfUnitOfWork
+IAsyncUnitOfWork &amp;lt;|.. EfUnitOfWork
+&lt;/pre&gt;
+&lt;h3 id="the-provider-seam"&gt;The provider seam&lt;/h3&gt;
+&lt;p&gt;The core never references a specific EF provider. Each provider package implements &lt;code&gt;IDatabaseProvider&lt;/code&gt;
+and registers it (keyed by &lt;code&gt;DatabaseType&lt;/code&gt;); &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt; reads the configured &lt;code&gt;DatabaseType&lt;/code&gt;
+and resolves the matching provider to configure the &lt;code&gt;DbContext&lt;/code&gt;. This is why you call both
+&lt;code&gt;AddXProvider()&lt;/code&gt; and &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;()&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class="mermaid"&gt;classDiagram
+class IDatabaseProvider {
++DatabaseType Type
++Configure(builder, connectionString)
+}
+class SqliteProvider
+class PostgreSqlProvider
+class MySqlProvider
+IDatabaseProvider &amp;lt;|.. SqliteProvider
+IDatabaseProvider &amp;lt;|.. PostgreSqlProvider
+IDatabaseProvider &amp;lt;|.. MySqlProvider
+&lt;/pre&gt;
+&lt;h2 id="mongodb-model"&gt;MongoDB model&lt;/h2&gt;
+&lt;p&gt;MongoDB uses a distinct interface family (&lt;code&gt;IDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt; / &lt;code&gt;IAsyncDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt; plus
+read-only tiers) with string/&lt;code&gt;ObjectId&lt;/code&gt; identity. &lt;code&gt;MongoDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt; implements them over a
+&lt;code&gt;MongoContext&lt;/code&gt; that carries the ambient session used by &lt;code&gt;MongoUnitOfWork&lt;/code&gt; transactions.&lt;/p&gt;
+&lt;pre class="mermaid"&gt;classDiagram
+class Document { +string Id }
+class VersionedDocument { +long Version }
+Document &amp;lt;|-- VersionedDocument
+class IDocumentRepository~T~
+class IAsyncDocumentRepository~T~
+class MongoDocumentRepository~T~
+IDocumentRepository &amp;lt;|.. MongoDocumentRepository
+IAsyncDocumentRepository &amp;lt;|.. MongoDocumentRepository
+class IMongoUnitOfWork
+class IAsyncMongoUnitOfWork
+class MongoUnitOfWork
+IMongoUnitOfWork &amp;lt;|.. MongoUnitOfWork
+IAsyncMongoUnitOfWork &amp;lt;|.. MongoUnitOfWork
+&lt;/pre&gt;
+&lt;h2 id="dynamodb-model"&gt;DynamoDB model&lt;/h2&gt;
+&lt;p&gt;DynamoDB has no shared base class — items are plain POCOs annotated with AWS attributes. The single
+async repository interface maps to DynamoDB&amp;rsquo;s real access model (key-based load, partition-key query,
+scan, batch).&lt;/p&gt;
+&lt;pre class="mermaid"&gt;classDiagram
+class IAsyncDynamoRepository~T~ {
++SaveAsync(T) DataOutput
++LoadAsync(hashKey) DataOutput
++LoadAsync(hashKey, rangeKey) DataOutput
++QueryAsync(hashKey) DataOutput
++ScanAsync(conditions) DataOutput
++SaveManyAsync(items) DataOutput
++LoadManyAsync(hashKeys) DataOutput
+}
+class DynamoRepository~T~
+IAsyncDynamoRepository &amp;lt;|.. DynamoRepository
+&lt;/pre&gt;
+&lt;h2 id="design-principles"&gt;Design principles&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Modular packaging.&lt;/strong&gt; One package per backend; install only what you use. NoSQL packages don&amp;rsquo;t drag
+in EF Core.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Envelopes, not exceptions.&lt;/strong&gt; Every public repository/unit-of-work method catches infrastructure
+exceptions and returns them as &lt;code&gt;DataOutput&lt;/code&gt;/&lt;code&gt;ProcessOutput&lt;/code&gt; errors. Optimistic-concurrency conflicts
+become a friendly &amp;ldquo;concurrency conflict&amp;rdquo; error. The one intentional exception is
+&lt;code&gt;OperationCanceledException&lt;/code&gt;, which propagates so cooperative cancellation stays idiomatic.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Opt-in optimistic concurrency.&lt;/strong&gt; Derive from &lt;code&gt;VersionedEntity&lt;/code&gt; / &lt;code&gt;VersionedDocument&lt;/code&gt;, or add
+&lt;code&gt;[DynamoDBVersion]&lt;/code&gt;, to get conditional writes; without it, writes are last-writer-wins.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transactions where the engine supports them.&lt;/strong&gt; Relational and MongoDB expose a delegate-based unit
+of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
+planned addition.)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Consistent naming.&lt;/strong&gt; &lt;code&gt;AddDataConfig&lt;/code&gt; / &lt;code&gt;AddMongoData&lt;/code&gt; / &lt;code&gt;AddDynamoData&lt;/code&gt; for DI; &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; /
+&lt;code&gt;ProcessOutput&lt;/code&gt; everywhere; &lt;code&gt;Async&lt;/code&gt; suffix + &lt;code&gt;CancellationToken&lt;/code&gt; on async members.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;See the &lt;a href="https://artur-rios.github.io/dotnet-data/relational/"&gt;Relational&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/mongodb/"&gt;MongoDB&lt;/a&gt;, and &lt;a href="https://artur-rios.github.io/dotnet-data/dynamodb/"&gt;DynamoDB&lt;/a&gt; guides for full
+usage.&lt;/p&gt;</content></item><item><title>DynamoDB</title><link>https://artur-rios.github.io/dotnet-data/dynamodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/dynamodb/</guid><description>&lt;h1 id="dynamodb-store"&gt;DynamoDB store&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.DynamoDb&lt;/code&gt; is a standalone, &lt;strong&gt;async-only&lt;/strong&gt; repository over the AWS SDK&amp;rsquo;s high-level
+object-persistence model (&lt;code&gt;IDynamoDBContext&lt;/code&gt;). It does not depend on the relational core. Every method
+returns a &lt;code&gt;DataOutput&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; envelope.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.DynamoDb
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="1-define-an-item"&gt;1. Define an item&lt;/h2&gt;
+&lt;p&gt;There&amp;rsquo;s no base class — annotate a POCO with the AWS attributes. Keys are a partition (hash) key plus an
+optional sort (range) key; add &lt;code&gt;[DynamoDBVersion]&lt;/code&gt; to opt into optimistic concurrency.&lt;/p&gt;</description><content>&lt;h1 id="dynamodb-store"&gt;DynamoDB store&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.DynamoDb&lt;/code&gt; is a standalone, &lt;strong&gt;async-only&lt;/strong&gt; repository over the AWS SDK&amp;rsquo;s high-level
+object-persistence model (&lt;code&gt;IDynamoDBContext&lt;/code&gt;). It does not depend on the relational core. Every method
+returns a &lt;code&gt;DataOutput&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; envelope.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.DynamoDb
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="1-define-an-item"&gt;1. Define an item&lt;/h2&gt;
+&lt;p&gt;There&amp;rsquo;s no base class — annotate a POCO with the AWS attributes. Keys are a partition (hash) key plus an
+optional sort (range) key; add &lt;code&gt;[DynamoDBVersion]&lt;/code&gt; to opt into optimistic concurrency.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; Amazon.DynamoDBv2.DataModel;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;[DynamoDBTable(&amp;#34;Products&amp;#34;)]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Product&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt; [DynamoDBHashKey]&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; Category { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty; &lt;span style="color:#75715e"&gt;// partition key&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt; [DynamoDBRangeKey]&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; Sku { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty; &lt;span style="color:#75715e"&gt;// sort key (optional)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; Name { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;decimal&lt;/span&gt; Price { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt; [DynamoDBVersion]&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;int?&lt;/span&gt; Version { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } &lt;span style="color:#75715e"&gt;// opt-in concurrency&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="2-configure"&gt;2. Configure&lt;/h2&gt;
+&lt;p&gt;The default section is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.DynamoDb&amp;quot;&lt;/code&gt;&lt;/strong&gt;. &lt;code&gt;ServiceUrl&lt;/code&gt; is optional — set it to point at
+&lt;strong&gt;DynamoDB Local&lt;/strong&gt; or &lt;strong&gt;LocalStack&lt;/strong&gt;; omit it to use real AWS (region + the default credential chain, or
+explicit &lt;code&gt;AccessKey&lt;/code&gt;/&lt;code&gt;SecretKey&lt;/code&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ArturRios.Data.DynamoDb&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;Region&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;us-east-1&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ServiceUrl&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;http://localhost:8000&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="3-register"&gt;3. Register&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.DynamoDb.DependencyInjection;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDynamoData(builder.Configuration); &lt;span style="color:#75715e"&gt;// binds &amp;#34;ArturRios.Data.DynamoDb&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This registers &lt;code&gt;IAmazonDynamoDB&lt;/code&gt;, &lt;code&gt;IDynamoDBContext&lt;/code&gt;, and the repository (&lt;code&gt;IAsyncDynamoRepository&amp;lt;T&amp;gt;&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id="4-use-the-repository"&gt;4. Use the repository&lt;/h2&gt;
+&lt;p&gt;Inject &lt;code&gt;IAsyncDynamoRepository&amp;lt;T&amp;gt;&lt;/code&gt;. It&amp;rsquo;s shaped to DynamoDB&amp;rsquo;s real access model — load by key, query a
+partition, scan, and batch — not &lt;code&gt;IQueryable&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.DynamoDb.Interfaces;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Output;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CatalogService&lt;/span&gt;(IAsyncDynamoRepository&amp;lt;Product&amp;gt; repo)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; Task&amp;lt;DataOutput&amp;lt;Product&amp;gt;&amp;gt; AddAsync(Product p) =&amp;gt; repo.SaveAsync(p);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;Product?&amp;gt; GetAsync(&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; category, &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; sku)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.LoadAsync(category, sku); &lt;span style="color:#75715e"&gt;// not-found = Success + null&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; result.Success ? result.Data : &lt;span style="color:#66d9ef"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;IEnumerable&amp;lt;Product&amp;gt;&amp;gt; InCategoryAsync(&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; category) =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; (&lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.QueryAsync(category)).Data ?? []; &lt;span style="color:#75715e"&gt;// all items in a partition&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Full surface:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Method&lt;/th&gt;
+&lt;th&gt;Purpose&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;SaveAsync(item)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Put (create or replace); returns the item&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;LoadAsync(hashKey)&lt;/code&gt; / &lt;code&gt;LoadAsync(hashKey, rangeKey)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Get by key; not-found is a successful null&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;DeleteAsync(item)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Delete (idempotent); returns &lt;code&gt;ProcessOutput&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;QueryAsync(hashKey)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;All items in a partition&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;QueryAsync(hashKey, op, sortValues)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Partition + a sort-key condition (&lt;code&gt;QueryOperator&lt;/code&gt;)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ScanAsync(conditions)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Full-table scan with &lt;code&gt;ScanCondition&lt;/code&gt;s — &lt;strong&gt;use sparingly&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;SaveManyAsync&lt;/code&gt; / &lt;code&gt;DeleteManyAsync&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Batch write&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;LoadManyAsync(hashKeys)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Batch get by partition key (hash-key-only tables)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="5-optimistic-concurrency"&gt;5. Optimistic concurrency&lt;/h2&gt;
+&lt;p&gt;Add &lt;code&gt;[DynamoDBVersion] int? Version&lt;/code&gt; to your item. &lt;code&gt;SaveAsync&lt;/code&gt; then issues a conditional write; a stale
+version returns a &lt;strong&gt;concurrency-conflict&lt;/strong&gt; error envelope instead of throwing.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Batch writes bypass concurrency.&lt;/strong&gt; DynamoDB&amp;rsquo;s &lt;code&gt;BatchWriteItem&lt;/code&gt; has no conditional-write support, so
+&lt;code&gt;SaveManyAsync&lt;/code&gt; / &lt;code&gt;DeleteManyAsync&lt;/code&gt; do &lt;strong&gt;not&lt;/strong&gt; enforce &lt;code&gt;[DynamoDBVersion]&lt;/code&gt;. Single-item &lt;code&gt;SaveAsync&lt;/code&gt; /
+&lt;code&gt;DeleteAsync&lt;/code&gt; still do.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="notes--roadmap"&gt;Notes &amp;amp; roadmap&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Async-only&lt;/strong&gt; — the AWS SDK v4 &lt;code&gt;IDynamoDBContext&lt;/code&gt; has no synchronous methods.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;Scan&lt;/code&gt;&lt;/strong&gt; reads the whole table; prefer &lt;code&gt;Query&lt;/code&gt; on a partition key (with a sort condition or a GSI)
+wherever possible.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deferred:&lt;/strong&gt; atomic multi-item transactions (&lt;code&gt;TransactWriteItems&lt;/code&gt;) and composite-key batch-get are
+planned future additions.&lt;/li&gt;
+&lt;/ul&gt;</content></item><item><title>MongoDB</title><link>https://artur-rios.github.io/dotnet-data/mongodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/mongodb/</guid><description>&lt;h1 id="mongodb-document-store"&gt;MongoDB document store&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.MongoDb&lt;/code&gt; is a standalone document-repository package over &lt;code&gt;MongoDB.Driver&lt;/code&gt; — it does
+&lt;strong&gt;not&lt;/strong&gt; depend on the relational core, so it pulls in no EF Core. It keeps the same enveloped style:
+every method returns a &lt;code&gt;DataOutput&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.MongoDb
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="1-define-a-document"&gt;1. Define a document&lt;/h2&gt;
+&lt;p&gt;Derive from &lt;code&gt;Document&lt;/code&gt; (a string &lt;code&gt;Id&lt;/code&gt; mapped to Mongo&amp;rsquo;s &lt;code&gt;_id&lt;/code&gt; as an &lt;code&gt;ObjectId&lt;/code&gt;), or &lt;code&gt;VersionedDocument&lt;/code&gt;
+to opt into optimistic concurrency (adds a &lt;code&gt;long Version&lt;/code&gt;).&lt;/p&gt;</description><content>&lt;h1 id="mongodb-document-store"&gt;MongoDB document store&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.MongoDb&lt;/code&gt; is a standalone document-repository package over &lt;code&gt;MongoDB.Driver&lt;/code&gt; — it does
+&lt;strong&gt;not&lt;/strong&gt; depend on the relational core, so it pulls in no EF Core. It keeps the same enveloped style:
+every method returns a &lt;code&gt;DataOutput&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.MongoDb
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="1-define-a-document"&gt;1. Define a document&lt;/h2&gt;
+&lt;p&gt;Derive from &lt;code&gt;Document&lt;/code&gt; (a string &lt;code&gt;Id&lt;/code&gt; mapped to Mongo&amp;rsquo;s &lt;code&gt;_id&lt;/code&gt; as an &lt;code&gt;ObjectId&lt;/code&gt;), or &lt;code&gt;VersionedDocument&lt;/code&gt;
+to opt into optimistic concurrency (adds a &lt;code&gt;long Version&lt;/code&gt;).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.MongoDb;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Product&lt;/span&gt; : Document &lt;span style="color:#75715e"&gt;// or : VersionedDocument&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; Name { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;decimal&lt;/span&gt; Price { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;By default the collection name is the type name. Override it with &lt;code&gt;[MongoCollection(&amp;quot;name&amp;quot;)]&lt;/code&gt; on the
+document class.&lt;/p&gt;
+&lt;h2 id="2-configure"&gt;2. Configure&lt;/h2&gt;
+&lt;p&gt;The default section is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.MongoDb&amp;quot;&lt;/code&gt;&lt;/strong&gt; — a connection string and a database name:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ArturRios.Data.MongoDb&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ConnectionString&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;mongodb://localhost:27017/?replicaSet=rs0&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;DatabaseName&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;mydb&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;Multi-document transactions require the server to be a &lt;strong&gt;replica set&lt;/strong&gt; — hence &lt;code&gt;?replicaSet=rs0&lt;/code&gt;
+above. A standalone &lt;code&gt;mongod&lt;/code&gt; supports everything except transactions.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="3-register"&gt;3. Register&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.MongoDb.DependencyInjection;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddMongoData(builder.Configuration); &lt;span style="color:#75715e"&gt;// binds &amp;#34;ArturRios.Data.MongoDb&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This registers the &lt;code&gt;IMongoClient&lt;/code&gt;, a scoped &lt;code&gt;MongoContext&lt;/code&gt;, the repository interfaces
+(&lt;code&gt;IDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt; / &lt;code&gt;IAsyncDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt; and their read-only tiers), and the unit of
+work (&lt;code&gt;IMongoUnitOfWork&lt;/code&gt; / &lt;code&gt;IAsyncMongoUnitOfWork&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id="4-use-the-repository"&gt;4. Use the repository&lt;/h2&gt;
+&lt;p&gt;Inject &lt;code&gt;IAsyncDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt; (or the sync &lt;code&gt;IDocumentRepository&amp;lt;T&amp;gt;&lt;/code&gt;). Every method is enveloped:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.MongoDb.Interfaces;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Output;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CatalogService&lt;/span&gt;(IAsyncDocumentRepository&amp;lt;Product&amp;gt; repo)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;&amp;gt; AddAsync(Product p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.CreateAsync(p); &lt;span style="color:#75715e"&gt;// DataOutput&amp;lt;string&amp;gt; — the generated id&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; result.Success ? result.Data! : &lt;span style="color:#66d9ef"&gt;throw&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;new&lt;/span&gt; InvalidOperationException(&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Join(&lt;span style="color:#e6db74"&gt;&amp;#34;, &amp;#34;&lt;/span&gt;, result.Errors));
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;Product?&amp;gt; GetAsync(&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; id)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.GetByIdAsync(id); &lt;span style="color:#75715e"&gt;// not-found = Success + null&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; result.Success ? result.Data : &lt;span style="color:#66d9ef"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;IEnumerable&amp;lt;Product&amp;gt;&amp;gt; ExpensiveAsync() =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; (&lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.FindAsync(p =&amp;gt; p.Price &amp;gt; &lt;span style="color:#ae81ff"&gt;100&lt;/span&gt;)).Data ?? []; &lt;span style="color:#75715e"&gt;// server-side filter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The full surface: &lt;code&gt;GetById&lt;/code&gt;, &lt;code&gt;GetAll&lt;/code&gt;, &lt;code&gt;Find(predicate)&lt;/code&gt; (server-side filter), &lt;code&gt;Create&lt;/code&gt;/&lt;code&gt;CreateRange&lt;/code&gt;,
+&lt;code&gt;Update&lt;/code&gt;/&lt;code&gt;UpdateRange&lt;/code&gt;, &lt;code&gt;Delete&lt;/code&gt;/&lt;code&gt;DeleteRange&lt;/code&gt;, plus the &lt;code&gt;Query()&lt;/code&gt; escape hatch.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;Query()&lt;/code&gt;&lt;/strong&gt; returns a composable &lt;code&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; (the driver&amp;rsquo;s LINQ provider). Note it &lt;strong&gt;bypasses the
+ambient unit-of-work transaction&lt;/strong&gt; — LINQ reads run outside the session, so they will not see
+uncommitted writes made earlier in the same transaction. Use &lt;code&gt;Find&lt;/code&gt; / &lt;code&gt;GetAll&lt;/code&gt; for transaction-aware
+reads.&lt;/p&gt;
+&lt;h2 id="5-transactions"&gt;5. Transactions&lt;/h2&gt;
+&lt;p&gt;Inject &lt;code&gt;IAsyncMongoUnitOfWork&lt;/code&gt; and run repository operations atomically. Operations inside the delegate
+enlist in the transaction automatically (via the context&amp;rsquo;s ambient session):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.MongoDb.Transactions;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;CatalogService&lt;/span&gt;(IAsyncDocumentRepository&amp;lt;Product&amp;gt; repo, IAsyncMongoUnitOfWork unitOfWork)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; Task&amp;lt;DataOutput&amp;lt;&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;&amp;gt;&amp;gt; AddTwoAtomicallyAsync(Product a, Product b) =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; unitOfWork.ExecuteInTransactionAsync(&lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; () =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; first = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.CreateAsync(a);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.CreateAsync(b);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; first.Data!;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; });
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;Transactions require a &lt;strong&gt;replica set&lt;/strong&gt;. On a standalone server the transaction will fail (and, being
+enveloped, return &lt;code&gt;Success == false&lt;/code&gt; rather than throwing).&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="6-optimistic-concurrency"&gt;6. Optimistic concurrency&lt;/h2&gt;
+&lt;p&gt;Derive from &lt;code&gt;VersionedDocument&lt;/code&gt;. On update the stored &lt;code&gt;Version&lt;/code&gt; is checked and incremented; a stale
+write returns a &lt;strong&gt;concurrency-conflict&lt;/strong&gt; error envelope instead of throwing:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.UpdateAsync(product);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;if&lt;/span&gt; (!result.Success)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#75715e"&gt;// e.g. &amp;#34;Concurrency conflict: the document was modified or removed by another process.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content></item><item><title>Relational</title><link>https://artur-rios.github.io/dotnet-data/relational/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/relational/</guid><description>&lt;h1 id="relational-ef-core"&gt;Relational (EF Core)&lt;/h1&gt;
+&lt;p&gt;The relational stack is a provider-agnostic data-access layer over Entity Framework Core. You install
+the &lt;strong&gt;core&lt;/strong&gt; plus a &lt;strong&gt;provider&lt;/strong&gt; for your engine; the core gives you enveloped repositories, a unit of
+work, optimistic concurrency, and DI wiring, while the provider teaches it how to talk to PostgreSQL,
+SQLite, or MySQL.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Relational.Core
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Sqlite &lt;span style="color:#75715e"&gt;# or ArturRios.Data.PostgreSql&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Provider package&lt;/th&gt;
+&lt;th&gt;&lt;code&gt;DatabaseType&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;Status&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ArturRios.Data.Sqlite&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;SQLite&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Available&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ArturRios.Data.PostgreSql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;PostgreSql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Available&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ArturRios.Data.MySql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;MySql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Deferred — see &lt;a href="#mysql-status"&gt;MySQL status&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="1-define-entities"&gt;1. Define entities&lt;/h2&gt;
+&lt;p&gt;Derive from &lt;code&gt;Entity&lt;/code&gt; (an &lt;code&gt;int Id&lt;/code&gt; mapped as the first column), or &lt;code&gt;VersionedEntity&lt;/code&gt; to opt into
+optimistic concurrency (adds a &lt;code&gt;Guid ConcurrencyStamp&lt;/code&gt;).&lt;/p&gt;</description><content>&lt;h1 id="relational-ef-core"&gt;Relational (EF Core)&lt;/h1&gt;
+&lt;p&gt;The relational stack is a provider-agnostic data-access layer over Entity Framework Core. You install
+the &lt;strong&gt;core&lt;/strong&gt; plus a &lt;strong&gt;provider&lt;/strong&gt; for your engine; the core gives you enveloped repositories, a unit of
+work, optimistic concurrency, and DI wiring, while the provider teaches it how to talk to PostgreSQL,
+SQLite, or MySQL.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Relational.Core
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Sqlite &lt;span style="color:#75715e"&gt;# or ArturRios.Data.PostgreSql&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Provider package&lt;/th&gt;
+&lt;th&gt;&lt;code&gt;DatabaseType&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;Status&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ArturRios.Data.Sqlite&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;SQLite&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Available&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ArturRios.Data.PostgreSql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;PostgreSql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Available&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;ArturRios.Data.MySql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;MySql&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Deferred — see &lt;a href="#mysql-status"&gt;MySQL status&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="1-define-entities"&gt;1. Define entities&lt;/h2&gt;
+&lt;p&gt;Derive from &lt;code&gt;Entity&lt;/code&gt; (an &lt;code&gt;int Id&lt;/code&gt; mapped as the first column), or &lt;code&gt;VersionedEntity&lt;/code&gt; to opt into
+optimistic concurrency (adds a &lt;code&gt;Guid ConcurrencyStamp&lt;/code&gt;).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Product&lt;/span&gt; : Entity &lt;span style="color:#75715e"&gt;// or : VersionedEntity&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; Name { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;decimal&lt;/span&gt; Price { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="2-define-your-context"&gt;2. Define your context&lt;/h2&gt;
+&lt;p&gt;Derive from &lt;code&gt;BaseDbContext&lt;/code&gt; and expose your &lt;code&gt;DbSet&lt;/code&gt;s. &lt;code&gt;BaseDbContext&lt;/code&gt; regenerates the &lt;code&gt;ConcurrencyStamp&lt;/code&gt;
+of modified &lt;code&gt;VersionedEntity&lt;/code&gt; rows on every &lt;code&gt;SaveChanges&lt;/code&gt; / &lt;code&gt;SaveChangesAsync&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core.Configuration;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; Microsoft.EntityFrameworkCore;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;AppDbContext&lt;/span&gt;(DbContextOptions options) : BaseDbContext(options)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; DbSet&amp;lt;Product&amp;gt; Products =&amp;gt; Set&amp;lt;Product&amp;gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="3-configure"&gt;3. Configure&lt;/h2&gt;
+&lt;p&gt;Bind a &lt;code&gt;BaseDbContextOptions&lt;/code&gt; (a &lt;code&gt;DatabaseType&lt;/code&gt; + a &lt;code&gt;ConnectionString&lt;/code&gt;) from configuration. The default
+section name is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.Core&amp;quot;&lt;/code&gt;&lt;/strong&gt; (you can pass a different &lt;code&gt;sectionName&lt;/code&gt; to &lt;code&gt;AddDataConfig&lt;/code&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ArturRios.Data.Core&amp;#34;&lt;/span&gt;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;DatabaseType&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;PostgreSql&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ConnectionString&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;Host=localhost;Database=mydb;Username=app;Password=secret;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;DatabaseType&lt;/code&gt; is an enum: &lt;code&gt;PostgreSql&lt;/code&gt;, &lt;code&gt;MySql&lt;/code&gt;, or &lt;code&gt;SQLite&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="4-register"&gt;4. Register&lt;/h2&gt;
+&lt;p&gt;Call your provider&amp;rsquo;s registration extension &lt;strong&gt;and&lt;/strong&gt; &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt;. The provider registers
+its &lt;code&gt;IDatabaseProvider&lt;/code&gt;; &lt;code&gt;AddDataConfig&lt;/code&gt; reads the configured &lt;code&gt;DatabaseType&lt;/code&gt;, resolves the matching
+provider, wires up your &lt;code&gt;DbContext&lt;/code&gt;, and registers the repositories and unit of work. It fails fast at
+registration if no provider matches the configured &lt;code&gt;DatabaseType&lt;/code&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.PostgreSql; &lt;span style="color:#75715e"&gt;// brings AddPostgreSqlProvider()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core.DependencyInjection;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddPostgreSqlProvider(); &lt;span style="color:#75715e"&gt;// or AddSqliteProvider()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfig&amp;lt;AppDbContext&amp;gt;(builder.Configuration);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="5-repositories"&gt;5. Repositories&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;AddDataConfig&lt;/code&gt; registers all four repository interfaces (backed by &lt;code&gt;EfRepository&amp;lt;T&amp;gt;&lt;/code&gt;). There are two
+tiers — read-only and full read/write — each in a &lt;strong&gt;sync&lt;/strong&gt; and an &lt;strong&gt;async&lt;/strong&gt; flavour:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Interface&lt;/th&gt;
+&lt;th&gt;Members&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;IReadOnlyRepository&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;Query()&lt;/code&gt;, &lt;code&gt;GetAll()&lt;/code&gt;, &lt;code&gt;GetById(int)&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;IRepository&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;the above + &lt;code&gt;Create&lt;/code&gt;, &lt;code&gt;CreateRange&lt;/code&gt;, &lt;code&gt;Update&lt;/code&gt;, &lt;code&gt;UpdateRange&lt;/code&gt;, &lt;code&gt;Delete&lt;/code&gt;, &lt;code&gt;DeleteRange&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;IAsyncReadOnlyRepository&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;async mirror of the read-only tier&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;IAsyncRepository&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;async mirror of the full tier&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Inject whichever tier you need. Every method returns a &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; envelope — check &lt;code&gt;Success&lt;/code&gt; /
+&lt;code&gt;Data&lt;/code&gt; / &lt;code&gt;Errors&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core.Interfaces;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Output;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ProductService&lt;/span&gt;(IAsyncRepository&amp;lt;Product&amp;gt; repo)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;Product?&amp;gt; GetAsync(&lt;span style="color:#66d9ef"&gt;int&lt;/span&gt; id)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; DataOutput&amp;lt;Product?&amp;gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.GetByIdAsync(id); &lt;span style="color:#75715e"&gt;// not-found = Success + null data&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; result.Success ? result.Data : &lt;span style="color:#66d9ef"&gt;null&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;&lt;span style="color:#66d9ef"&gt;int&lt;/span&gt;&amp;gt; CreateAsync(Product p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.CreateAsync(p); &lt;span style="color:#75715e"&gt;// DataOutput&amp;lt;int&amp;gt; (the new id)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; result.Success ? result.Data : &lt;span style="color:#66d9ef"&gt;throw&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;new&lt;/span&gt; InvalidOperationException(&lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Join(&lt;span style="color:#e6db74"&gt;&amp;#34;, &amp;#34;&lt;/span&gt;, result.Errors));
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;The &lt;code&gt;Query()&lt;/code&gt; escape hatch.&lt;/strong&gt; When you need composable LINQ or paging, &lt;code&gt;Query()&lt;/code&gt; returns a raw,
+deferred &lt;code&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; (not enveloped — it does no I/O until materialized):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; page = repo.Query()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .Where(p =&amp;gt; p.Price &amp;gt; &lt;span style="color:#ae81ff"&gt;10&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .OrderBy(p =&amp;gt; p.Name)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .Skip(&lt;span style="color:#ae81ff"&gt;20&lt;/span&gt;).Take(&lt;span style="color:#ae81ff"&gt;10&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .ToList();
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="6-transactions-unit-of-work"&gt;6. Transactions (unit of work)&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;AddDataConfig&lt;/code&gt; also registers &lt;code&gt;IUnitOfWork&lt;/code&gt; / &lt;code&gt;IAsyncUnitOfWork&lt;/code&gt;. Run several repository operations
+atomically with the delegate helper — it commits on success and rolls back on any exception, returning
+an envelope:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core.Transactions;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;OrderService&lt;/span&gt;(IAsyncRepository&amp;lt;Product&amp;gt; repo, IAsyncUnitOfWork unitOfWork)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; Task&amp;lt;DataOutput&amp;lt;&lt;span style="color:#66d9ef"&gt;int&lt;/span&gt;&amp;gt;&amp;gt; CreateTwoAtomicallyAsync(Product a, Product b) =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; unitOfWork.ExecuteInTransactionAsync(&lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; () =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; first = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.CreateAsync(a);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.CreateAsync(b);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; first.Data;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; });
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="7-optimistic-concurrency"&gt;7. Optimistic concurrency&lt;/h2&gt;
+&lt;p&gt;Derive an entity from &lt;code&gt;VersionedEntity&lt;/code&gt; to opt in. On update, the stored &lt;code&gt;ConcurrencyStamp&lt;/code&gt; is checked;
+if another writer changed the row, the update returns a &lt;strong&gt;concurrency-conflict&lt;/strong&gt; error envelope
+(&lt;code&gt;Success == false&lt;/code&gt;) instead of throwing:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; repo.UpdateAsync(product);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;if&lt;/span&gt; (!result.Success)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#75715e"&gt;// e.g. &amp;#34;Concurrency conflict: the record was modified or removed by another process.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="8-dapper-read-path-optional"&gt;8. Dapper read path (optional)&lt;/h2&gt;
+&lt;p&gt;For raw-SQL reads alongside EF-based persistence, add &lt;code&gt;ArturRios.Data.Dapper&lt;/code&gt; and register &lt;code&gt;AddDapper()&lt;/code&gt;
+after &lt;code&gt;AddDataConfig&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Dapper
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Dapper;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddSqliteProvider(); &lt;span style="color:#75715e"&gt;// or AddPostgreSqlProvider()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfig&amp;lt;AppDbContext&amp;gt;(builder.Configuration);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDapper();
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Inject &lt;code&gt;IAsyncSqlQuery&lt;/code&gt; (or the sync &lt;code&gt;ISqlQuery&lt;/code&gt;) and run enveloped, &lt;strong&gt;parameterized&lt;/strong&gt; queries:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ReportService&lt;/span&gt;(IAsyncSqlQuery sql)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;&lt;span style="color:#66d9ef"&gt;long&lt;/span&gt;&amp;gt; ActiveCountAsync()
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; result = &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; sql.ExecuteScalarAsync&amp;lt;&lt;span style="color:#66d9ef"&gt;long&lt;/span&gt;&amp;gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#e6db74"&gt;&amp;#34;SELECT COUNT(*) FROM Products WHERE IsActive = @active&amp;#34;&lt;/span&gt;, &lt;span style="color:#66d9ef"&gt;new&lt;/span&gt; { active = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt; });
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; result.Success ? result.Data : &lt;span style="color:#ae81ff"&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;ISqlQuery&lt;/code&gt;/&lt;code&gt;IAsyncSqlQuery&lt;/code&gt; expose &lt;code&gt;Query&amp;lt;T&amp;gt;&lt;/code&gt;, &lt;code&gt;QueryFirstOrDefault&amp;lt;T&amp;gt;&lt;/code&gt;, &lt;code&gt;QuerySingleOrDefault&amp;lt;T&amp;gt;&lt;/code&gt;, and
+&lt;code&gt;ExecuteScalar&amp;lt;T&amp;gt;&lt;/code&gt; (all enveloped, generic &lt;code&gt;T&lt;/code&gt; unconstrained so you can map to DTOs or scalars).&lt;/p&gt;
+&lt;p&gt;The Dapper path is &lt;strong&gt;read-only&lt;/strong&gt; — all writes go through the EF repositories. It runs on the &lt;strong&gt;same
+&lt;code&gt;DbContext&lt;/code&gt; connection&lt;/strong&gt; and enlists in the active &lt;code&gt;IUnitOfWork&lt;/code&gt; transaction, so a Dapper read inside a
+unit of work sees the not-yet-committed EF writes.&lt;/p&gt;
+&lt;h2 id="mysql-status"&gt;MySQL status&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.MySql&lt;/code&gt; is written but &lt;strong&gt;deferred&lt;/strong&gt;: it depends on &lt;code&gt;Pomelo.EntityFrameworkCore.MySql&lt;/code&gt;,
+whose latest release still targets EF Core 9, while this library is on EF Core 10. The project is kept
+in the repository (excluded from the build) and will ship once Pomelo publishes an EF Core 10 release.
+An alternative provider (Oracle&amp;rsquo;s &lt;code&gt;MySql.EntityFrameworkCore&lt;/code&gt;, which does support EF Core 10) is under
+consideration; it would trade Pomelo&amp;rsquo;s &lt;code&gt;MySqlConnector&lt;/code&gt; (MIT, true async) and MariaDB support for
+immediate availability.&lt;/p&gt;</content></item></channel></rss>
