@@ -1,6 +1,6 @@
 baseURL = 'https://artur-rios.github.io/dotnet-data'
 locale = 'en-us'
-title = 'Dotnet Extensions'
+title = 'Dotnet Data'
 theme = 'hugo-theme-re-terminal'
 
 [module]
@@ -13,18 +13,41 @@ author_email = 'arturdev@duck.com'
 name = 'Artur Rios'
 
 [params.logo]
-logoText = 'Dotnet Extensions'
+logoText = 'Dotnet Data'
 
 [menu]
+[[menu.main]]
+identifier = "architecture"
+name = "Architecture"
+url = "/architecture/"
+weight = 10
+[[menu.main]]
+identifier = "relational"
+name = "Relational"
+url = "/relational/"
+weight = 20
+[[menu.main]]
+identifier = "mongodb"
+name = "MongoDB"
+url = "/mongodb/"
+weight = 30
+[[menu.main]]
+identifier = "dynamodb"
+name = "DynamoDB"
+url = "/dynamodb/"
+weight = 40
 [[menu.main]]
 identifier = "author"
 name = "Author"
 url = "https://www.artur-rios.tech/"
+weight = 50
 [[menu.main]]
 identifier = "github"
 name = "GitHub"
 url = "https://github.com/artur-rios/dotnet-data"
+weight = 60
 [[menu.main]]
 identifier = "test-coverage"
 name = "Test Coverage"
 url = "https://artur-rios.github.io/dotnet-data/coverage-report"
+weight = 70
