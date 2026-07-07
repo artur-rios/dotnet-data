@@ -1,1126 +1,320 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <meta content="IE=EDGE,chrome=1" http-equiv="X-UA-Compatible"/>
-    <link
-        href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAn1BMVEUAAADCAAAAAAA3yDfUAAA3yDfUAAA8PDzr6+sAAAD4+Pg3yDeQkJDTAADt7e3V1dU3yDdCQkIAAADbMTHUAABBykHUAAA2yDY3yDfr6+vTAAB3diDR0dGYcHDUAAAjhiPSAAA3yDeuAADUAAA3yDf////OCALg9+BLzktBuzRelimzKgv87+/dNTVflSn1/PWz6rO126g5yDlYniy0KgwjJ0TyAAAAI3RSTlMABAj0WD6rJcsN7X1HzMqUJyYW+/X08+bltqSeaVRBOy0cE+citBEAAADBSURBVDjLlczXEoIwFIThJPYGiL0XiL3r+z+bBOJs9JDMuLffP8v+Gxfc6aIyDQVjQcnqnvRDEQwLJYtXpZT+YhDHKIjLbS+OUeT4TjkKi6OwOArq+yeKXD9uDqQQbcOjyCy0e6bTojZSftX+U6zUQ7OuittDu1k0WHqRFfdXQijgjKfF6ZwAikvmKD6OQjmKWUcDigkztm5FZN05nMON9ZcoinlBmTNnAUdBnRbUUbgdBZwWbkcBpwXcVsBtxfjb31j1QB5qeebOAAAAAElFTkSuQmCC"
-        rel="icon" type="image/x-icon"/>
-    <title>ArturRios.Data.Dapper.DapperSqlQuery - Coverage Report</title>
-    <link href="report.css" rel="stylesheet" type="text/css"/>
-</head>
-<body>
-<div class="container">
-    <div class="containerleft">
-        <h1><a class="back" href="index.html">&lt;</a> Summary</h1>
-        <div class="card-group">
-            <div class="card">
-                <div class="card-header">Information</div>
-                <div class="card-body">
-                    <div class="table">
-                        <table>
-                            <tr>
-                                <th>Class:</th>
-                                <td class="limit-width " title="ArturRios.Data.Dapper.DapperSqlQuery">
-                                    ArturRios.Data.Dapper.DapperSqlQuery
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Assembly:</th>
-                                <td class="limit-width " title="ArturRios.Data.Dapper">ArturRios.Data.Dapper</td>
-                            </tr>
-                            <tr>
-                                <th>File(s):</th>
-                                <td class="overflow-wrap"><a
-                                    class="navigatetohash"
-                                    href="#DRepositoriesdotnetdatasrcArturRiosDataDapperDapperSqlQuerycs">D:\Repositories\dotnet-data\src\ArturRios.Data.Dapper\DapperSqlQuery.cs</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card-group">
-            <div class="card">
-                <div class="card-header">Line coverage</div>
-                <div class="card-body">
-                    <div class="large cardpercentagebar cardpercentagebar19">81%</div>
-                    <div class="table">
-                        <table>
-                            <tr>
-                                <th>Covered lines:</th>
-                                <td class="limit-width right" title="26">26</td>
-                            </tr>
-                            <tr>
-                                <th>Uncovered lines:</th>
-                                <td class="limit-width right" title="6">6</td>
-                            </tr>
-                            <tr>
-                                <th>Coverable lines:</th>
-                                <td class="limit-width right" title="32">32</td>
-                            </tr>
-                            <tr>
-                                <th>Total lines:</th>
-                                <td class="limit-width right" title="96">96</td>
-                            </tr>
-                            <tr>
-                                <th>Line coverage:</th>
-                                <td class="limit-width right" title="26 of 32">81.2%</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Branch coverage</div>
-                <div class="card-body">
-                    <div class="large cardpercentagebar cardpercentagebar0">100%</div>
-                    <div class="table">
-                        <table>
-                            <tr>
-                                <th>Covered branches:</th>
-                                <td class="limit-width right" title="2">2</td>
-                            </tr>
-                            <tr>
-                                <th>Total branches:</th>
-                                <td class="limit-width right" title="2">2</td>
-                            </tr>
-                            <tr>
-                                <th>Branch coverage:</th>
-                                <td class="limit-width right" title="2 of 2">100%</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Method coverage</div>
-                <div class="card-body">
-                    <div class="large cardpercentagebar cardpercentagebar0">100%</div>
-                    <div class="table">
-                        <table>
-                            <tr>
-                                <th>Covered methods:</th>
-                                <td class="limit-width right" title="14">14</td>
-                            </tr>
-                            <tr>
-                                <th>Fully covered methods:</th>
-                                <td class="limit-width right" title="12">12</td>
-                            </tr>
-                            <tr>
-                                <th>Total methods:</th>
-                                <td class="limit-width right" title="14">14</td>
-                            </tr>
-                            <tr>
-                                <th>Method coverage:</th>
-                                <td class="limit-width right" title="14 of 14">100%</td>
-                            </tr>
-                            <tr>
-                                <th>Full method coverage:</th>
-                                <td class="limit-width right" title="12 of 14">85.7%</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <h1>Metrics</h1>
-        <div class="table-responsive">
-            <table class="overview table-fixed">
-                <colgroup>
-                    <col class="column-min-200"/>
-                    <col class="column105"/>
-                    <col class="column105"/>
-                    <col class="column105"/>
-                    <col class="column105"/>
-                </colgroup>
-                <thead>
-                <tr>
-                    <th>Method</th>
-                    <th>Branch coverage <a href="https://en.wikipedia.org/wiki/Code_coverage" target="_blank"><i
-                        class="icon-info-circled"></i></a></th>
-                    <th>Crap Score <a href="https://googletesting.blogspot.de/2011/02/this-code-is-crap.html"
-                                      target="_blank"><i class="icon-info-circled"></i></a></th>
-                    <th>Cyclomatic complexity <a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity"
-                                                 target="_blank"><i class="icon-info-circled"></i></a></th>
-                    <th>Line coverage <a href="https://en.wikipedia.org/wiki/Code_coverage" target="_blank"><i
-                        class="icon-info-circled"></i></a></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td title=".ctor(ArturRios.Data.Core.Configuration.BaseDbContext)"><a class="navigatetohash"
-                                                                                          href="#file0_line16">.ctor(...)</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="get_Connection()"><a class="navigatetohash" href="#file0_line22">get_Connection()</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="get_Transaction()"><a class="navigatetohash" href="#file0_line25">get_Transaction()</a>
-                    </td>
-                    <td>100%</td>
-                    <td>2</td>
-                    <td>2</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="Query(System.String,System.Object)"><a class="navigatetohash" href="#file0_line29">Query(...)</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="QueryFirstOrDefault(System.String,System.Object)"><a class="navigatetohash"
-                                                                                    href="#file0_line33">QueryFirstOrDefault(...)</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="QuerySingleOrDefault(System.String,System.Object)"><a class="navigatetohash"
-                                                                                     href="#file0_line37">QuerySingleOrDefault(...)</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="ExecuteScalar(System.String,System.Object)"><a class="navigatetohash"
-                                                                              href="#file0_line41">ExecuteScalar(...)</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="QueryAsync(System.String,System.Object,System.Threading.CancellationToken)"><a
-                        class="navigatetohash" href="#file0_line45">QueryAsync(...)</a></td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="QueryFirstOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)">
-                        <a class="navigatetohash" href="#file0_line49">QueryFirstOrDefaultAsync(...)</a></td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="QuerySingleOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)">
-                        <a class="navigatetohash" href="#file0_line53">QuerySingleOrDefaultAsync(...)</a></td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="ExecuteScalarAsync(System.String,System.Object,System.Threading.CancellationToken)"><a
-                        class="navigatetohash" href="#file0_line57">ExecuteScalarAsync(...)</a></td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="Guarded(System.Func`1&lt;TResult&gt;)"><a class="navigatetohash" href="#file0_line61">Guarded(...)</a>
-                    </td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>70%</td>
-                </tr>
-                <tr>
-                    <td title="Command(System.String,System.Object,System.Threading.CancellationToken)"><a
-                        class="navigatetohash" href="#file0_line78">Command(...)</a></td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <td title="GuardedAsync()"><a class="navigatetohash" href="#file0_line82">GuardedAsync()</a></td>
-                    <td>100%</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>70%</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <h1>File(s)</h1>
-        <h2 id="DRepositoriesdotnetdatasrcArturRiosDataDapperDapperSqlQuerycs">
-            D:\Repositories\dotnet-data\src\ArturRios.Data.Dapper\DapperSqlQuery.cs</h2>
-        <div class="table-responsive">
-            <table class="lineAnalysis">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>#</th>
-                    <th>Line</th>
-                    <th></th>
-                    <th>Line coverage</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line1"></a><code>1</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>using&nbsp;System.Data.Common;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line2"></a><code>2</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>using&nbsp;ArturRios.Data.Core.Configuration;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line3"></a><code>3</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>using&nbsp;ArturRios.Output;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line4"></a><code>4</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>using&nbsp;Dapper;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line5"></a><code>5</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>using&nbsp;Microsoft.EntityFrameworkCore;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line6"></a><code>6</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>using&nbsp;Microsoft.EntityFrameworkCore.Storage;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line7"></a><code>7</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line8"></a><code>8</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>namespace&nbsp;ArturRios.Data.Dapper;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line9"></a><code>9</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line10"></a><code>10</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>///&nbsp;&lt;summary&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line11"></a><code>11</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>///&nbsp;Dapper-backed&nbsp;read-only&nbsp;query&nbsp;executor.&nbsp;Runs&nbsp;against&nbsp;the&nbsp;&lt;see&nbsp;cref=&quot;BaseDbContext&quot;/&gt;&#39;s</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line12"></a><code>12</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>///&nbsp;connection&nbsp;and&nbsp;enlists&nbsp;in&nbsp;its&nbsp;ambient&nbsp;transaction,&nbsp;so&nbsp;Dapper&nbsp;reads&nbsp;and&nbsp;EF&nbsp;writes&nbsp;share&nbsp;one</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line13"></a><code>13</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>///&nbsp;connection&nbsp;and&nbsp;one&nbsp;unit-of-work&nbsp;transaction.&nbsp;Failures&nbsp;are&nbsp;returned&nbsp;as&nbsp;&lt;see&nbsp;cref=&quot;DataOutput{T}&quot;/&gt;.</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line14"></a><code>14</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>///&nbsp;&lt;/summary&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line15"></a><code>15</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>///&nbsp;&lt;param&nbsp;name=&quot;context&quot;&gt;The&nbsp;application&#39;s&nbsp;&lt;see&nbsp;cref=&quot;BaseDbContext&quot;/&gt;.&lt;/param&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '15', 'LVS': 'green'}}"
-                    title="Covered (15 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">15</td>
-                    <td class="rightmargin right"><a id="file0_line16"></a><code>16</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>public&nbsp;class&nbsp;DapperSqlQuery(BaseDbContext&nbsp;context)&nbsp;:&nbsp;ISqlQuery,&nbsp;IAsyncSqlQuery</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line17"></a><code>17</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>{</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line18"></a><code>18</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Message&nbsp;prefix&nbsp;returned&nbsp;when&nbsp;a&nbsp;query&nbsp;fails.&lt;/summary&gt;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line19"></a><code>19</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;const&nbsp;string&nbsp;QueryFailedMessage&nbsp;=&nbsp;&quot;A&nbsp;data-access&nbsp;error&nbsp;occurred:&quot;;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line20"></a><code>20</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line21"></a><code>21</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;The&nbsp;context&#39;s&nbsp;underlying&nbsp;database&nbsp;connection.&lt;/summary&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '14', 'LVS': 'green'}}"
-                    title="Covered (14 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">14</td>
-                    <td class="rightmargin right"><a id="file0_line22"></a><code>22</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;DbConnection&nbsp;Connection&nbsp;=&gt;&nbsp;context.Database.GetDbConnection();</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line23"></a><code>23</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line24"></a><code>24</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;The&nbsp;ambient&nbsp;database&nbsp;transaction,&nbsp;or&nbsp;&lt;see&nbsp;langword=&quot;null&quot;/&gt;&nbsp;when&nbsp;none&nbsp;is&nbsp;active.&lt;/summary&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '14', 'LVS': 'green'}}"
-                    title="Covered (14 visits, 2 of 2 branches are covered)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">14</td>
-                    <td class="rightmargin right"><a id="file0_line25"></a><code>25</code></td>
-                    <td class="percentagebar percentagebar100"><i class="icon-fork"></i></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;DbTransaction?&nbsp;Transaction&nbsp;=&gt;&nbsp;context.Database.CurrentTransaction?.GetDbTransaction();</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line26"></a><code>26</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line27"></a><code>27</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line28"></a><code>28</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;IEnumerable&lt;T&gt;&gt;&nbsp;Query&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '6', 'LVS': 'green'}}"
-                    title="Covered (6 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">6</td>
-                    <td class="rightmargin right"><a id="file0_line29"></a><code>29</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.Query&lt;T&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line30"></a><code>30</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line31"></a><code>31</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line32"></a><code>32</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;T?&gt;&nbsp;QueryFirstOrDefault&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '4', 'LVS': 'green'}}"
-                    title="Covered (4 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">4</td>
-                    <td class="rightmargin right"><a id="file0_line33"></a><code>33</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.QueryFirstOrDefault&lt;T?&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line34"></a><code>34</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line35"></a><code>35</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line36"></a><code>36</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;T?&gt;&nbsp;QuerySingleOrDefault&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line37"></a><code>37</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.QuerySingleOrDefault&lt;T?&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line38"></a><code>38</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line39"></a><code>39</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line40"></a><code>40</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;T?&gt;&nbsp;ExecuteScalar&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line41"></a><code>41</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.ExecuteScalar&lt;T?&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line42"></a><code>42</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line43"></a><code>43</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line44"></a><code>44</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;IEnumerable&lt;T&gt;&gt;&gt;&nbsp;QueryAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,&nbsp;CancellationToken&nbsp;ct&nbsp;=&nbsp;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '8', 'LVS': 'green'}}"
-                    title="Covered (8 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">8</td>
-                    <td class="rightmargin right"><a id="file0_line45"></a><code>45</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.QueryAsync&lt;T&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line46"></a><code>46</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line47"></a><code>47</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line48"></a><code>48</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;T?&gt;&gt;&nbsp;QueryFirstOrDefaultAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,&nbsp;CancellationToken&nbsp;ct&nbsp;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line49"></a><code>49</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.QueryFirstOrDefaultAsync&lt;T?&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line50"></a><code>50</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line51"></a><code>51</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line52"></a><code>52</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;T?&gt;&gt;&nbsp;QuerySingleOrDefaultAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,&nbsp;CancellationToken&nbsp;ct</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line53"></a><code>53</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.QuerySingleOrDefaultAsync&lt;T?&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line54"></a><code>54</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line55"></a><code>55</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line56"></a><code>56</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;T?&gt;&gt;&nbsp;ExecuteScalarAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,&nbsp;CancellationToken&nbsp;ct&nbsp;=&nbsp;defa</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line57"></a><code>57</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.ExecuteScalarAsync&lt;T?&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line58"></a><code>58</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line59"></a><code>59</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Runs&nbsp;a&nbsp;synchronous&nbsp;query,&nbsp;converting&nbsp;failures&nbsp;to&nbsp;envelope&nbsp;errors.&lt;/summary&gt;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line60"></a><code>60</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;static&nbsp;DataOutput&lt;TResult&gt;&nbsp;Guarded&lt;TResult&gt;(Func&lt;TResult&gt;&nbsp;operation)</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line61"></a><code>61</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line62"></a><code>62</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line63"></a><code>63</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line64"></a><code>64</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithData(operation());</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line65"></a><code>65</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"
-                    title="Not covered (0 visits)">
-                    <td class="red">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">0</td>
-                    <td class="rightmargin right"><a id="file0_line66"></a><code>66</code></td>
-                    <td></td>
-                    <td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(OperationCanceledException)</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"
-                    title="Not covered (0 visits)">
-                    <td class="red">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">0</td>
-                    <td class="rightmargin right"><a id="file0_line67"></a><code>67</code></td>
-                    <td></td>
-                    <td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"
-                    title="Not covered (0 visits)">
-                    <td class="red">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">0</td>
-                    <td class="rightmargin right"><a id="file0_line68"></a><code>68</code></td>
-                    <td></td>
-                    <td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line69"></a><code>69</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line70"></a><code>70</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(Exception&nbsp;ex)</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line71"></a><code>71</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line72"></a><code>72</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithError($&quot;{QueryFailedMessage}&nbsp;{ex.GetBaseException().Message}&quot;);</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line73"></a><code>73</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line74"></a><code>74</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line75"></a><code>75</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line76"></a><code>76</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Builds&nbsp;a&nbsp;Dapper&nbsp;command&nbsp;carrying&nbsp;the&nbsp;ambient&nbsp;transaction&nbsp;and&nbsp;cancellation&nbsp;token.&lt;/summary&gt;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line77"></a><code>77</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;CommandDefinition&nbsp;Command(string&nbsp;sql,&nbsp;object?&nbsp;parameters,&nbsp;CancellationToken&nbsp;ct)&nbsp;=&gt;</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line78"></a><code>78</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new(sql,&nbsp;parameters,&nbsp;Transaction,&nbsp;cancellationToken:&nbsp;ct);</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line79"></a><code>79</code></td>
-                    <td></td>
-                    <td class="lightgray"><code></code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line80"></a><code>80</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Runs&nbsp;an&nbsp;asynchronous&nbsp;query,&nbsp;converting&nbsp;failures&nbsp;to&nbsp;envelope&nbsp;errors.&lt;/summary&gt;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line81"></a><code>81</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;static&nbsp;async&nbsp;Task&lt;DataOutput&lt;TResult&gt;&gt;&nbsp;GuardedAsync&lt;TResult&gt;(Func&lt;Task&lt;TResult&gt;&gt;&nbsp;operation)</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line82"></a><code>82</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line83"></a><code>83</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line84"></a><code>84</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line85"></a><code>85</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithData(await&nbsp;operation());</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line86"></a><code>86</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"
-                    title="Not covered (0 visits)">
-                    <td class="red">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">0</td>
-                    <td class="rightmargin right"><a id="file0_line87"></a><code>87</code></td>
-                    <td></td>
-                    <td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(OperationCanceledException)</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"
-                    title="Not covered (0 visits)">
-                    <td class="red">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">0</td>
-                    <td class="rightmargin right"><a id="file0_line88"></a><code>88</code></td>
-                    <td></td>
-                    <td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"
-                    title="Not covered (0 visits)">
-                    <td class="red">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">0</td>
-                    <td class="rightmargin right"><a id="file0_line89"></a><code>89</code></td>
-                    <td></td>
-                    <td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw;</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line90"></a><code>90</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line91"></a><code>91</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(Exception&nbsp;ex)</code>
-                    </td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line92"></a><code>92</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"
-                    title="Covered (2 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">2</td>
-                    <td class="rightmargin right"><a id="file0_line93"></a><code>93</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithError($&quot;{QueryFailedMessage}&nbsp;{ex.GetBaseException().Message}&quot;);</code>
-                    </td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line94"></a><code>94</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="coverableline" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"
-                    title="Covered (7 visits)">
-                    <td class="green">&nbsp;</td>
-                    <td class="leftmargin rightmargin right">7</td>
-                    <td class="rightmargin right"><a id="file0_line95"></a><code>95</code></td>
-                    <td></td>
-                    <td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;}</code></td>
-                </tr>
-                <tr class="" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}" title="Not coverable">
-                    <td class="gray">&nbsp;</td>
-                    <td class="leftmargin rightmargin right"></td>
-                    <td class="rightmargin right"><a id="file0_line96"></a><code>96</code></td>
-                    <td></td>
-                    <td class="lightgray"><code>}</code></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="footer">Generated by: ReportGenerator 5.4.5.0<br/>7/6/2026 - 8:13:19 PM<br/><a
-            href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="https://reportgenerator.io">reportgenerator.io</a>
-        </div>
-    </div>
-    <div class="containerright">
-        <div class="containerrightfixed">
-            <h1>Methods/Properties</h1>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line16"
-               title="Line coverage: 100% - .ctor(ArturRios.Data.Core.Configuration.BaseDbContext)"><i
-                class="icon-cube"></i>.ctor(ArturRios.Data.Core.Configuration.BaseDbContext)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line22"
-               title="Line coverage: 100% - get_Connection()"><i class="icon-wrench"></i>get_Connection()</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line25"
-               title="Line coverage: 100% - get_Transaction()"><i class="icon-wrench"></i>get_Transaction()</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line29"
-               title="Line coverage: 100% - Query(System.String,System.Object)"><i class="icon-cube"></i>Query(System.String,System.Object)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line33"
-               title="Line coverage: 100% - QueryFirstOrDefault(System.String,System.Object)"><i class="icon-cube"></i>QueryFirstOrDefault(System.String,System.Object)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line37"
-               title="Line coverage: 100% - QuerySingleOrDefault(System.String,System.Object)"><i class="icon-cube"></i>QuerySingleOrDefault(System.String,System.Object)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line41"
-               title="Line coverage: 100% - ExecuteScalar(System.String,System.Object)"><i class="icon-cube"></i>ExecuteScalar(System.String,System.Object)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line45"
-               title="Line coverage: 100% - QueryAsync(System.String,System.Object,System.Threading.CancellationToken)"><i
-                class="icon-cube"></i>QueryAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line49"
-               title="Line coverage: 100% - QueryFirstOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)"><i
-                class="icon-cube"></i>QueryFirstOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line53"
-               title="Line coverage: 100% - QuerySingleOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)"><i
-                class="icon-cube"></i>QuerySingleOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line57"
-               title="Line coverage: 100% - ExecuteScalarAsync(System.String,System.Object,System.Threading.CancellationToken)"><i
-                class="icon-cube"></i>ExecuteScalarAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar70" href="#file0_line61"
-               title="Line coverage: 70% - Guarded(System.Func`1&lt;TResult&gt;)"><i class="icon-cube"></i>Guarded(System.Func`1&lt;TResult&gt;)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar100" href="#file0_line78"
-               title="Line coverage: 100% - Command(System.String,System.Object,System.Threading.CancellationToken)"><i
-                class="icon-cube"></i>Command(System.String,System.Object,System.Threading.CancellationToken)</a><br/>
-            <a class="navigatetohash percentagebar percentagebar70" href="#file0_line82"
-               title="Line coverage: 70% - GuardedAsync()"><i class="icon-cube"></i>GuardedAsync()</a><br/>
-            <br/></div>
-    </div>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE,chrome=1" />
+<link href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAn1BMVEUAAADCAAAAAAA3yDfUAAA3yDfUAAA8PDzr6+sAAAD4+Pg3yDeQkJDTAADt7e3V1dU3yDdCQkIAAADbMTHUAABBykHUAAA2yDY3yDfr6+vTAAB3diDR0dGYcHDUAAAjhiPSAAA3yDeuAADUAAA3yDf////OCALg9+BLzktBuzRelimzKgv87+/dNTVflSn1/PWz6rO126g5yDlYniy0KgwjJ0TyAAAAI3RSTlMABAj0WD6rJcsN7X1HzMqUJyYW+/X08+bltqSeaVRBOy0cE+citBEAAADBSURBVDjLlczXEoIwFIThJPYGiL0XiL3r+z+bBOJs9JDMuLffP8v+Gxfc6aIyDQVjQcnqnvRDEQwLJYtXpZT+YhDHKIjLbS+OUeT4TjkKi6OwOArq+yeKXD9uDqQQbcOjyCy0e6bTojZSftX+U6zUQ7OuittDu1k0WHqRFfdXQijgjKfF6ZwAikvmKD6OQjmKWUcDigkztm5FZN05nMON9ZcoinlBmTNnAUdBnRbUUbgdBZwWbkcBpwXcVsBtxfjb31j1QB5qeebOAAAAAElFTkSuQmCC" rel="icon" type="image/x-icon" />
+<title>ArturRios.Data.Dapper.DapperSqlQuery - Coverage Report</title>
+<link rel="stylesheet" type="text/css" href="report.css" />
+</head><body><div class="container"><div class="containerleft">
+<h1><a href="index.html" class="back">&lt;</a> Summary</h1>
+<div class="card-group">
+<div class="card">
+<div class="card-header">Information</div>
+<div class="card-body">
+<div class="table">
+<table>
+<tr>
+<th>Class:</th>
+<td class="limit-width " title="ArturRios.Data.Dapper.DapperSqlQuery">ArturRios.Data.Dapper.DapperSqlQuery</td>
+</tr>
+<tr>
+<th>Assembly:</th>
+<td class="limit-width " title="ArturRios.Data.Dapper">ArturRios.Data.Dapper</td>
+</tr>
+<tr>
+<th>File(s):</th>
+<td class="overflow-wrap"><a href="#DRepositoriesdotnetdatasrcArturRiosDataDapperDapperSqlQuerycs" class="navigatetohash">D:\Repositories\dotnet-data\src\ArturRios.Data.Dapper\DapperSqlQuery.cs</a></td>
+</tr>
+</table>
 </div>
+</div>
+</div>
+</div>
+<div class="card-group">
+<div class="card">
+<div class="card-header">Line coverage</div>
+<div class="card-body">
+<div class="large cardpercentagebar cardpercentagebar19">81%</div>
+<div class="table">
+<table>
+<tr>
+<th>Covered lines:</th>
+<td class="limit-width right" title="26">26</td>
+</tr>
+<tr>
+<th>Uncovered lines:</th>
+<td class="limit-width right" title="6">6</td>
+</tr>
+<tr>
+<th>Coverable lines:</th>
+<td class="limit-width right" title="32">32</td>
+</tr>
+<tr>
+<th>Total lines:</th>
+<td class="limit-width right" title="100">100</td>
+</tr>
+<tr>
+<th>Line coverage:</th>
+<td class="limit-width right" title="26 of 32">81.2%</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">Branch coverage</div>
+<div class="card-body">
+<div class="large cardpercentagebar cardpercentagebar0">100%</div>
+<div class="table">
+<table>
+<tr>
+<th>Covered branches:</th>
+<td class="limit-width right" title="2">2</td>
+</tr>
+<tr>
+<th>Total branches:</th>
+<td class="limit-width right" title="2">2</td>
+</tr>
+<tr>
+<th>Branch coverage:</th>
+<td class="limit-width right" title="2 of 2">100%</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">Method coverage</div>
+<div class="card-body">
+<div class="large cardpercentagebar cardpercentagebar0">100%</div>
+<div class="table">
+<table>
+<tr>
+<th>Covered methods:</th>
+<td class="limit-width right" title="14">14</td>
+</tr>
+<tr>
+<th>Fully covered methods:</th>
+<td class="limit-width right" title="12">12</td>
+</tr>
+<tr>
+<th>Total methods:</th>
+<td class="limit-width right" title="14">14</td>
+</tr>
+<tr>
+<th>Method coverage:</th>
+<td class="limit-width right" title="14 of 14">100%</td>
+</tr>
+<tr>
+<th>Full method coverage:</th>
+<td class="limit-width right" title="12 of 14">85.7%</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<h1>Metrics</h1>
+<div class="table-responsive">
+<table class="overview table-fixed">
+<colgroup>
+<col class="column-min-200" />
+<col class="column105" />
+<col class="column105" />
+<col class="column105" />
+<col class="column105" />
+</colgroup>
+<thead><tr><th>Method</th><th>Branch coverage <a href="https://en.wikipedia.org/wiki/Code_coverage" target="_blank"><i class="icon-info-circled"></i></a></th><th>Crap Score <a href="https://googletesting.blogspot.de/2011/02/this-code-is-crap.html" target="_blank"><i class="icon-info-circled"></i></a></th><th>Cyclomatic complexity <a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity" target="_blank"><i class="icon-info-circled"></i></a></th><th>Line coverage <a href="https://en.wikipedia.org/wiki/Code_coverage" target="_blank"><i class="icon-info-circled"></i></a></th></tr></thead>
+<tbody>
+<tr><td title=".ctor(ArturRios.Data.Relational.Core.Configuration.BaseDbContext)"><a href="#file0_line16" class="navigatetohash">.ctor(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="get_Connection()"><a href="#file0_line22" class="navigatetohash">get_Connection()</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="get_Transaction()"><a href="#file0_line25" class="navigatetohash">get_Transaction()</a></td><td>100%</td><td>2</td><td>2</td><td>100%</td></tr>
+<tr><td title="QueryAsync(System.String,System.Object,System.Threading.CancellationToken)"><a href="#file0_line30" class="navigatetohash">QueryAsync(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="QueryFirstOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)"><a href="#file0_line35" class="navigatetohash">QueryFirstOrDefaultAsync(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="QuerySingleOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)"><a href="#file0_line40" class="navigatetohash">QuerySingleOrDefaultAsync(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="ExecuteScalarAsync(System.String,System.Object,System.Threading.CancellationToken)"><a href="#file0_line45" class="navigatetohash">ExecuteScalarAsync(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="Query(System.String,System.Object)"><a href="#file0_line49" class="navigatetohash">Query(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="QueryFirstOrDefault(System.String,System.Object)"><a href="#file0_line53" class="navigatetohash">QueryFirstOrDefault(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="QuerySingleOrDefault(System.String,System.Object)"><a href="#file0_line57" class="navigatetohash">QuerySingleOrDefault(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="ExecuteScalar(System.String,System.Object)"><a href="#file0_line61" class="navigatetohash">ExecuteScalar(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="Guarded(System.Func`1&lt;TResult&gt;)"><a href="#file0_line65" class="navigatetohash">Guarded(...)</a></td><td>100%</td><td>1</td><td>1</td><td>70%</td></tr>
+<tr><td title="Command(System.String,System.Object,System.Threading.CancellationToken)"><a href="#file0_line82" class="navigatetohash">Command(...)</a></td><td>100%</td><td>1</td><td>1</td><td>100%</td></tr>
+<tr><td title="GuardedAsync()"><a href="#file0_line86" class="navigatetohash">GuardedAsync()</a></td><td>100%</td><td>1</td><td>1</td><td>70%</td></tr>
+</tbody>
+</table>
+</div>
+<h1>File(s)</h1>
+<h2 id="DRepositoriesdotnetdatasrcArturRiosDataDapperDapperSqlQuerycs">D:\Repositories\dotnet-data\src\ArturRios.Data.Dapper\DapperSqlQuery.cs</h2>
+<div class="table-responsive">
+<table class="lineAnalysis">
+<thead><tr><th></th><th>#</th><th>Line</th><th></th><th>Line coverage</th></tr></thead>
+<tbody>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line1"></a><code>1</code></td><td></td><td class="lightgray"><code>using&nbsp;System.Data.Common;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line2"></a><code>2</code></td><td></td><td class="lightgray"><code>using&nbsp;ArturRios.Data.Relational.Core.Configuration;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line3"></a><code>3</code></td><td></td><td class="lightgray"><code>using&nbsp;ArturRios.Output;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line4"></a><code>4</code></td><td></td><td class="lightgray"><code>using&nbsp;Dapper;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line5"></a><code>5</code></td><td></td><td class="lightgray"><code>using&nbsp;Microsoft.EntityFrameworkCore;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line6"></a><code>6</code></td><td></td><td class="lightgray"><code>using&nbsp;Microsoft.EntityFrameworkCore.Storage;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line7"></a><code>7</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line8"></a><code>8</code></td><td></td><td class="lightgray"><code>namespace&nbsp;ArturRios.Data.Dapper;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line9"></a><code>9</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line10"></a><code>10</code></td><td></td><td class="lightgray"><code>///&nbsp;&lt;summary&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line11"></a><code>11</code></td><td></td><td class="lightgray"><code>///&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dapper-backed&nbsp;read-only&nbsp;query&nbsp;executor.&nbsp;Runs&nbsp;against&nbsp;the&nbsp;&lt;see&nbsp;cref=&quot;BaseDbContext&quot;&nbsp;/&gt;&#39;s</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line12"></a><code>12</code></td><td></td><td class="lightgray"><code>///&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;and&nbsp;enlists&nbsp;in&nbsp;its&nbsp;ambient&nbsp;transaction,&nbsp;so&nbsp;Dapper&nbsp;reads&nbsp;and&nbsp;EF&nbsp;writes&nbsp;share&nbsp;one</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line13"></a><code>13</code></td><td></td><td class="lightgray"><code>///&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;and&nbsp;one&nbsp;unit-of-work&nbsp;transaction.&nbsp;Failures&nbsp;are&nbsp;returned&nbsp;as&nbsp;&lt;see&nbsp;cref=&quot;DataOutput{T}&quot;&nbsp;/&gt;.</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line14"></a><code>14</code></td><td></td><td class="lightgray"><code>///&nbsp;&lt;/summary&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line15"></a><code>15</code></td><td></td><td class="lightgray"><code>///&nbsp;&lt;param&nbsp;name=&quot;context&quot;&gt;The&nbsp;application&#39;s&nbsp;&lt;see&nbsp;cref=&quot;BaseDbContext&quot;&nbsp;/&gt;.&lt;/param&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (15 visits)" data-coverage="{'AllTestMethods': {'VC': '15', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">15</td><td class="rightmargin right"><a id="file0_line16"></a><code>16</code></td><td></td><td class="lightgreen"><code>public&nbsp;class&nbsp;DapperSqlQuery(BaseDbContext&nbsp;context)&nbsp;:&nbsp;ISqlQuery,&nbsp;IAsyncSqlQuery</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line17"></a><code>17</code></td><td></td><td class="lightgray"><code>{</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line18"></a><code>18</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Message&nbsp;prefix&nbsp;returned&nbsp;when&nbsp;a&nbsp;query&nbsp;fails.&lt;/summary&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line19"></a><code>19</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;const&nbsp;string&nbsp;QueryFailedMessage&nbsp;=&nbsp;&quot;A&nbsp;data-access&nbsp;error&nbsp;occurred:&quot;;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line20"></a><code>20</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line21"></a><code>21</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;The&nbsp;context&#39;s&nbsp;underlying&nbsp;database&nbsp;connection.&lt;/summary&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (14 visits)" data-coverage="{'AllTestMethods': {'VC': '14', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">14</td><td class="rightmargin right"><a id="file0_line22"></a><code>22</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;DbConnection&nbsp;Connection&nbsp;=&gt;&nbsp;context.Database.GetDbConnection();</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line23"></a><code>23</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line24"></a><code>24</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;The&nbsp;ambient&nbsp;database&nbsp;transaction,&nbsp;or&nbsp;&lt;see&nbsp;langword=&quot;null&quot;&nbsp;/&gt;&nbsp;when&nbsp;none&nbsp;is&nbsp;active.&lt;/summary&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (14 visits, 2 of 2 branches are covered)" data-coverage="{'AllTestMethods': {'VC': '14', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">14</td><td class="rightmargin right"><a id="file0_line25"></a><code>25</code></td><td class="percentagebar percentagebar100"><i class="icon-fork"></i></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;DbTransaction?&nbsp;Transaction&nbsp;=&gt;&nbsp;context.Database.CurrentTransaction?.GetDbTransaction();</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line26"></a><code>26</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line27"></a><code>27</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line28"></a><code>28</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;IEnumerable&lt;T&gt;&gt;&gt;&nbsp;QueryAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line29"></a><code>29</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CancellationToken&nbsp;ct&nbsp;=&nbsp;default)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (8 visits)" data-coverage="{'AllTestMethods': {'VC': '8', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">8</td><td class="rightmargin right"><a id="file0_line30"></a><code>30</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.QueryAsync&lt;T&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line31"></a><code>31</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line32"></a><code>32</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line33"></a><code>33</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;T?&gt;&gt;&nbsp;QueryFirstOrDefaultAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line34"></a><code>34</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CancellationToken&nbsp;ct&nbsp;=&nbsp;default)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line35"></a><code>35</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.QueryFirstOrDefaultAsync&lt;T?&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line36"></a><code>36</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line37"></a><code>37</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line38"></a><code>38</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;T?&gt;&gt;&nbsp;QuerySingleOrDefaultAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line39"></a><code>39</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CancellationToken&nbsp;ct&nbsp;=&nbsp;default)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line40"></a><code>40</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.QuerySingleOrDefaultAsync&lt;T?&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line41"></a><code>41</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line42"></a><code>42</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line43"></a><code>43</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;Task&lt;DataOutput&lt;T?&gt;&gt;&nbsp;ExecuteScalarAsync&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null,</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line44"></a><code>44</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CancellationToken&nbsp;ct&nbsp;=&nbsp;default)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line45"></a><code>45</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GuardedAsync(async&nbsp;()&nbsp;=&gt;&nbsp;await&nbsp;Connection.ExecuteScalarAsync&lt;T?&gt;(Command(sql,&nbsp;parameters,&nbsp;ct)));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line46"></a><code>46</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line47"></a><code>47</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line48"></a><code>48</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;IEnumerable&lt;T&gt;&gt;&nbsp;Query&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (6 visits)" data-coverage="{'AllTestMethods': {'VC': '6', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">6</td><td class="rightmargin right"><a id="file0_line49"></a><code>49</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.Query&lt;T&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line50"></a><code>50</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line51"></a><code>51</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line52"></a><code>52</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;T?&gt;&nbsp;QueryFirstOrDefault&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (4 visits)" data-coverage="{'AllTestMethods': {'VC': '4', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">4</td><td class="rightmargin right"><a id="file0_line53"></a><code>53</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.QueryFirstOrDefault&lt;T?&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line54"></a><code>54</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line55"></a><code>55</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line56"></a><code>56</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;T?&gt;&nbsp;QuerySingleOrDefault&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line57"></a><code>57</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.QuerySingleOrDefault&lt;T?&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line58"></a><code>58</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line59"></a><code>59</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;inheritdoc&nbsp;/&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line60"></a><code>60</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;DataOutput&lt;T?&gt;&nbsp;ExecuteScalar&lt;T&gt;(string&nbsp;sql,&nbsp;object?&nbsp;parameters&nbsp;=&nbsp;null)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line61"></a><code>61</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guarded(()&nbsp;=&gt;&nbsp;Connection.ExecuteScalar&lt;T?&gt;(sql,&nbsp;parameters,&nbsp;Transaction));</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line62"></a><code>62</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line63"></a><code>63</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Runs&nbsp;a&nbsp;synchronous&nbsp;query,&nbsp;converting&nbsp;failures&nbsp;to&nbsp;envelope&nbsp;errors.&lt;/summary&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line64"></a><code>64</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;static&nbsp;DataOutput&lt;TResult&gt;&nbsp;Guarded&lt;TResult&gt;(Func&lt;TResult&gt;&nbsp;operation)</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line65"></a><code>65</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line66"></a><code>66</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line67"></a><code>67</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line68"></a><code>68</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithData(operation());</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line69"></a><code>69</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line70"></a><code>70</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(OperationCanceledException)</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line71"></a><code>71</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line72"></a><code>72</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line73"></a><code>73</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line74"></a><code>74</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(Exception&nbsp;ex)</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line75"></a><code>75</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line76"></a><code>76</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithError($&quot;{QueryFailedMessage}&nbsp;{ex.GetBaseException().Message}&quot;);</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line77"></a><code>77</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line78"></a><code>78</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line79"></a><code>79</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line80"></a><code>80</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Builds&nbsp;a&nbsp;Dapper&nbsp;command&nbsp;carrying&nbsp;the&nbsp;ambient&nbsp;transaction&nbsp;and&nbsp;cancellation&nbsp;token.&lt;/summary&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line81"></a><code>81</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;CommandDefinition&nbsp;Command(string&nbsp;sql,&nbsp;object?&nbsp;parameters,&nbsp;CancellationToken&nbsp;ct)&nbsp;=&gt;</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line82"></a><code>82</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new(sql,&nbsp;parameters,&nbsp;Transaction,&nbsp;cancellationToken:&nbsp;ct);</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line83"></a><code>83</code></td><td></td><td class="lightgray"><code></code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line84"></a><code>84</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;///&nbsp;&lt;summary&gt;Runs&nbsp;an&nbsp;asynchronous&nbsp;query,&nbsp;converting&nbsp;failures&nbsp;to&nbsp;envelope&nbsp;errors.&lt;/summary&gt;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line85"></a><code>85</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;static&nbsp;async&nbsp;Task&lt;DataOutput&lt;TResult&gt;&gt;&nbsp;GuardedAsync&lt;TResult&gt;(Func&lt;Task&lt;TResult&gt;&gt;&nbsp;operation)</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line86"></a><code>86</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line87"></a><code>87</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line88"></a><code>88</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line89"></a><code>89</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithData(await&nbsp;operation());</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line90"></a><code>90</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line91"></a><code>91</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(OperationCanceledException)</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line92"></a><code>92</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Not covered (0 visits)" data-coverage="{'AllTestMethods': {'VC': '0', 'LVS': 'red'}}"><td class="red">&nbsp;</td><td class="leftmargin rightmargin right">0</td><td class="rightmargin right"><a id="file0_line93"></a><code>93</code></td><td></td><td class="lightred"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throw;</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line94"></a><code>94</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line95"></a><code>95</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;(Exception&nbsp;ex)</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line96"></a><code>96</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</code></td></tr>
+<tr class="coverableline" title="Covered (2 visits)" data-coverage="{'AllTestMethods': {'VC': '2', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">2</td><td class="rightmargin right"><a id="file0_line97"></a><code>97</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;DataOutput&lt;TResult&gt;.New.WithError($&quot;{QueryFailedMessage}&nbsp;{ex.GetBaseException().Message}&quot;);</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line98"></a><code>98</code></td><td></td><td class="lightgray"><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="coverableline" title="Covered (7 visits)" data-coverage="{'AllTestMethods': {'VC': '7', 'LVS': 'green'}}"><td class="green">&nbsp;</td><td class="leftmargin rightmargin right">7</td><td class="rightmargin right"><a id="file0_line99"></a><code>99</code></td><td></td><td class="lightgreen"><code>&nbsp;&nbsp;&nbsp;&nbsp;}</code></td></tr>
+<tr class="" title="Not coverable" data-coverage="{'AllTestMethods': {'VC': '', 'LVS': 'gray'}}"><td class="gray">&nbsp;</td><td class="leftmargin rightmargin right"></td><td class="rightmargin right"><a id="file0_line100"></a><code>100</code></td><td></td><td class="lightgray"><code>}</code></td></tr>
+</tbody>
+</table>
+</div>
+<div class="footer">Generated by: ReportGenerator 5.4.5.0<br />7/7/2026 - 12:05:03 PM<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="https://reportgenerator.io">reportgenerator.io</a></div></div>
+<div class="containerright">
+<div class="containerrightfixed">
+<h1>Methods/Properties</h1>
+<a href="#file0_line16" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - .ctor(ArturRios.Data.Relational.Core.Configuration.BaseDbContext)"><i class="icon-cube"></i>.ctor(ArturRios.Data.Relational.Core.Configuration.BaseDbContext)</a><br />
+<a href="#file0_line22" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - get_Connection()"><i class="icon-wrench"></i>get_Connection()</a><br />
+<a href="#file0_line25" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - get_Transaction()"><i class="icon-wrench"></i>get_Transaction()</a><br />
+<a href="#file0_line30" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - QueryAsync(System.String,System.Object,System.Threading.CancellationToken)"><i class="icon-cube"></i>QueryAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br />
+<a href="#file0_line35" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - QueryFirstOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)"><i class="icon-cube"></i>QueryFirstOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br />
+<a href="#file0_line40" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - QuerySingleOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)"><i class="icon-cube"></i>QuerySingleOrDefaultAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br />
+<a href="#file0_line45" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - ExecuteScalarAsync(System.String,System.Object,System.Threading.CancellationToken)"><i class="icon-cube"></i>ExecuteScalarAsync(System.String,System.Object,System.Threading.CancellationToken)</a><br />
+<a href="#file0_line49" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - Query(System.String,System.Object)"><i class="icon-cube"></i>Query(System.String,System.Object)</a><br />
+<a href="#file0_line53" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - QueryFirstOrDefault(System.String,System.Object)"><i class="icon-cube"></i>QueryFirstOrDefault(System.String,System.Object)</a><br />
+<a href="#file0_line57" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - QuerySingleOrDefault(System.String,System.Object)"><i class="icon-cube"></i>QuerySingleOrDefault(System.String,System.Object)</a><br />
+<a href="#file0_line61" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - ExecuteScalar(System.String,System.Object)"><i class="icon-cube"></i>ExecuteScalar(System.String,System.Object)</a><br />
+<a href="#file0_line65" class="navigatetohash percentagebar percentagebar70" title="Line coverage: 70% - Guarded(System.Func`1&lt;TResult&gt;)"><i class="icon-cube"></i>Guarded(System.Func`1&lt;TResult&gt;)</a><br />
+<a href="#file0_line82" class="navigatetohash percentagebar percentagebar100" title="Line coverage: 100% - Command(System.String,System.Object,System.Threading.CancellationToken)"><i class="icon-cube"></i>Command(System.String,System.Object,System.Threading.CancellationToken)</a><br />
+<a href="#file0_line86" class="navigatetohash percentagebar percentagebar70" title="Line coverage: 70% - GuardedAsync()"><i class="icon-cube"></i>GuardedAsync()</a><br />
+<br/></div>
+</div></div>
 <script type="text/javascript">
-    /* <![CDATA[ */
-    (function () {
-        var url = window.location.href;
-        var startOfQueryString = url.indexOf('?');
-        var queryString = startOfQueryString > -1 ? url.substr(startOfQueryString) : '';
+/* <![CDATA[ */
+(function() {
+    var url = window.location.href;
+    var startOfQueryString = url.indexOf('?');
+    var queryString = startOfQueryString > -1 ? url.substr(startOfQueryString) : '';
 
-        if (startOfQueryString > -1) {
-            var i = 0, href = null;
-            var css = document.getElementsByTagName('link');
+    if (startOfQueryString > -1) {
+        var i = 0, href= null;
+        var css = document.getElementsByTagName('link');
 
-            for (i = 0; i < css.length; i++) {
-                if (css[i].getAttribute('rel') !== 'stylesheet') {
-                    continue;
-                }
-
-                href = css[i].getAttribute('href');
-
-                if (href) {
-                    css[i].setAttribute('href', href + queryString);
-                }
+        for (i = 0; i < css.length; i++) {
+            if (css[i].getAttribute('rel') !== 'stylesheet') {
+            continue;
             }
 
-            var links = document.getElementsByTagName('a');
+            href = css[i].getAttribute('href');
 
-            for (i = 0; i < links.length; i++) {
-                href = links[i].getAttribute('href');
-
-                if (href
-                    && !href.startsWith('http://')
-                    && !href.startsWith('https://')
-                    && !href.startsWith('#')
-                    && href.indexOf('?') === -1) {
-                    links[i].setAttribute('href', href + queryString);
-                }
+            if (href) {
+            css[i].setAttribute('href', href + queryString);
             }
         }
 
-        var newScript = document.createElement('script');
-        newScript.src = 'class.js' + queryString;
-        document.getElementsByTagName('body')[0].appendChild(newScript);
-    })();
-    /* ]]> */
-</script>
-</body>
-</html>
+        var links = document.getElementsByTagName('a');
+
+        for (i = 0; i < links.length; i++) {
+            href = links[i].getAttribute('href');
+
+            if (href
+                && !href.startsWith('http://')
+                && !href.startsWith('https://')
+                && !href.startsWith('#')
+                && href.indexOf('?') === -1) {
+            links[i].setAttribute('href', href + queryString);
+            }
+        }
+    }
+
+    var newScript = document.createElement('script');
+    newScript.src = 'class.js' + queryString;
+    document.getElementsByTagName('body')[0].appendChild(newScript);
+})();
+/* ]]> */ 
+</script></body></html>
