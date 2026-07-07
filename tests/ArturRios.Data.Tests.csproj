@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +35,8 @@
     <ProjectReference Include="..\src\ArturRios.Data.Dapper\ArturRios.Data.Dapper.csproj"/>
     <ProjectReference Include="..\src\ArturRios.Data.MongoDb\ArturRios.Data.MongoDb.csproj"/>
     <ProjectReference Include="..\src\ArturRios.Data.DynamoDb\ArturRios.Data.DynamoDb.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.Export\ArturRios.Data.Export.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.Export.Excel\ArturRios.Data.Export.Excel.csproj"/>
   </ItemGroup>
 
   <!--
