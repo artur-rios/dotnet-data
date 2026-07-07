@@ -1,7 +1,7 @@
 namespace ArturRios.Data.Relational.Core.Configuration;
 
 /// <summary>
-/// Supported relational database engines for provider selection.
+///     Supported relational database engines for provider selection.
 /// </summary>
 public enum DatabaseType
 {

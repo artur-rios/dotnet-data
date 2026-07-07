@@ -5,8 +5,6 @@ namespace ArturRios.Data.Tests.MongoDb;
 
 public class MongoContextTests
 {
-    private sealed class Thing : Document { }
-
     private static MongoContext NewContext()
     {
         var database = new MongoClient("mongodb://localhost:27017").GetDatabase("testdb");
@@ -26,5 +24,9 @@ public class MongoContextTests
     {
         var context = NewContext();
         Assert.Null(context.Session);
+    }
+
+    private sealed class Thing : Document
+    {
     }
 }

@@ -3,9 +3,9 @@ using ArturRios.Output;
 namespace ArturRios.Data.Relational.Core.Interfaces;
 
 /// <summary>
-/// Full read/write repository contract for entities of type <typeparamref name="T"/>.
+///     Full read/write repository contract for entities of type <typeparamref name="T" />.
 /// </summary>
-/// <typeparam name="T">The entity type, must derive from <see cref="Entity"/>.</typeparam>
+/// <typeparam name="T">The entity type, must derive from <see cref="Entity" />.</typeparam>
 public interface IRepository<T> : IReadOnlyRepository<T> where T : Entity
 {
     /// <summary>Persists a new entity and returns its generated identifier.</summary>

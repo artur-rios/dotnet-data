@@ -8,6 +8,7 @@
 ## 1. Context & Scope
 
 `ArturRios.Data` is being built as sequenced sub-projects. Done and merged to `main`:
+
 - **Relational core** (`ArturRios.Data.Core`, v2.0.0): EF Core over PostgreSQL/MySQL/SQLite,
   `DataOutput`-enveloped repository interfaces, `IUnitOfWork` transactions, optimistic concurrency.
 - **Dapper query path** (`ArturRios.Data.Dapper`, v1.0.0): read-only raw-SQL query surface.
@@ -250,6 +251,7 @@ public class MongoOptions
 ```
 
 `appsettings.json`:
+
 ```json
 {
   "ArturRios.Data.MongoDb": {
@@ -273,6 +275,7 @@ public static class ServiceCollectionExtensions
 ```
 
 Behavior:
+
 1. Bind/obtain `MongoOptions`.
 2. Register `IMongoClient` as a **singleton** (`new MongoClient(options.ConnectionString)`; the driver's
    client is thread-safe and pools connections).
@@ -282,6 +285,7 @@ Behavior:
 5. Register `IMongoUnitOfWork`/`IAsyncMongoUnitOfWork` → `MongoUnitOfWork` (scoped).
 
 Consumer:
+
 ```csharp
 services.AddMongoData(configuration);
 // inject IAsyncDocumentRepository<Product>, IAsyncMongoUnitOfWork, ...
@@ -326,6 +330,7 @@ transaction tests) and is torn down after.
 - The tests project references `ArturRios.Data.MongoDb`, `EphemeralMongo`, and `MongoDB.Driver`.
 
 Cover:
+
 1. CRUD: `Create` assigns/returns an id; `GetById` round-trips; `Update` mutates; `Delete` removes.
 2. Not found: `GetById` → `Success=true`, `Data=null`.
 3. `Find(predicate)` returns matching documents; empty → `Success=true`, empty sequence.

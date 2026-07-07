@@ -10,11 +10,9 @@ public class IRepositoryTests
     private static readonly Type Type = typeof(IRepository<>);
 
     [Fact]
-    public void ExtendsReadOnlyRepository()
-    {
+    public void ExtendsReadOnlyRepository() =>
         Assert.Contains(typeof(IReadOnlyRepository<>),
             Type.GetInterfaces().Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
-    }
 
     [Theory]
     [InlineData("Create")]

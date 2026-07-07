@@ -5,8 +5,8 @@ using ArturRios.Output;
 namespace ArturRios.Data.DynamoDb.Interfaces;
 
 /// <summary>
-/// Asynchronous DynamoDB repository over the AWS object-persistence model. All results are
-/// enveloped in <see cref="DataOutput{T}"/> / <see cref="ProcessOutput"/>.
+///     Asynchronous DynamoDB repository over the AWS object-persistence model. All results are
+///     enveloped in <see cref="DataOutput{T}" /> / <see cref="ProcessOutput" />.
 /// </summary>
 /// <typeparam name="T">The item type (a POCO annotated with DynamoDB attributes).</typeparam>
 public interface IAsyncDynamoRepository<T> where T : class
@@ -27,17 +27,24 @@ public interface IAsyncDynamoRepository<T> where T : class
     Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, CancellationToken ct = default);
 
     /// <summary>Returns items with the given partition key and a sort-key condition.</summary>
-    Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op, IEnumerable<object> sortKeyValues, CancellationToken ct = default);
+    Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op, IEnumerable<object> sortKeyValues,
+        CancellationToken ct = default);
 
     /// <summary>Scans the table with the given conditions. This is a full-table scan — use sparingly.</summary>
     Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions, CancellationToken ct = default);
 
     /// <summary>Batch-writes (puts) multiple items and returns them.</summary>
-    /// <remarks>Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no conditional-write support; single-item <see cref="SaveAsync"/> still enforces it.</remarks>
+    /// <remarks>
+    ///     Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no
+    ///     conditional-write support; single-item <see cref="SaveAsync" /> still enforces it.
+    /// </remarks>
     Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default);
 
     /// <summary>Batch-deletes multiple items (idempotent).</summary>
-    /// <remarks>Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no conditional-write support; single-item <see cref="DeleteAsync"/> still enforces it.</remarks>
+    /// <remarks>
+    ///     Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no
+    ///     conditional-write support; single-item <see cref="DeleteAsync" /> still enforces it.
+    /// </remarks>
     Task<ProcessOutput> DeleteManyAsync(IEnumerable<T> items, CancellationToken ct = default);
 
     /// <summary>Batch-gets items by partition key (hash-key-only tables).</summary>

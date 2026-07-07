@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ArturRios.Data.PostgreSql;
 
 /// <summary>
-/// <see cref="IDatabaseProvider"/> that configures EF Core to use PostgreSQL via Npgsql.
+///     <see cref="IDatabaseProvider" /> that configures EF Core to use PostgreSQL via Npgsql.
 /// </summary>
 public class PostgreSqlProvider : IDatabaseProvider
 {

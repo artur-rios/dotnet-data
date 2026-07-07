@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -15,15 +16,14 @@ using Amazon.Runtime;
 namespace ArturRios.Data.Tests.DynamoDb.TestSupport;
 
 /// <summary>
-/// Downloads DynamoDB Local once, runs one in-memory instance (Java) for the whole Dynamo test
-/// collection, and exposes a client/context factory plus a table-creation helper. Disposing kills
-/// the Java process.
+///     Downloads DynamoDB Local once, runs one in-memory instance (Java) for the whole Dynamo test
+///     collection, and exposes a client/context factory plus a table-creation helper. Disposing kills
+///     the Java process.
 /// </summary>
 public sealed class DynamoLocalFixture : IDisposable
 {
     private const string DownloadUrl = "https://s3.us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip";
     private readonly Process _process;
-    public string ServiceUrl { get; }
 
     public DynamoLocalFixture()
     {
@@ -32,6 +32,25 @@ public sealed class DynamoLocalFixture : IDisposable
         ServiceUrl = $"http://localhost:{port}";
         _process = StartJava(dir, port);
         WaitUntilReady().GetAwaiter().GetResult();
+    }
+
+    public string ServiceUrl { get; }
+
+    public void Dispose()
+    {
+        try
+        {
+            if (!_process.HasExited)
+            {
+                _process.Kill(true);
+            }
+        }
+        catch
+        {
+            /* ignore */
+        }
+
+        _process.Dispose();
     }
 
     public IAmazonDynamoDB CreateClient() =>
@@ -51,6 +70,7 @@ public sealed class DynamoLocalFixture : IDisposable
             attrs.Add(new AttributeDefinition(rangeKey, ScalarAttributeType.S));
             schema.Add(new KeySchemaElement(rangeKey, KeyType.RANGE));
         }
+
         try
         {
             await client.CreateTableAsync(new CreateTableRequest
@@ -66,11 +86,16 @@ public sealed class DynamoLocalFixture : IDisposable
             // Table already exists (e.g. a prior test class instance in the same shared fixture
             // already created it). Table creation is treated as idempotent for test setup.
         }
+
         // wait until ACTIVE
         for (var i = 0; i < 50; i++)
         {
             var desc = await client.DescribeTableAsync(tableName);
-            if (desc.Table.TableStatus == TableStatus.ACTIVE) return;
+            if (desc.Table.TableStatus == TableStatus.ACTIVE)
+            {
+                return;
+            }
+
             await Task.Delay(100);
         }
     }
@@ -79,14 +104,21 @@ public sealed class DynamoLocalFixture : IDisposable
     {
         var cache = Path.Combine(Path.GetTempPath(), "dynamodb-local-cache");
         var jar = Path.Combine(cache, "DynamoDBLocal.jar");
-        if (File.Exists(jar)) return cache;
+        if (File.Exists(jar))
+        {
+            return cache;
+        }
+
         Directory.CreateDirectory(cache);
         var zip = Path.Combine(cache, "ddb.zip");
         using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
         using (var s = http.GetStreamAsync(DownloadUrl).GetAwaiter().GetResult())
         using (var f = File.Create(zip))
+        {
             s.CopyTo(f);
-        ZipFile.ExtractToDirectory(zip, cache, overwriteFiles: true);
+        }
+
+        ZipFile.ExtractToDirectory(zip, cache, true);
         return cache;
     }
 
@@ -116,8 +148,12 @@ public sealed class DynamoLocalFixture : IDisposable
         if (!string.IsNullOrEmpty(home))
         {
             var candidate = Path.Combine(home, "bin", OperatingSystem.IsWindows() ? "java.exe" : "java");
-            if (File.Exists(candidate)) return candidate;
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
         }
+
         return OperatingSystem.IsWindows() ? "java.exe" : "java";
     }
 
@@ -126,24 +162,23 @@ public sealed class DynamoLocalFixture : IDisposable
         using var client = CreateClient();
         for (var i = 0; i < 100; i++)
         {
-            try { await client.ListTablesAsync(); return; }
+            try
+            {
+                await client.ListTablesAsync();
+                return;
+            }
             catch { await Task.Delay(200); }
         }
+
         throw new InvalidOperationException("DynamoDB Local did not become ready in time.");
     }
 
     private static int FreeTcpPort()
     {
-        var l = new TcpListener(System.Net.IPAddress.Loopback, 0);
+        var l = new TcpListener(IPAddress.Loopback, 0);
         l.Start();
-        var port = ((System.Net.IPEndPoint)l.LocalEndpoint).Port;
+        var port = ((IPEndPoint)l.LocalEndpoint).Port;
         l.Stop();
         return port;
-    }
-
-    public void Dispose()
-    {
-        try { if (!_process.HasExited) _process.Kill(entireProcessTree: true); } catch { /* ignore */ }
-        _process.Dispose();
     }
 }

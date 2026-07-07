@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace ArturRios.Data.Tests.TestSupport;
 
 /// <summary>
-/// Builds a TestDbContext backed by a real SQLite in-memory database. The returned
-/// context owns an open connection; dispose the context to close it.
+///     Builds a TestDbContext backed by a real SQLite in-memory database. The returned
+///     context owns an open connection; dispose the context to close it.
 /// </summary>
 public static class SqliteTestContextFactory
 {

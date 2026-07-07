@@ -1,31 +1,59 @@
 # DynamoDB Store Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build `ArturRios.Data.DynamoDb` — an async-only, `DataOutput`-enveloped repository over the AWS high-level `IDynamoDBContext` (Save/Load/Delete/Query/Scan + batch), with opt-in `[DynamoDBVersion]` optimistic concurrency and config-driven DI.
+**Goal:** Build `ArturRios.Data.DynamoDb` — an async-only, `DataOutput`-enveloped repository over the AWS high-level
+`IDynamoDBContext` (Save/Load/Delete/Query/Scan + batch), with opt-in `[DynamoDBVersion]` optimistic concurrency and
+config-driven DI.
 
-**Architecture:** A new sibling package (no `ArturRios.Data.Core`/EF dependency) referencing `AWSSDK.DynamoDBv2` (v4, async-only) + `ArturRios.Output`. `DynamoRepository<T>(IDynamoDBContext)` implements `IAsyncDynamoRepository<T>`; every call is enveloped and `ConditionalCheckFailedException` maps to a concurrency error. `AddDynamoData(configuration)` wires up `IAmazonDynamoDB` + `IDynamoDBContext` + repositories, supporting a custom `ServiceUrl` (DynamoDB Local / LocalStack).
+**Architecture:** A new sibling package (no `ArturRios.Data.Core`/EF dependency) referencing `AWSSDK.DynamoDBv2` (v4,
+async-only) + `ArturRios.Output`. `DynamoRepository<T>(IDynamoDBContext)` implements `IAsyncDynamoRepository<T>`; every
+call is enveloped and `ConditionalCheckFailedException` maps to a concurrency error. `AddDynamoData(configuration)`
+wires up `IAmazonDynamoDB` + `IDynamoDBContext` + repositories, supporting a custom `ServiceUrl` (DynamoDB Local /
+LocalStack).
 
-**Tech Stack:** .NET 10, AWSSDK.DynamoDBv2 v4 (async-only), DynamoDB Local (Java 17, in-memory) for tests, xUnit, `ArturRios.Output` 2.0.1.
+**Tech Stack:** .NET 10, AWSSDK.DynamoDBv2 v4 (async-only), DynamoDB Local (Java 17, in-memory) for tests, xUnit,
+`ArturRios.Output` 2.0.1.
 
-**Design spec:** [docs/superpowers/specs/2026-07-04-dynamodb-store-design.md](../specs/2026-07-04-dynamodb-store-design.md)
+**Design spec:
+** [docs/superpowers/specs/2026-07-04-dynamodb-store-design.md](../specs/2026-07-04-dynamodb-store-design.md)
 
 ## Global Constraints
 
-- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable (in `src`; tests project has NO `ImplicitUsings` — add explicit `using`s there).
-- **XML documentation is mandatory** on every public type/member (`GenerateDocumentationFile=true`; build warns on missing docs).
-- **New package version → `1.0.0`.** Reuse the sibling-package csproj conventions (Authors/Company "Artur Rios", MIT, `PackageProjectUrl`/`RepositoryUrl` as in `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`). **No reference to `ArturRios.Data.Core`** — depend on `AWSSDK.DynamoDBv2` + `ArturRios.Output` only.
-- **Async-only.** No synchronous repository methods (the AWS SDK v4 `IDynamoDBContext` is async-only). Methods return `Task<DataOutput<...>>` / `Task<ProcessOutput>` with `CancellationToken ct = default`.
-- **Envelopes, not exceptions, cross the boundary.** No public repository method may let an infrastructure exception propagate; catch → `DataOutput`/`ProcessOutput`, EXCEPT `OperationCanceledException`, which propagates. `ConditionalCheckFailedException` → a concurrency error envelope.
-- **Namespaces:** package sources under `ArturRios.Data.DynamoDb` (+ `.Configuration`, `.Interfaces`, `.Repositories`, `.Exceptions`, `.DependencyInjection`). Test namespaces under `ArturRios.Data.Tests.DynamoDb`.
-- **AWS SDK v4 API note:** MongoDB-style caveat. Where an exact `IDynamoDBContext` v4 signature differs from what a task shows (e.g. `QueryAsync`/`ScanAsync` overloads, `AsyncSearch<T>.GetRemainingAsync`, `CreateBatchWrite`/`CreateBatchGet`, `DynamoDBContextBuilder`), adjust to the real 4.x signature during RED→GREEN and note it — do not change observable behavior. Pin `AWSSDK.DynamoDBv2` to `4.*`; if v4 cannot resolve for net10, use the newest `3.*` (which also has the async methods) and note it.
-- **Tests:** xUnit. Server-free tests (options, interface shape, DI resolution) run without DynamoDB. Integration tests use a **shared DynamoDB Local (Java, in-memory)** fixture. If DynamoDB Local cannot be downloaded/started (no Java, no network, native-lib/Java-version incompatibility), STOP and report BLOCKED with the exact error/stderr — do NOT fall back to mocks.
-- **Git policy:** Work on the local `feature/dynamodb-store` branch. **Commit locally after each task** (TDD red-green-commit). **NEVER `git push`** and **never touch `main`**. Stage ONLY the task's own files with explicit `git add <path>` (never `git add -A`/`.`). Conventional-commit messages, body ending with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
+- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable (in `src`;
+  tests project has NO `ImplicitUsings` — add explicit `using`s there).
+- **XML documentation is mandatory** on every public type/member (`GenerateDocumentationFile=true`; build warns on
+  missing docs).
+- **New package version → `1.0.0`.** Reuse the sibling-package csproj conventions (Authors/Company "Artur Rios", MIT,
+  `PackageProjectUrl`/`RepositoryUrl` as in `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`). **No reference
+  to `ArturRios.Data.Core`** — depend on `AWSSDK.DynamoDBv2` + `ArturRios.Output` only.
+- **Async-only.** No synchronous repository methods (the AWS SDK v4 `IDynamoDBContext` is async-only). Methods return
+  `Task<DataOutput<...>>` / `Task<ProcessOutput>` with `CancellationToken ct = default`.
+- **Envelopes, not exceptions, cross the boundary.** No public repository method may let an infrastructure exception
+  propagate; catch → `DataOutput`/`ProcessOutput`, EXCEPT `OperationCanceledException`, which propagates.
+  `ConditionalCheckFailedException` → a concurrency error envelope.
+- **Namespaces:** package sources under `ArturRios.Data.DynamoDb` (+ `.Configuration`, `.Interfaces`, `.Repositories`,
+  `.Exceptions`, `.DependencyInjection`). Test namespaces under `ArturRios.Data.Tests.DynamoDb`.
+- **AWS SDK v4 API note:** MongoDB-style caveat. Where an exact `IDynamoDBContext` v4 signature differs from what a task
+  shows (e.g. `QueryAsync`/`ScanAsync` overloads, `AsyncSearch<T>.GetRemainingAsync`, `CreateBatchWrite`/
+  `CreateBatchGet`, `DynamoDBContextBuilder`), adjust to the real 4.x signature during RED→GREEN and note it — do not
+  change observable behavior. Pin `AWSSDK.DynamoDBv2` to `4.*`; if v4 cannot resolve for net10, use the newest `3.*` (
+  which also has the async methods) and note it.
+- **Tests:** xUnit. Server-free tests (options, interface shape, DI resolution) run without DynamoDB. Integration tests
+  use a **shared DynamoDB Local (Java, in-memory)** fixture. If DynamoDB Local cannot be downloaded/started (no Java, no
+  network, native-lib/Java-version incompatibility), STOP and report BLOCKED with the exact error/stderr — do NOT fall
+  back to mocks.
+- **Git policy:** Work on the local `feature/dynamodb-store` branch. **Commit locally after each task** (TDD
+  red-green-commit). **NEVER `git push`** and **never touch `main`**. Stage ONLY the task's own files with explicit
+  `git add <path>` (never `git add -A`/`.`). Conventional-commit messages, body ending with
+  `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 - Build/test with the .NET CLI.
 
 ## File Structure
 
 **`src/ArturRios.Data.DynamoDb/`** (new package):
+
 - `ArturRios.Data.DynamoDb.csproj`
 - `Configuration/DynamoOptions.cs`
 - `Interfaces/IAsyncDynamoRepository.cs`
@@ -34,9 +62,11 @@
 - `DependencyInjection/ServiceCollectionExtensions.cs`
 
 **Tests** (`tests/ArturRios.Data.Tests`):
+
 - `ArturRios.Data.Tests.csproj` *(modify — add ProjectReference + `AWSSDK.DynamoDBv2` package ref)*
 - `DynamoDb/TestSupport/{TestItems.cs, DynamoLocalFixture.cs, DynamoTestCollection.cs}`
-- `DynamoDb/{DynamoOptionsTests.cs, DynamoInterfaceTests.cs, DynamoRepositoryTests.cs, DynamoQueryScanTests.cs, DynamoBatchTests.cs, AddDynamoDataTests.cs}`
+-
+`DynamoDb/{DynamoOptionsTests.cs, DynamoInterfaceTests.cs, DynamoRepositoryTests.cs, DynamoQueryScanTests.cs, DynamoBatchTests.cs, AddDynamoDataTests.cs}`
 
 **Solution:** `src/ArturRios.Data.sln` *(add the project)*.
 
@@ -47,12 +77,15 @@
 ### Task 1: Scaffold package + options
 
 **Files:**
+
 - Create: `src/ArturRios.Data.DynamoDb/ArturRios.Data.DynamoDb.csproj`, `Configuration/DynamoOptions.cs`
 - Modify: `src/ArturRios.Data.sln`, `tests/ArturRios.Data.Tests.csproj`
 - Test: `tests/DynamoDb/DynamoOptionsTests.cs`
 
 **Interfaces:**
-- Produces: `DynamoOptions` (`Region`, `ServiceUrl?`, `AccessKey?`, `SecretKey?` — all `init`) in `ArturRios.Data.DynamoDb.Configuration`.
+
+- Produces: `DynamoOptions` (`Region`, `ServiceUrl?`, `AccessKey?`, `SecretKey?` — all `init`) in
+  `ArturRios.Data.DynamoDb.Configuration`.
 
 - [ ] **Step 1: Create the csproj**
 
@@ -86,7 +119,9 @@ Create `src/ArturRios.Data.DynamoDb/ArturRios.Data.DynamoDb.csproj`:
 </Project>
 ```
 
-> **Implementer note:** Core's csproj already excludes `ArturRios.Data.*\**` from its compile glob — do NOT edit the core csproj. If `AWSSDK.DynamoDBv2` `4.*` fails to restore (network / not published for net10), STOP and report BLOCKED with the exact error.
+> **Implementer note:** Core's csproj already excludes `ArturRios.Data.*\**` from its compile glob — do NOT edit the
+> core csproj. If `AWSSDK.DynamoDBv2` `4.*` fails to restore (network / not published for net10), STOP and report BLOCKED
+> with the exact error.
 
 - [ ] **Step 2: Write the options**
 
@@ -117,10 +152,13 @@ public class DynamoOptions
 Run: `dotnet sln src/ArturRios.Data.sln add src/ArturRios.Data.DynamoDb/ArturRios.Data.DynamoDb.csproj`
 
 In `tests/ArturRios.Data.Tests.csproj`, add to the `ProjectReference` ItemGroup:
+
 ```xml
 <ProjectReference Include="..\src\ArturRios.Data.DynamoDb\ArturRios.Data.DynamoDb.csproj" />
 ```
+
 and add the SDK to a `PackageReference` ItemGroup (the test fixture needs the low-level client to create tables):
+
 ```xml
 <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.*" />
 ```
@@ -173,19 +211,25 @@ Expected: PASS (2 tests).
 
 - [ ] **Step 6: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: scaffold ArturRios.Data.DynamoDb package with options`). Do NOT push.
+Stage only this task's files; commit locally (e.g. `feat: scaffold ArturRios.Data.DynamoDb package with options`). Do
+NOT push.
 
 ---
 
 ### Task 2: Repository interface + exception
 
 **Files:**
+
 - Create: `src/ArturRios.Data.DynamoDb/Interfaces/IAsyncDynamoRepository.cs`, `Exceptions/DynamoDataException.cs`
 - Test: `tests/DynamoDb/DynamoInterfaceTests.cs`
 
 **Interfaces:**
-- Consumes: `DataOutput<T>`/`ProcessOutput` (`ArturRios.Output`), `QueryOperator` (`Amazon.DynamoDBv2.DocumentModel`), `ScanCondition` (`Amazon.DynamoDBv2.DataModel`).
-- Produces: `IAsyncDynamoRepository<T> where T : class` (namespace `ArturRios.Data.DynamoDb.Interfaces`) with the members from spec §5; `DynamoDataException(string[]) : CustomException` (namespace `ArturRios.Data.DynamoDb.Exceptions`).
+
+- Consumes: `DataOutput<T>`/`ProcessOutput` (`ArturRios.Output`), `QueryOperator` (`Amazon.DynamoDBv2.DocumentModel`),
+  `ScanCondition` (`Amazon.DynamoDBv2.DataModel`).
+- Produces: `IAsyncDynamoRepository<T> where T : class` (namespace `ArturRios.Data.DynamoDb.Interfaces`) with the
+  members from spec §5; `DynamoDataException(string[]) : CustomException` (namespace
+  `ArturRios.Data.DynamoDb.Exceptions`).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -313,22 +357,32 @@ Expected: PASS. Build the package → 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: add DynamoDb repository interface and exception`). Do NOT push.
+Stage only this task's files; commit locally (e.g. `feat: add DynamoDb repository interface and exception`). Do NOT
+push.
 
 ---
 
 ### Task 3: DynamoDB Local fixture + `DynamoRepository` (Save/Load/Delete + concurrency)
 
 **Files:**
-- Create: `tests/DynamoDb/TestSupport/TestItems.cs`, `tests/DynamoDb/TestSupport/DynamoLocalFixture.cs`, `tests/DynamoDb/TestSupport/DynamoTestCollection.cs`
+
+- Create: `tests/DynamoDb/TestSupport/TestItems.cs`, `tests/DynamoDb/TestSupport/DynamoLocalFixture.cs`,
+  `tests/DynamoDb/TestSupport/DynamoTestCollection.cs`
 - Create: `src/ArturRios.Data.DynamoDb/Repositories/DynamoRepository.cs`
 - Test: `tests/DynamoDb/DynamoRepositoryTests.cs`
 
 **Interfaces:**
-- Consumes: `IAsyncDynamoRepository<T>`, `IDynamoDBContext` (`Amazon.DynamoDBv2.DataModel`), `IAmazonDynamoDB`, `DynamoDataException`, `ConditionalCheckFailedException` (`Amazon.DynamoDBv2.Model`), `DataOutput<T>`/`ProcessOutput`.
+
+- Consumes: `IAsyncDynamoRepository<T>`, `IDynamoDBContext` (`Amazon.DynamoDBv2.DataModel`), `IAmazonDynamoDB`,
+  `DynamoDataException`, `ConditionalCheckFailedException` (`Amazon.DynamoDBv2.Model`), `DataOutput<T>`/`ProcessOutput`.
 - Produces:
-  - Test support: `TestItem` (a `[DynamoDBTable]` POCO with `[DynamoDBHashKey]` + `[DynamoDBRangeKey]`), `VersionedTestItem` (adds `[DynamoDBVersion] int? Version`); `DynamoLocalFixture` (starts one in-memory DynamoDB Local via Java, exposes `ServiceUrl`, a `CreateClient()`, a `CreateContext()`, and a `CreateTableAsync(...)` helper); an xUnit `[CollectionDefinition]`.
-  - `DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoRepository<T> where T : class` — implements SaveAsync/LoadAsync(×2)/DeleteAsync + `GuardedAsync`/`GuardedProcessAsync`/`Fail`. Query/Scan/batch members are `throw new NotImplementedException()` STUBS (Tasks 4–5 fill them).
+    - Test support: `TestItem` (a `[DynamoDBTable]` POCO with `[DynamoDBHashKey]` + `[DynamoDBRangeKey]`),
+      `VersionedTestItem` (adds `[DynamoDBVersion] int? Version`); `DynamoLocalFixture` (starts one in-memory DynamoDB
+      Local via Java, exposes `ServiceUrl`, a `CreateClient()`, a `CreateContext()`, and a `CreateTableAsync(...)`
+      helper); an xUnit `[CollectionDefinition]`.
+    - `DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoRepository<T> where T : class` — implements
+      SaveAsync/LoadAsync(×2)/DeleteAsync + `GuardedAsync`/`GuardedProcessAsync`/`Fail`. Query/Scan/batch members are
+      `throw new NotImplementedException()` STUBS (Tasks 4–5 fill them).
 
 - [ ] **Step 1: Write the test support**
 
@@ -501,7 +555,14 @@ public sealed class DynamoLocalFixture : IDisposable
 }
 ```
 
-> **Implementer note (feasibility gate):** This fixture downloads DynamoDB Local from the S3 URL and runs it with Java (JRE 17 is on the machine). Verify at RED→GREEN: (a) the download URL serves a Java-17-compatible build with `DynamoDBLocal.jar` + `DynamoDBLocal_lib/` (if it fails or the jar won't run under Java 17, try a region variant such as `https://s3.eu-west-1.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip`, or report BLOCKED with the exact stderr — do NOT mock); (b) `DynamoDBContextBuilder().WithDynamoDBClient(factory).Build()` is the correct AWSSDK.DynamoDBv2 v4 way to build an `IDynamoDBContext` (if the resolved SDK differs, use its documented builder/constructor); (c) `CreateTableAsync`/`DescribeTableAsync`/`BillingMode.PAY_PER_REQUEST` match the resolved SDK. Adjust signatures, keep behavior.
+> **Implementer note (feasibility gate):** This fixture downloads DynamoDB Local from the S3 URL and runs it with Java (
+> JRE 17 is on the machine). Verify at RED→GREEN: (a) the download URL serves a Java-17-compatible build with
+`DynamoDBLocal.jar` + `DynamoDBLocal_lib/` (if it fails or the jar won't run under Java 17, try a region variant such as
+`https://s3.eu-west-1.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip`, or report BLOCKED with the exact stderr —
+> do NOT mock); (b) `DynamoDBContextBuilder().WithDynamoDBClient(factory).Build()` is the correct AWSSDK.DynamoDBv2 v4 way
+> to build an `IDynamoDBContext` (if the resolved SDK differs, use its documented builder/constructor); (c)
+`CreateTableAsync`/`DescribeTableAsync`/`BillingMode.PAY_PER_REQUEST` match the resolved SDK. Adjust signatures, keep
+> behavior.
 
 Create `tests/DynamoDb/TestSupport/DynamoTestCollection.cs`:
 
@@ -605,12 +666,19 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
 }
 ```
 
-> **Implementer note:** The concurrency test models a stale write. `[DynamoDBVersion]` makes `SaveAsync` conditional; the exact sequence that yields a genuine `ConditionalCheckFailedException` may need small adjustment against the SDK's version handling (e.g. capture the original item, save a modified copy loaded fresh to advance the stored version, then re-save the original stale in-memory instance). Adjust the TEST SETUP to genuinely trigger the conflict — do NOT change the production concurrency mapping. `UnmappedItem` is a throwaway POCO defined in the test file: `[DynamoDBTable("UnmappedItems")] public class UnmappedItem { [DynamoDBHashKey] public string Id { get; set; } = string.Empty; }` (its table is never created, so the save errors).
+> **Implementer note:** The concurrency test models a stale write. `[DynamoDBVersion]` makes `SaveAsync` conditional;
+> the exact sequence that yields a genuine `ConditionalCheckFailedException` may need small adjustment against the SDK's
+> version handling (e.g. capture the original item, save a modified copy loaded fresh to advance the stored version, then
+> re-save the original stale in-memory instance). Adjust the TEST SETUP to genuinely trigger the conflict — do NOT change
+> the production concurrency mapping. `UnmappedItem` is a throwaway POCO defined in the test file:
+`[DynamoDBTable("UnmappedItems")] public class UnmappedItem { [DynamoDBHashKey] public string Id { get; set; } = string.Empty; }` (
+> its table is never created, so the save errors).
 
 - [ ] **Step 3: Run to verify it fails**
 
 Run: `dotnet test tests/ArturRios.Data.Tests.csproj --filter DynamoRepositoryTests`
-Expected: compile failure — `DynamoRepository` missing (and the fixture may start DynamoDB Local — confirm it starts; if it cannot, this is the BLOCKED gate).
+Expected: compile failure — `DynamoRepository` missing (and the fixture may start DynamoDB Local — confirm it starts; if
+it cannot, this is the BLOCKED gate).
 
 - [ ] **Step 4: Implement `DynamoRepository` (Save/Load/Delete + guards + stubs)**
 
@@ -721,7 +789,12 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
 }
 ```
 
-> **Implementer note:** Verify the v4 `IDynamoDBContext` async signatures: `SaveAsync<T>(T, CancellationToken)`, `LoadAsync<T>(object, CancellationToken)`, `LoadAsync<T>(object, object, CancellationToken)`, `DeleteAsync<T>(T, CancellationToken)`. `LoadAsync<T>` returns `null` when the item is absent (→ `Success=true`, `Data=null`). `ConditionalCheckFailedException` is in `Amazon.DynamoDBv2.Model`. If the resolved SDK's method has a different cancellation-token position or an extra config parameter, adjust to the real signature without changing behavior.
+> **Implementer note:** Verify the v4 `IDynamoDBContext` async signatures: `SaveAsync<T>(T, CancellationToken)`,
+`LoadAsync<T>(object, CancellationToken)`, `LoadAsync<T>(object, object, CancellationToken)`,
+`DeleteAsync<T>(T, CancellationToken)`. `LoadAsync<T>` returns `null` when the item is absent (→ `Success=true`,
+`Data=null`). `ConditionalCheckFailedException` is in `Amazon.DynamoDBv2.Model`. If the resolved SDK's method has a
+> different cancellation-token position or an extra config parameter, adjust to the real signature without changing
+> behavior.
 
 - [ ] **Step 5: Run to verify it passes**
 
@@ -730,17 +803,20 @@ Expected: PASS (4 tests) against DynamoDB Local. Build → 0 warnings.
 
 - [ ] **Step 6: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: add DynamoDB Local fixture and DynamoRepository save/load/delete with concurrency`). Do NOT push.
+Stage only this task's files; commit locally (e.g.
+`feat: add DynamoDB Local fixture and DynamoRepository save/load/delete with concurrency`). Do NOT push.
 
 ---
 
 ### Task 4: `DynamoRepository` — Query + Scan
 
 **Files:**
+
 - Modify: `src/ArturRios.Data.DynamoDb/Repositories/DynamoRepository.cs`
 - Test: `tests/DynamoDb/DynamoQueryScanTests.cs`
 
 **Interfaces:**
+
 - Consumes: everything from Task 3 + `IDynamoDBContext.QueryAsync`/`ScanAsync` + `AsyncSearch<T>.GetRemainingAsync`.
 - Produces: real implementations of the three Query/Scan members (replacing the stubs).
 
@@ -831,7 +907,13 @@ In `src/ArturRios.Data.DynamoDb/Repositories/DynamoRepository.cs`, replace the t
         GuardedAsync<IEnumerable<T>>(async () => await context.ScanAsync<T>(conditions).GetRemainingAsync(ct));
 ```
 
-> **Implementer note:** Verify the v4 shapes: `context.QueryAsync<T>(object hashKeyValue)` and `context.QueryAsync<T>(object hashKeyValue, QueryOperator op, IEnumerable<object> values)` return an `AsyncSearch<T>` (or `IAsyncSearch<T>` in v4) with `GetRemainingAsync(CancellationToken)`; `context.ScanAsync<T>(IEnumerable<ScanCondition>)` likewise. If v4 requires a config object (e.g. `FromQueryConfig`/`QueryConfig`) instead of the positional `QueryOperator` overload, use the documented v4 form that expresses "partition key + sort-key condition" and keep the behavior. `ScanOperator`/`ScanCondition` are in `Amazon.DynamoDBv2.DataModel`; `QueryOperator` in `Amazon.DynamoDBv2.DocumentModel`.
+> **Implementer note:** Verify the v4 shapes: `context.QueryAsync<T>(object hashKeyValue)` and
+`context.QueryAsync<T>(object hashKeyValue, QueryOperator op, IEnumerable<object> values)` return an `AsyncSearch<T>` (
+> or `IAsyncSearch<T>` in v4) with `GetRemainingAsync(CancellationToken)`;
+`context.ScanAsync<T>(IEnumerable<ScanCondition>)` likewise. If v4 requires a config object (e.g. `FromQueryConfig`/
+`QueryConfig`) instead of the positional `QueryOperator` overload, use the documented v4 form that expresses "partition
+> key + sort-key condition" and keep the behavior. `ScanOperator`/`ScanCondition` are in `Amazon.DynamoDBv2.DataModel`;
+`QueryOperator` in `Amazon.DynamoDBv2.DocumentModel`.
 
 - [ ] **Step 4: Run to verify it passes**
 
@@ -847,10 +929,12 @@ Stage only this task's files; commit locally (e.g. `feat: add DynamoRepository q
 ### Task 5: `DynamoRepository` — batch (SaveMany / DeleteMany / LoadMany)
 
 **Files:**
+
 - Modify: `src/ArturRios.Data.DynamoDb/Repositories/DynamoRepository.cs`
 - Test: `tests/DynamoDb/DynamoBatchTests.cs`
 
 **Interfaces:**
+
 - Consumes: everything above + `IDynamoDBContext.CreateBatchWrite<T>()` / `CreateBatchGet<T>()` + `ExecuteAsync`.
 - Produces: real implementations of `SaveManyAsync`/`DeleteManyAsync`/`LoadManyAsync` (replacing the stubs).
 
@@ -937,14 +1021,20 @@ In `src/ArturRios.Data.DynamoDb/Repositories/DynamoRepository.cs`, replace the t
         });
 ```
 
-Add `using System.Linq;` at the top of the file if not already present (the src project has ImplicitUsings, so `System.Linq` is available — no change needed).
+Add `using System.Linq;` at the top of the file if not already present (the src project has ImplicitUsings, so
+`System.Linq` is available — no change needed).
 
-> **Implementer note:** Verify v4 batch shapes: `context.CreateBatchWrite<T>()` returning a `BatchWrite<T>` with `AddPutItems(IEnumerable<T>)`/`AddDeleteItems(IEnumerable<T>)` and `ExecuteAsync(CancellationToken)`; `context.CreateBatchGet<T>()` returning a `BatchGet<T>` with `AddKey(object hashKey)` and `Results`. If v4 renamed `Results` or `ExecuteAsync`'s token position, adjust. Batch-get here is hash-key-only (single-key `AddKey(object)`); composite-key batch-get is out of scope.
+> **Implementer note:** Verify v4 batch shapes: `context.CreateBatchWrite<T>()` returning a `BatchWrite<T>` with
+`AddPutItems(IEnumerable<T>)`/`AddDeleteItems(IEnumerable<T>)` and `ExecuteAsync(CancellationToken)`;
+`context.CreateBatchGet<T>()` returning a `BatchGet<T>` with `AddKey(object hashKey)` and `Results`. If v4 renamed
+`Results` or `ExecuteAsync`'s token position, adjust. Batch-get here is hash-key-only (single-key `AddKey(object)`);
+> composite-key batch-get is out of scope.
 
 - [ ] **Step 4: Run to verify it passes**
 
 Run: `dotnet test tests/ArturRios.Data.Tests.csproj --filter DynamoBatchTests`
-Expected: PASS (1 test). Also run `--filter "DynamoRepositoryTests|DynamoQueryScanTests|DynamoBatchTests"` — all green. Build → 0 warnings.
+Expected: PASS (1 test). Also run `--filter "DynamoRepositoryTests|DynamoQueryScanTests|DynamoBatchTests"` — all green.
+Build → 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
@@ -955,14 +1045,21 @@ Stage only this task's files; commit locally (e.g. `feat: add DynamoRepository b
 ### Task 6: `AddDynamoData` DI registration
 
 **Files:**
+
 - Create: `src/ArturRios.Data.DynamoDb/DependencyInjection/ServiceCollectionExtensions.cs`
 - Test: `tests/DynamoDb/AddDynamoDataTests.cs`
 
 **Interfaces:**
-- Consumes: `DynamoOptions`, `IAsyncDynamoRepository<>`, `DynamoRepository<>`, `IAmazonDynamoDB`/`AmazonDynamoDBClient`/`AmazonDynamoDBConfig`, `IDynamoDBContext`/`DynamoDBContextBuilder`, `BasicAWSCredentials`, `RegionEndpoint`, `IConfiguration`, `IServiceCollection`.
-- Produces: `ServiceCollectionExtensions` (namespace `ArturRios.Data.DynamoDb.DependencyInjection`) with `AddDynamoData(this IServiceCollection, IConfiguration, string sectionName = "ArturRios.Data.DynamoDb")` and `AddDynamoData(this IServiceCollection, DynamoOptions options)`.
 
-- [ ] **Step 1: Write the failing test** (resolution only — no server needed; client/context construction performs no network I/O)
+- Consumes: `DynamoOptions`, `IAsyncDynamoRepository<>`, `DynamoRepository<>`, `IAmazonDynamoDB`/`AmazonDynamoDBClient`/
+  `AmazonDynamoDBConfig`, `IDynamoDBContext`/`DynamoDBContextBuilder`, `BasicAWSCredentials`, `RegionEndpoint`,
+  `IConfiguration`, `IServiceCollection`.
+- Produces: `ServiceCollectionExtensions` (namespace `ArturRios.Data.DynamoDb.DependencyInjection`) with
+  `AddDynamoData(this IServiceCollection, IConfiguration, string sectionName = "ArturRios.Data.DynamoDb")` and
+  `AddDynamoData(this IServiceCollection, DynamoOptions options)`.
+
+- [ ] **Step 1: Write the failing test** (resolution only — no server needed; client/context construction performs no
+  network I/O)
 
 Create `tests/DynamoDb/AddDynamoDataTests.cs`:
 
@@ -1072,7 +1169,10 @@ public static class ServiceCollectionExtensions
 }
 ```
 
-> **Implementer note:** `DynamoDBContextBuilder().WithDynamoDBClient(Func<IAmazonDynamoDB>).Build()` is the v4 way to construct an `IDynamoDBContext`; if the resolved SDK exposes a different builder/ctor (e.g. `new DynamoDBContext(client)` in older 3.x), use that. `RegionEndpoint.GetBySystemName` is in the `Amazon` namespace; `BasicAWSCredentials` in `Amazon.Runtime`. The resolution test does not connect, so no live DynamoDB is needed for it.
+> **Implementer note:** `DynamoDBContextBuilder().WithDynamoDBClient(Func<IAmazonDynamoDB>).Build()` is the v4 way to
+> construct an `IDynamoDBContext`; if the resolved SDK exposes a different builder/ctor (e.g.
+`new DynamoDBContext(client)` in older 3.x), use that. `RegionEndpoint.GetBySystemName` is in the `Amazon` namespace;
+`BasicAWSCredentials` in `Amazon.Runtime`. The resolution test does not connect, so no live DynamoDB is needed for it.
 
 - [ ] **Step 4: Run to verify it passes**
 
@@ -1088,17 +1188,21 @@ Stage only this task's files; commit locally (e.g. `feat: add AddDynamoData DI r
 ### Task 7: Documentation + full verification
 
 **Files:**
+
 - Modify: `README.md`, `docs/content/_index.md`
 
 **Interfaces:**
+
 - Consumes: everything above. No new production types.
 
 - [ ] **Step 1: Full solution build & test**
 
 Run: `dotnet build src/ArturRios.Data.sln`
-Expected: all projects build (the tracked NU1903 SQLitePCLRaw advisory warnings from the relational test deps remain; 0 errors).
+Expected: all projects build (the tracked NU1903 SQLitePCLRaw advisory warnings from the relational test deps remain; 0
+errors).
 Run: `dotnet test tests/ArturRios.Data.Tests.csproj`
-Expected: entire suite green (previous count + the new Dynamo tests). Note: the Dynamo integration tests start DynamoDB Local (download on first run + Java process).
+Expected: entire suite green (previous count + the new Dynamo tests). Note: the Dynamo integration tests start DynamoDB
+Local (download on first run + Java process).
 
 - [ ] **Step 2: Add a DynamoDB section to `README.md`**
 
@@ -1161,7 +1265,8 @@ Atomic multi-item transactions are a planned future addition.
 
 - [ ] **Step 3: Add the same to `docs/content/_index.md`**
 
-Add an equivalent "DynamoDB store" section to `docs/content/_index.md` (after the MongoDB section), using the same samples, consistent with the README wording.
+Add an equivalent "DynamoDB store" section to `docs/content/_index.md` (after the MongoDB section), using the same
+samples, consistent with the README wording.
 
 - [ ] **Step 4: Final verification**
 
@@ -1170,14 +1275,19 @@ Expected: build succeeds (only NU1903 warnings), all tests green.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only `README.md` and `docs/content/_index.md`; commit locally (e.g. `docs: document the DynamoDB store`). Do NOT push.
+Stage only `README.md` and `docs/content/_index.md`; commit locally (e.g. `docs: document the DynamoDB store`). Do NOT
+push.
 
 ---
 
 ## Notes for the implementer
 
-- **Commit locally after each task** on `feature/dynamodb-store`; **never `git push`** and **never touch `main`**. Stage only each task's own files.
+- **Commit locally after each task** on `feature/dynamodb-store`; **never `git push`** and **never touch `main`**. Stage
+  only each task's own files.
 - Keep XML docs on every public member; `GenerateDocumentationFile=true` warns otherwise.
-- The Dynamo integration tests need a real in-memory DynamoDB Local (Java 17). If it cannot download/run, report BLOCKED rather than mocking.
-- `OperationCanceledException` must propagate from the guards; `ConditionalCheckFailedException` → concurrency envelope; everything else is enveloped.
-- Where an AWSSDK.DynamoDBv2 4.x signature differs from the shown code (context build, Query/Scan overloads, `AsyncSearch<T>` materialization, batch APIs), adjust to the real API during RED→GREEN without changing behavior.
+- The Dynamo integration tests need a real in-memory DynamoDB Local (Java 17). If it cannot download/run, report BLOCKED
+  rather than mocking.
+- `OperationCanceledException` must propagate from the guards; `ConditionalCheckFailedException` → concurrency envelope;
+  everything else is enveloped.
+- Where an AWSSDK.DynamoDBv2 4.x signature differs from the shown code (context build, Query/Scan overloads,
+  `AsyncSearch<T>` materialization, batch APIs), adjust to the real API during RED→GREEN without changing behavior.

@@ -17,12 +17,10 @@ public class MongoInterfacesTests
     }
 
     [Fact]
-    public void Repository_ExtendsReadOnly()
-    {
+    public void Repository_ExtendsReadOnly() =>
         Assert.Contains(typeof(IDocumentReadOnlyRepository<>),
             typeof(IDocumentRepository<>).GetInterfaces()
                 .Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
-    }
 
     [Theory]
     [InlineData("Create")]
@@ -43,7 +41,8 @@ public class MongoInterfacesTests
     [InlineData("FindAsync")]
     public void AsyncMethods_ReturnTaskOfDataOutput_WithCancellationToken(string name)
     {
-        var m = typeof(IAsyncDocumentRepository<>).GetMethod(name) ?? typeof(IAsyncDocumentReadOnlyRepository<>).GetMethod(name);
+        var m = typeof(IAsyncDocumentRepository<>).GetMethod(name) ??
+                typeof(IAsyncDocumentReadOnlyRepository<>).GetMethod(name);
         Assert.NotNull(m);
         Assert.Equal(typeof(Task<>), m!.ReturnType.GetGenericTypeDefinition());
         Assert.Contains(m.GetParameters(), p => p.ParameterType == typeof(CancellationToken));

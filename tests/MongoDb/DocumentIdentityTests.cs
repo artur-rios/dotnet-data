@@ -6,9 +6,6 @@ namespace ArturRios.Data.Tests.MongoDb;
 
 public class DocumentIdentityTests
 {
-    private sealed class Sample : Document { }
-    private sealed class VersionedSample : VersionedDocument { }
-
     [Fact]
     public void Document_Id_HasBsonIdAttribute()
     {
@@ -17,10 +14,7 @@ public class DocumentIdentityTests
     }
 
     [Fact]
-    public void Document_Id_DefaultsToEmptyString()
-    {
-        Assert.Equal(string.Empty, new Sample().Id);
-    }
+    public void Document_Id_DefaultsToEmptyString() => Assert.Equal(string.Empty, new Sample().Id);
 
     [Fact]
     public void VersionedDocument_DerivesFromDocument_AndHasVersion()
@@ -35,5 +29,13 @@ public class DocumentIdentityTests
         var o = new MongoOptions { ConnectionString = "mongodb://localhost:27017", DatabaseName = "db" };
         Assert.Equal("mongodb://localhost:27017", o.ConnectionString);
         Assert.Equal("db", o.DatabaseName);
+    }
+
+    private sealed class Sample : Document
+    {
+    }
+
+    private sealed class VersionedSample : VersionedDocument
+    {
     }
 }

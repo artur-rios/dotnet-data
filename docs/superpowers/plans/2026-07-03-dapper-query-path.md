@@ -1,38 +1,62 @@
 # Dapper Query Path Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a read-only, `DataOutput`-enveloped Dapper query surface (`ArturRios.Data.Dapper`) that reuses the `BaseDbContext` connection and enlists in the ambient unit-of-work transaction, so consumers can run raw-SQL queries alongside EF-only persistence.
+**Goal:** Add a read-only, `DataOutput`-enveloped Dapper query surface (`ArturRios.Data.Dapper`) that reuses the
+`BaseDbContext` connection and enlists in the ambient unit-of-work transaction, so consumers can run raw-SQL queries
+alongside EF-only persistence.
 
-**Architecture:** A new thin package `ArturRios.Data.Dapper` references `ArturRios.Data.Core` + Dapper. `DapperSqlQuery(BaseDbContext)` implements `ISqlQuery`/`IAsyncSqlQuery`, running Dapper over `context.Database.GetDbConnection()` and passing `context.Database.CurrentTransaction?.GetDbTransaction()`. Every method is enveloped; a `AddDapper()` DI extension registers it scoped.
+**Architecture:** A new thin package `ArturRios.Data.Dapper` references `ArturRios.Data.Core` + Dapper.
+`DapperSqlQuery(BaseDbContext)` implements `ISqlQuery`/`IAsyncSqlQuery`, running Dapper over
+`context.Database.GetDbConnection()` and passing `context.Database.CurrentTransaction?.GetDbTransaction()`. Every method
+is enveloped; a `AddDapper()` DI extension registers it scoped.
 
-**Tech Stack:** .NET 10, Dapper 2.x, EF Core 10 (for the shared context/connection), xUnit, `ArturRios.Output` 2.0.1, real SQLite in-memory for tests.
+**Tech Stack:** .NET 10, Dapper 2.x, EF Core 10 (for the shared context/connection), xUnit, `ArturRios.Output` 2.0.1,
+real SQLite in-memory for tests.
 
-**Design spec:** [docs/superpowers/specs/2026-07-03-dapper-query-path-design.md](../specs/2026-07-03-dapper-query-path-design.md)
+**Design spec:
+** [docs/superpowers/specs/2026-07-03-dapper-query-path-design.md](../specs/2026-07-03-dapper-query-path-design.md)
 
 ## Global Constraints
 
-- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable (in `src`; the tests project has NO `ImplicitUsings` — add explicit `using`s there).
-- **XML documentation is mandatory** on every public type and member (`GenerateDocumentationFile=true`; build warns on missing docs). No public member ships without a `<summary>`.
-- **New package version → `1.0.0`.** Reuse the existing provider-package csproj conventions (Authors/Company "Artur Rios", MIT, `PackageProjectUrl`/`RepositoryUrl` as in `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`).
+- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable (in `src`; the
+  tests project has NO `ImplicitUsings` — add explicit `using`s there).
+- **XML documentation is mandatory** on every public type and member (`GenerateDocumentationFile=true`; build warns on
+  missing docs). No public member ships without a `<summary>`.
+- **New package version → `1.0.0`.** Reuse the existing provider-package csproj conventions (Authors/Company "Artur
+  Rios", MIT, `PackageProjectUrl`/`RepositoryUrl` as in `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`).
 - **Read-only:** the Dapper surface exposes ONLY queries. No `Execute`/writes. Persistence stays on EF.
-- **Envelopes, not exceptions, cross the boundary.** No public method of `DapperSqlQuery` may let an infrastructure exception propagate; catch and convert to `DataOutput`, EXCEPT `OperationCanceledException`, which must propagate (cancellation is not an infrastructure failure).
+- **Envelopes, not exceptions, cross the boundary.** No public method of `DapperSqlQuery` may let an infrastructure
+  exception propagate; catch and convert to `DataOutput`, EXCEPT `OperationCanceledException`, which must propagate (
+  cancellation is not an infrastructure failure).
 - **Generic `T` is unconstrained** (DTOs/records/scalars — not `Entity`).
-- **Git policy:** Work on the local `feature/dapper-query-path` branch. **Commit locally after each task** (TDD red-green-commit). **NEVER `git push`** and **never touch `main`** — the user performs the final merge/commit to `main` manually. Stage ONLY the task's own files with explicit `git add <path>` (never `git add -A`/`.`; there are untracked scratch/planning files that must not be swept in). Conventional-commit messages, body ending with the `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` trailer.
-- **Namespaces:** `ArturRios.Data.Dapper` for the package sources; core types come from `ArturRios.Data.Core.*` (e.g. `BaseDbContext` in `ArturRios.Data.Core.Configuration`). Test namespaces under `ArturRios.Data.Tests.*`.
-- **Tests:** xUnit, real SQLite in-memory. Reuse existing `tests/TestSupport/` (`TestEntity`/`VersionedTestEntity` in `ArturRios.Data.Tests.TestSupport`, `TestDbContext` with `DbSet<TestEntity> Items`/`DbSet<VersionedTestEntity> VersionedItems`, `SqliteTestContextFactory.Create()`). EF names the tables after the DbSet properties → table `Items` with columns `Id`, `Name`.
+- **Git policy:** Work on the local `feature/dapper-query-path` branch. **Commit locally after each task** (TDD
+  red-green-commit). **NEVER `git push`** and **never touch `main`** — the user performs the final merge/commit to
+  `main` manually. Stage ONLY the task's own files with explicit `git add <path>` (never `git add -A`/`.`; there are
+  untracked scratch/planning files that must not be swept in). Conventional-commit messages, body ending with the
+  `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` trailer.
+- **Namespaces:** `ArturRios.Data.Dapper` for the package sources; core types come from `ArturRios.Data.Core.*` (e.g.
+  `BaseDbContext` in `ArturRios.Data.Core.Configuration`). Test namespaces under `ArturRios.Data.Tests.*`.
+- **Tests:** xUnit, real SQLite in-memory. Reuse existing `tests/TestSupport/` (`TestEntity`/`VersionedTestEntity` in
+  `ArturRios.Data.Tests.TestSupport`, `TestDbContext` with `DbSet<TestEntity> Items`/
+  `DbSet<VersionedTestEntity> VersionedItems`, `SqliteTestContextFactory.Create()`). EF names the tables after the DbSet
+  properties → table `Items` with columns `Id`, `Name`.
 - Build/test with the .NET CLI: `dotnet build`, `dotnet test`.
 
 ## File Structure
 
 **`src/ArturRios.Data.Dapper/`** (new package):
-- `ArturRios.Data.Dapper.csproj` — `PackageId` `ArturRios.Data.Dapper`, v1.0.0; references `Dapper` (2.x) + `ProjectReference ..\ArturRios.Data.Core.csproj` + `Microsoft.Extensions.DependencyInjection.Abstractions`.
+
+- `ArturRios.Data.Dapper.csproj` — `PackageId` `ArturRios.Data.Dapper`, v1.0.0; references `Dapper` (2.x) +
+  `ProjectReference ..\ArturRios.Data.Core.csproj` + `Microsoft.Extensions.DependencyInjection.Abstractions`.
 - `ISqlQuery.cs` — synchronous read-only query interface.
 - `IAsyncSqlQuery.cs` — asynchronous read-only query interface.
 - `DapperSqlQuery.cs` — `DapperSqlQuery(BaseDbContext) : ISqlQuery, IAsyncSqlQuery`, plus `Guarded`/`GuardedAsync`.
 - `ServiceCollectionExtensions.cs` — `AddDapper(this IServiceCollection)`.
 
 **Tests** (`tests/ArturRios.Data.Tests`):
+
 - `ArturRios.Data.Tests.csproj` *(modify — add `ProjectReference` to the Dapper package)*.
 - `Dapper/DapperSqlQueryTests.cs` *(new — sync integration tests)*.
 - `Dapper/DapperSqlQueryAsyncTests.cs` *(new — async integration tests)*.
@@ -48,15 +72,23 @@
 ### Task 1: Scaffold the `ArturRios.Data.Dapper` package (csproj + interfaces)
 
 **Files:**
-- Create: `src/ArturRios.Data.Dapper/ArturRios.Data.Dapper.csproj`, `src/ArturRios.Data.Dapper/ISqlQuery.cs`, `src/ArturRios.Data.Dapper/IAsyncSqlQuery.cs`
+
+- Create: `src/ArturRios.Data.Dapper/ArturRios.Data.Dapper.csproj`, `src/ArturRios.Data.Dapper/ISqlQuery.cs`,
+  `src/ArturRios.Data.Dapper/IAsyncSqlQuery.cs`
 - Modify: `src/ArturRios.Data.sln` (add project), `tests/ArturRios.Data.Tests.csproj` (add ProjectReference)
 - Test: `tests/Dapper/DapperInterfacesTests.cs`
 
 **Interfaces:**
+
 - Consumes: `ArturRios.Output.DataOutput<T>`.
 - Produces (namespace `ArturRios.Data.Dapper`):
-  - `ISqlQuery`: `DataOutput<IEnumerable<T>> Query<T>(string sql, object? parameters = null)`, `DataOutput<T?> QueryFirstOrDefault<T>(...)`, `DataOutput<T?> QuerySingleOrDefault<T>(...)`, `DataOutput<T?> ExecuteScalar<T>(...)`.
-  - `IAsyncSqlQuery`: `Task<DataOutput<IEnumerable<T>>> QueryAsync<T>(string sql, object? parameters = null, CancellationToken ct = default)`, `Task<DataOutput<T?>> QueryFirstOrDefaultAsync<T>(...)`, `Task<DataOutput<T?>> QuerySingleOrDefaultAsync<T>(...)`, `Task<DataOutput<T?>> ExecuteScalarAsync<T>(...)`.
+    - `ISqlQuery`: `DataOutput<IEnumerable<T>> Query<T>(string sql, object? parameters = null)`,
+      `DataOutput<T?> QueryFirstOrDefault<T>(...)`, `DataOutput<T?> QuerySingleOrDefault<T>(...)`,
+      `DataOutput<T?> ExecuteScalar<T>(...)`.
+    - `IAsyncSqlQuery`:
+      `Task<DataOutput<IEnumerable<T>>> QueryAsync<T>(string sql, object? parameters = null, CancellationToken ct = default)`,
+      `Task<DataOutput<T?>> QueryFirstOrDefaultAsync<T>(...)`, `Task<DataOutput<T?>> QuerySingleOrDefaultAsync<T>(...)`,
+      `Task<DataOutput<T?>> ExecuteScalarAsync<T>(...)`.
 
 - [ ] **Step 1: Create the csproj**
 
@@ -90,7 +122,10 @@ Create `src/ArturRios.Data.Dapper/ArturRios.Data.Dapper.csproj`:
 </Project>
 ```
 
-> **Implementer note:** The core project file is `src/ArturRios.Data.Core.csproj` (directly under `src/`). The core csproj already excludes `ArturRios.Data.*\**` from its compile glob, so this new `ArturRios.Data.Dapper/` folder is automatically excluded from the core project — do NOT edit the core csproj. If `Dapper` `2.*` fails to restore for network reasons, STOP and report BLOCKED with the exact error.
+> **Implementer note:** The core project file is `src/ArturRios.Data.Core.csproj` (directly under `src/`). The core
+> csproj already excludes `ArturRios.Data.*\**` from its compile glob, so this new `ArturRios.Data.Dapper/` folder is
+> automatically excluded from the core project — do NOT edit the core csproj. If `Dapper` `2.*` fails to restore for
+> network reasons, STOP and report BLOCKED with the exact error.
 
 - [ ] **Step 2: Write the interfaces**
 
@@ -241,19 +276,29 @@ Expected: PASS (8 cases).
 
 - [ ] **Step 6: Commit (local branch)**
 
-Stage only this task's files (`git add src/ArturRios.Data.Dapper/ArturRios.Data.Dapper.csproj src/ArturRios.Data.Dapper/ISqlQuery.cs src/ArturRios.Data.Dapper/IAsyncSqlQuery.cs src/ArturRios.Data.sln tests/ArturRios.Data.Tests.csproj tests/Dapper/DapperInterfacesTests.cs`) and commit locally with a conventional message (e.g. `feat: scaffold ArturRios.Data.Dapper package and query interfaces`). Do NOT push. Do NOT touch `main`.
+Stage only this task's files (
+`git add src/ArturRios.Data.Dapper/ArturRios.Data.Dapper.csproj src/ArturRios.Data.Dapper/ISqlQuery.cs src/ArturRios.Data.Dapper/IAsyncSqlQuery.cs src/ArturRios.Data.sln tests/ArturRios.Data.Tests.csproj tests/Dapper/DapperInterfacesTests.cs`)
+and commit locally with a conventional message (e.g.
+`feat: scaffold ArturRios.Data.Dapper package and query interfaces`). Do NOT push. Do NOT touch `main`.
 
 ---
 
 ### Task 2: `DapperSqlQuery` — synchronous members
 
 **Files:**
+
 - Create: `src/ArturRios.Data.Dapper/DapperSqlQuery.cs`
 - Test: `tests/Dapper/DapperSqlQueryTests.cs`
 
 **Interfaces:**
-- Consumes: `ISqlQuery`, `IAsyncSqlQuery` (from Task 1), `BaseDbContext` (`ArturRios.Data.Core.Configuration`), `DataOutput<T>` (`ArturRios.Output`), Dapper (`Dapper` namespace), `Microsoft.EntityFrameworkCore` (`GetDbConnection`), `Microsoft.EntityFrameworkCore.Storage` (`GetDbTransaction`).
-- Produces: `public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery` in `namespace ArturRios.Data.Dapper`. This task implements the FOUR sync members + the `Guarded<TResult>` helper + the private `Connection`/`Transaction` accessors. The async members are written as `throw new NotImplementedException()` STUBS now (Task 3 fills them) so the type compiles.
+
+- Consumes: `ISqlQuery`, `IAsyncSqlQuery` (from Task 1), `BaseDbContext` (`ArturRios.Data.Core.Configuration`),
+  `DataOutput<T>` (`ArturRios.Output`), Dapper (`Dapper` namespace), `Microsoft.EntityFrameworkCore` (
+  `GetDbConnection`), `Microsoft.EntityFrameworkCore.Storage` (`GetDbTransaction`).
+- Produces: `public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery` in
+  `namespace ArturRios.Data.Dapper`. This task implements the FOUR sync members + the `Guarded<TResult>` helper + the
+  private `Connection`/`Transaction` accessors. The async members are written as `throw new NotImplementedException()`
+  STUBS now (Task 3 fills them) so the type compiles.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -361,7 +406,10 @@ public class DapperSqlQueryTests
 }
 ```
 
-> **Implementer note:** `SELECT COUNT(*)` in SQLite returns an `INTEGER` that maps to `long`; the test uses `ExecuteScalar<long>` accordingly. EF names the table `Items` (from `DbSet<TestEntity> Items`) with columns `Id`, `Name`. If a query unexpectedly fails on the table/column name, confirm the actual name via the failing test output before changing the SQL.
+> **Implementer note:** `SELECT COUNT(*)` in SQLite returns an `INTEGER` that maps to `long`; the test uses
+`ExecuteScalar<long>` accordingly. EF names the table `Items` (from `DbSet<TestEntity> Items`) with columns `Id`,
+`Name`. If a query unexpectedly fails on the table/column name, confirm the actual name via the failing test output
+> before changing the SQL.
 
 - [ ] **Step 2: Run to verify it fails**
 
@@ -444,7 +492,10 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
 }
 ```
 
-> **Implementer note:** `Connection.Query<T>(...)` returns `IEnumerable<T>`; assigning it into `DataOutput<IEnumerable<T>>` is direct. For the nullable-returning single-row helpers, calling Dapper's generic as `QueryFirstOrDefault<T?>` yields `T?`. Dapper opens the connection if it is closed and closes it afterward; when an ambient transaction is active the connection is already open and `Transaction` is non-null, so Dapper enlists correctly.
+> **Implementer note:** `Connection.Query<T>(...)` returns `IEnumerable<T>`; assigning it into
+`DataOutput<IEnumerable<T>>` is direct. For the nullable-returning single-row helpers, calling Dapper's generic as
+`QueryFirstOrDefault<T?>` yields `T?`. Dapper opens the connection if it is closed and closes it afterward; when an
+> ambient transaction is active the connection is already open and `Transaction` is non-null, so Dapper enlists correctly.
 
 - [ ] **Step 4: Run to verify it passes**
 
@@ -455,19 +506,25 @@ Expected: 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only `src/ArturRios.Data.Dapper/DapperSqlQuery.cs` and `tests/Dapper/DapperSqlQueryTests.cs`; commit locally (e.g. `feat: add synchronous Dapper query execution`). Do NOT push. Do NOT touch `main`.
+Stage only `src/ArturRios.Data.Dapper/DapperSqlQuery.cs` and `tests/Dapper/DapperSqlQueryTests.cs`; commit locally (e.g.
+`feat: add synchronous Dapper query execution`). Do NOT push. Do NOT touch `main`.
 
 ---
 
 ### Task 3: `DapperSqlQuery` — asynchronous members
 
 **Files:**
+
 - Modify: `src/ArturRios.Data.Dapper/DapperSqlQuery.cs`
 - Test: `tests/Dapper/DapperSqlQueryAsyncTests.cs`
 
 **Interfaces:**
-- Consumes: everything from Task 2, plus Dapper's async APIs (`QueryAsync`, `QueryFirstOrDefaultAsync`, `QuerySingleOrDefaultAsync`, `ExecuteScalarAsync`) and `Dapper.CommandDefinition`.
-- Produces: real implementations of the four async members (replacing the stubs) + a `GuardedAsync<TResult>` helper. Async methods build a `CommandDefinition(sql, parameters, Transaction, cancellationToken: ct)` and call Dapper's async APIs on `Connection`.
+
+- Consumes: everything from Task 2, plus Dapper's async APIs (`QueryAsync`, `QueryFirstOrDefaultAsync`,
+  `QuerySingleOrDefaultAsync`, `ExecuteScalarAsync`) and `Dapper.CommandDefinition`.
+- Produces: real implementations of the four async members (replacing the stubs) + a `GuardedAsync<TResult>` helper.
+  Async methods build a `CommandDefinition(sql, parameters, Transaction, cancellationToken: ct)` and call Dapper's async
+  APIs on `Connection`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -623,19 +680,24 @@ Expected: 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only `src/ArturRios.Data.Dapper/DapperSqlQuery.cs` and `tests/Dapper/DapperSqlQueryAsyncTests.cs`; commit locally (e.g. `feat: implement asynchronous Dapper query execution`). Do NOT push. Do NOT touch `main`.
+Stage only `src/ArturRios.Data.Dapper/DapperSqlQuery.cs` and `tests/Dapper/DapperSqlQueryAsyncTests.cs`; commit
+locally (e.g. `feat: implement asynchronous Dapper query execution`). Do NOT push. Do NOT touch `main`.
 
 ---
 
 ### Task 4: `AddDapper()` DI registration
 
 **Files:**
+
 - Create: `src/ArturRios.Data.Dapper/ServiceCollectionExtensions.cs`
 - Test: `tests/Dapper/AddDapperTests.cs`
 
 **Interfaces:**
-- Consumes: `ISqlQuery`, `IAsyncSqlQuery`, `DapperSqlQuery`, `BaseDbContext` (`ArturRios.Data.Core.Configuration`), `IServiceCollection`.
-- Produces: `ServiceCollectionExtensions.AddDapper(this IServiceCollection services)` (namespace `ArturRios.Data.Dapper`) registering `ISqlQuery` and `IAsyncSqlQuery` as scoped `DapperSqlQuery`.
+
+- Consumes: `ISqlQuery`, `IAsyncSqlQuery`, `DapperSqlQuery`, `BaseDbContext` (`ArturRios.Data.Core.Configuration`),
+  `IServiceCollection`.
+- Produces: `ServiceCollectionExtensions.AddDapper(this IServiceCollection services)` (namespace
+  `ArturRios.Data.Dapper`) registering `ISqlQuery` and `IAsyncSqlQuery` as scoped `DapperSqlQuery`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -707,17 +769,23 @@ Expected: PASS (1 test).
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only `src/ArturRios.Data.Dapper/ServiceCollectionExtensions.cs` and `tests/Dapper/AddDapperTests.cs`; commit locally (e.g. `feat: add AddDapper DI registration`). Do NOT push. Do NOT touch `main`.
+Stage only `src/ArturRios.Data.Dapper/ServiceCollectionExtensions.cs` and `tests/Dapper/AddDapperTests.cs`; commit
+locally (e.g. `feat: add AddDapper DI registration`). Do NOT push. Do NOT touch `main`.
 
 ---
 
 ### Task 5: Transaction-sharing integration test
 
 **Files:**
+
 - Test: `tests/Dapper/DapperTransactionSharingTests.cs`
 
 **Interfaces:**
-- Consumes: `DapperSqlQuery`, `EfRepository<T>` (`ArturRios.Data.Core.Repositories`), `EfUnitOfWork` (`ArturRios.Data.Core.Transactions`), `TestEntity`/`TestDbContext`/`SqliteTestContextFactory`. No production code changes expected — this verifies the connection/transaction reuse built in Tasks 2–3. If it fails, fix `DapperSqlQuery` (not the test).
+
+- Consumes: `DapperSqlQuery`, `EfRepository<T>` (`ArturRios.Data.Core.Repositories`), `EfUnitOfWork` (
+  `ArturRios.Data.Core.Transactions`), `TestEntity`/`TestDbContext`/`SqliteTestContextFactory`. No production code
+  changes expected — this verifies the connection/transaction reuse built in Tasks 2–3. If it fails, fix
+  `DapperSqlQuery` (not the test).
 
 - [ ] **Step 1: Write the test**
 
@@ -777,25 +845,32 @@ public class DapperTransactionSharingTests
 }
 ```
 
-> **Implementer note:** `ExecuteInTransactionAsync` commits on success and rolls back on exception, returning an envelope (it does not rethrow). The first test asserts Dapper sees the row *inside* the transaction; the second asserts that after a rolled-back transaction nothing persists. Both prove `DapperSqlQuery` reuses the context connection and enlists in the ambient transaction.
+> **Implementer note:** `ExecuteInTransactionAsync` commits on success and rolls back on exception, returning an
+> envelope (it does not rethrow). The first test asserts Dapper sees the row *inside* the transaction; the second asserts
+> that after a rolled-back transaction nothing persists. Both prove `DapperSqlQuery` reuses the context connection and
+> enlists in the ambient transaction.
 
 - [ ] **Step 2: Run the tests**
 
 Run: `dotnet test tests/ArturRios.Data.Tests.csproj --filter DapperTransactionSharingTests`
-Expected: PASS (2 tests). If the first test sees 0 rows, `DapperSqlQuery` is not enlisting in the ambient transaction — fix the `Transaction` accessor / that it is passed to Dapper (production fix, not a test change).
+Expected: PASS (2 tests). If the first test sees 0 rows, `DapperSqlQuery` is not enlisting in the ambient transaction —
+fix the `Transaction` accessor / that it is passed to Dapper (production fix, not a test change).
 
 - [ ] **Step 3: Commit (local branch)**
 
-Stage only `tests/Dapper/DapperTransactionSharingTests.cs`; commit locally (e.g. `test: verify Dapper shares connection and transaction with EF`). Do NOT push. Do NOT touch `main`.
+Stage only `tests/Dapper/DapperTransactionSharingTests.cs`; commit locally (e.g.
+`test: verify Dapper shares connection and transaction with EF`). Do NOT push. Do NOT touch `main`.
 
 ---
 
 ### Task 6: Documentation + full verification
 
 **Files:**
+
 - Modify: `README.md`, `docs/content/_index.md`
 
 **Interfaces:**
+
 - Consumes: everything above. No new production types.
 
 - [ ] **Step 1: Full solution build & test**
@@ -845,7 +920,9 @@ unit of work sees the not-yet-committed EF writes.
 
 - [ ] **Step 3: Add the same to the Hugo docs `docs/content/_index.md`**
 
-Add an equivalent "Dapper query path" section to `docs/content/_index.md` (place it after the read-only/async usage section), using the same code samples as Step 2, so the published docs cover the new package. Keep it consistent with the README wording.
+Add an equivalent "Dapper query path" section to `docs/content/_index.md` (place it after the read-only/async usage
+section), using the same code samples as Step 2, so the published docs cover the new package. Keep it consistent with
+the README wording.
 
 - [ ] **Step 4: Final verification**
 
@@ -854,13 +931,16 @@ Expected: build succeeds (only NU1903 warnings), all tests green.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only `README.md` and `docs/content/_index.md`; commit locally (e.g. `docs: document the Dapper query path`). Do NOT push. Do NOT touch `main`.
+Stage only `README.md` and `docs/content/_index.md`; commit locally (e.g. `docs: document the Dapper query path`). Do
+NOT push. Do NOT touch `main`.
 
 ---
 
 ## Notes for the implementer
 
-- **Commit locally after each task** on `feature/dapper-query-path`; **never `git push`** and **never touch `main`** — the user does the final merge to `main` manually. Stage only each task's own files.
+- **Commit locally after each task** on `feature/dapper-query-path`; **never `git push`** and **never touch `main`** —
+  the user does the final merge to `main` manually. Stage only each task's own files.
 - Keep XML docs on every public member; `GenerateDocumentationFile=true` warns otherwise.
 - The Dapper surface is read-only by design — do not add write/`Execute` methods.
-- `OperationCanceledException` must propagate from the guards (cancellation is not an infra failure); everything else is enveloped.
+- `OperationCanceledException` must propagate from the guards (cancellation is not an infra failure); everything else is
+  enveloped.

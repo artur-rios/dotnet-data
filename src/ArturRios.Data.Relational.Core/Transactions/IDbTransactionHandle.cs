@@ -1,7 +1,7 @@
 namespace ArturRios.Data.Relational.Core.Transactions;
 
 /// <summary>
-/// A handle over an active database transaction with manual commit/rollback control.
+///     A handle over an active database transaction with manual commit/rollback control.
 /// </summary>
 public interface IDbTransactionHandle : IDisposable, IAsyncDisposable
 {

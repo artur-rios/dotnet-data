@@ -1,51 +1,77 @@
 # Relational Data Access Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add config-driven EF Core implementations of a redesigned, `DataOutput`-enveloped repository interface family for PostgreSQL / MySQL / SQLite, with transactions and optimistic concurrency.
+**Goal:** Add config-driven EF Core implementations of a redesigned, `DataOutput`-enveloped repository interface family
+for PostgreSQL / MySQL / SQLite, with transactions and optimistic concurrency.
 
-**Architecture:** A lean core package (`ArturRios.Data`) holds the abstractions and a provider-agnostic EF implementation (`EfRepository<T>`, `EfUnitOfWork`, `BaseDbContext`). Three thin provider packages each add one EF provider and register it (keyed by `DatabaseType`) behind an `IDatabaseProvider` seam so configuration selects the provider at runtime. All infrastructure failures are caught and returned as `ArturRios.Output` envelopes.
+**Architecture:** A lean core package (`ArturRios.Data`) holds the abstractions and a provider-agnostic EF
+implementation (`EfRepository<T>`, `EfUnitOfWork`, `BaseDbContext`). Three thin provider packages each add one EF
+provider and register it (keyed by `DatabaseType`) behind an `IDatabaseProvider` seam so configuration selects the
+provider at runtime. All infrastructure failures are caught and returned as `ArturRios.Output` envelopes.
 
-**Tech Stack:** .NET 10, EF Core 10, xUnit, `ArturRios.Output` 2.0.1, Npgsql / Pomelo.MySql / Microsoft SQLite EF providers, Microsoft.Extensions.Configuration + DependencyInjection.
+**Tech Stack:** .NET 10, EF Core 10, xUnit, `ArturRios.Output` 2.0.1, Npgsql / Pomelo.MySql / Microsoft SQLite EF
+providers, Microsoft.Extensions.Configuration + DependencyInjection.
 
-**Design spec:** [docs/superpowers/specs/2026-07-02-relational-data-access-design.md](../specs/2026-07-02-relational-data-access-design.md)
+**Design spec:
+** [docs/superpowers/specs/2026-07-02-relational-data-access-design.md](../specs/2026-07-02-relational-data-access-design.md)
 
 ## Global Constraints
 
-- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable — matches existing csproj.
-- **XML documentation is mandatory** on every public type and member (`GenerateDocumentationFile=true` is on; the repo's recent history is entirely XML-doc work). No public member ships without a `<summary>`.
-- **Package version → `2.0.0`** for `ArturRios.Data` (breaking interface redesign). Provider packages start at `1.0.0`. Reuse the existing csproj packaging block (Authors/Company "Artur Rios", MIT license, README, RepositoryUrl `https://github.com/artur-rios/dotnet-data`).
-- **Git policy:** Work happens on the local `feat/relational-data-access` branch. **Commit locally after each task** (TDD red-green-commit). **NEVER `git push`** and **never touch `main`** — the user performs the final merge/commit to `main` manually. Each task's final step is a local commit on this branch; use a conventional-commit message (`feat:` / `test:` / `docs:` as fitting) and end the body with the `Co-Authored-By` trailer the repo uses.
-- **Envelopes, not exceptions, cross the repository boundary.** No repository/UoW public method may let an infrastructure exception propagate; catch and convert to `DataOutput`/`ProcessOutput`.
-- **Namespaces** follow folder layout under `ArturRios.Data` (e.g. `ArturRios.Data.Interfaces`, `ArturRios.Data.Configuration`, `ArturRios.Data.Repositories`, `ArturRios.Data.Transactions`, `ArturRios.Data.Providers`, `ArturRios.Data.Exceptions`, `ArturRios.Data.DependencyInjection`).
-- **Test framework:** xUnit (`Version="*"` per existing tests csproj). Integration tests use the **real SQLite provider over an in-memory connection** kept open for the test's lifetime.
+- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable — matches
+  existing csproj.
+- **XML documentation is mandatory** on every public type and member (`GenerateDocumentationFile=true` is on; the repo's
+  recent history is entirely XML-doc work). No public member ships without a `<summary>`.
+- **Package version → `2.0.0`** for `ArturRios.Data` (breaking interface redesign). Provider packages start at `1.0.0`.
+  Reuse the existing csproj packaging block (Authors/Company "Artur Rios", MIT license, README, RepositoryUrl
+  `https://github.com/artur-rios/dotnet-data`).
+- **Git policy:** Work happens on the local `feat/relational-data-access` branch. **Commit locally after each task** (
+  TDD red-green-commit). **NEVER `git push`** and **never touch `main`** — the user performs the final merge/commit to
+  `main` manually. Each task's final step is a local commit on this branch; use a conventional-commit message (`feat:` /
+  `test:` / `docs:` as fitting) and end the body with the `Co-Authored-By` trailer the repo uses.
+- **Envelopes, not exceptions, cross the repository boundary.** No repository/UoW public method may let an
+  infrastructure exception propagate; catch and convert to `DataOutput`/`ProcessOutput`.
+- **Namespaces** follow folder layout under `ArturRios.Data` (e.g. `ArturRios.Data.Interfaces`,
+  `ArturRios.Data.Configuration`, `ArturRios.Data.Repositories`, `ArturRios.Data.Transactions`,
+  `ArturRios.Data.Providers`, `ArturRios.Data.Exceptions`, `ArturRios.Data.DependencyInjection`).
+- **Test framework:** xUnit (`Version="*"` per existing tests csproj). Integration tests use the **real SQLite provider
+  over an in-memory connection** kept open for the test's lifetime.
 - Run builds/tests from `src/` and `tests/` with the .NET CLI: `dotnet build`, `dotnet test`.
 
 ## File Structure
 
 **`src/ArturRios.Data`** (core — abstractions + EF impl + DI):
+
 - `Entity.cs` *(exists, unchanged)*
 - `VersionedEntity.cs` *(new)* — opt-in concurrency base.
-- `Interfaces/IReadOnlyRepository.cs` *(rewrite)*, `Interfaces/IRepository.cs` *(new)*, `Interfaces/IAsyncReadOnlyRepository.cs` *(new)*, `Interfaces/IAsyncRepository.cs` *(new)*.
+- `Interfaces/IReadOnlyRepository.cs` *(rewrite)*, `Interfaces/IRepository.cs` *(new)*,
+  `Interfaces/IAsyncReadOnlyRepository.cs` *(new)*, `Interfaces/IAsyncRepository.cs` *(new)*.
 - `Interfaces/ICrudRepository.cs`, `Interfaces/IRangeRepository.cs` *(delete)*.
-- `Configuration/DatabaseType.cs` *(new)*, `Configuration/BaseDbContextOptions.cs` *(modify)*, `Configuration/BaseDbContext.cs` *(new)*.
+- `Configuration/DatabaseType.cs` *(new)*, `Configuration/BaseDbContextOptions.cs` *(modify)*,
+  `Configuration/BaseDbContext.cs` *(new)*.
 - `Exceptions/DataAccessException.cs` *(new)*.
 - `Providers/IDatabaseProvider.cs` *(new)*.
 - `Repositories/EfRepository.cs` *(new)*.
-- `Transactions/IDbTransactionHandle.cs`, `Transactions/IUnitOfWork.cs`, `Transactions/IAsyncUnitOfWork.cs`, `Transactions/EfUnitOfWork.cs` *(new)*.
+- `Transactions/IDbTransactionHandle.cs`, `Transactions/IUnitOfWork.cs`, `Transactions/IAsyncUnitOfWork.cs`,
+  `Transactions/EfUnitOfWork.cs` *(new)*.
 - `DependencyInjection/ServiceCollectionExtensions.cs` *(new)*.
 - `ArturRios.Data.csproj` *(modify — add package refs, bump version)*.
 
 **Provider packages** (each: 1 provider impl + 1 DI extension + csproj):
+
 - `src/ArturRios.Data.Sqlite/{SqliteProvider.cs, ServiceCollectionExtensions.cs, ArturRios.Data.Sqlite.csproj}`
-- `src/ArturRios.Data.PostgreSql/{PostgreSqlProvider.cs, ServiceCollectionExtensions.cs, ArturRios.Data.PostgreSql.csproj}`
+-
+`src/ArturRios.Data.PostgreSql/{PostgreSqlProvider.cs, ServiceCollectionExtensions.cs, ArturRios.Data.PostgreSql.csproj}`
 - `src/ArturRios.Data.MySql/{MySqlProvider.cs, ServiceCollectionExtensions.cs, ArturRios.Data.MySql.csproj}`
 
 **Tests** (`tests/ArturRios.Data.Tests`):
+
 - `Interfaces/*.cs` *(rewrite reflection tests for the 4 new interfaces; delete stale ones)*.
 - `EntityTests.cs` *(exists)*, `Entities/VersionedEntityTests.cs` *(new)*.
 - `TestSupport/TestEntities.cs`, `TestSupport/TestDbContext.cs`, `TestSupport/SqliteTestContextFactory.cs` *(new)*.
-- `Repositories/EfRepositoryTests.cs`, `Transactions/EfUnitOfWorkTests.cs`, `Concurrency/ConcurrencyTests.cs`, `DependencyInjection/ServiceCollectionExtensionsTests.cs` *(new)*.
+- `Repositories/EfRepositoryTests.cs`, `Transactions/EfUnitOfWorkTests.cs`, `Concurrency/ConcurrencyTests.cs`,
+  `DependencyInjection/ServiceCollectionExtensionsTests.cs` *(new)*.
 - `ArturRios.Data.Tests.csproj` *(modify — reference core + Sqlite provider package + EF Sqlite)*.
 
 **Solution:** `src/ArturRios.Data.sln` *(add the 3 provider projects)*.
@@ -57,15 +83,19 @@
 ### Task 1: Add ArturRios.Output dependency to core
 
 **Files:**
+
 - Modify: `src/ArturRios.Data.csproj`
 
 **Interfaces:**
+
 - Consumes: nothing.
-- Produces: `ArturRios.Output` types (`DataOutput<T>`, `ProcessOutput`, `CustomException`) available to the core project; package version `2.0.0`.
+- Produces: `ArturRios.Output` types (`DataOutput<T>`, `ProcessOutput`, `CustomException`) available to the core
+  project; package version `2.0.0`.
 
 - [ ] **Step 1: Add the package reference and bump version**
 
-In `src/ArturRios.Data.csproj`, change `<Version>1.0.0</Version>` to `<Version>2.0.0</Version>`, and add an `ItemGroup` with:
+In `src/ArturRios.Data.csproj`, change `<Version>1.0.0</Version>` to `<Version>2.0.0</Version>`, and add an `ItemGroup`
+with:
 
 ```xml
 <ItemGroup>
@@ -80,19 +110,24 @@ Expected: build succeeds; `ArturRios.Output` restored.
 
 - [ ] **Step 3: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 2: `VersionedEntity` concurrency base
 
 **Files:**
+
 - Create: `src/VersionedEntity.cs`
 - Test: `tests/Entities/VersionedEntityTests.cs`
 
 **Interfaces:**
+
 - Consumes: `Entity` (existing, `namespace ArturRios.Data`, `int Id`).
-- Produces: `public abstract class VersionedEntity : Entity` with `public Guid ConcurrencyStamp { get; set; }` decorated `[ConcurrencyCheck]`, defaulting to `Guid.NewGuid()`.
+- Produces: `public abstract class VersionedEntity : Entity` with `public Guid ConcurrencyStamp { get; set; }` decorated
+  `[ConcurrencyCheck]`, defaulting to `Guid.NewGuid()`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -167,13 +202,16 @@ Expected: PASS (3 tests).
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 3: Redesign the repository interfaces
 
 **Files:**
+
 - Rewrite: `src/Interfaces/IReadOnlyRepository.cs`
 - Create: `src/Interfaces/IRepository.cs`, `IAsyncReadOnlyRepository.cs`, `IAsyncRepository.cs`
 - Delete: `src/Interfaces/ICrudRepository.cs`, `IRangeRepository.cs`
@@ -182,12 +220,19 @@ Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the
 - Delete: `tests/Interfaces/ICrudRepositoryTests.cs`, `IRangeRepositoryTests.cs`
 
 **Interfaces:**
+
 - Consumes: `Entity`, `ArturRios.Output.DataOutput<T>`.
 - Produces (all in `namespace ArturRios.Data.Interfaces`):
-  - `IReadOnlyRepository<T> where T : Entity`: `IQueryable<T> Query()`, `DataOutput<IEnumerable<T>> GetAll()`, `DataOutput<T?> GetById(int id)`.
-  - `IRepository<T> : IReadOnlyRepository<T>`: `Create`/`CreateRange`/`Update`/`UpdateRange`/`Delete`/`DeleteRange` returning `DataOutput<int>`, `DataOutput<IEnumerable<int>>`, `DataOutput<T>`, `DataOutput<IEnumerable<T>>`, `DataOutput<int>`, `DataOutput<IEnumerable<int>>` respectively.
-  - `IAsyncReadOnlyRepository<T>`: `IQueryable<T> Query()`, `Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default)`, `Task<DataOutput<T?>> GetByIdAsync(int id, CancellationToken ct = default)`.
-  - `IAsyncRepository<T> : IAsyncReadOnlyRepository<T>`: async mirrors with `Async` suffix + `CancellationToken ct = default`.
+    - `IReadOnlyRepository<T> where T : Entity`: `IQueryable<T> Query()`, `DataOutput<IEnumerable<T>> GetAll()`,
+      `DataOutput<T?> GetById(int id)`.
+    - `IRepository<T> : IReadOnlyRepository<T>`: `Create`/`CreateRange`/`Update`/`UpdateRange`/`Delete`/`DeleteRange`
+      returning `DataOutput<int>`, `DataOutput<IEnumerable<int>>`, `DataOutput<T>`, `DataOutput<IEnumerable<T>>`,
+      `DataOutput<int>`, `DataOutput<IEnumerable<int>>` respectively.
+    - `IAsyncReadOnlyRepository<T>`: `IQueryable<T> Query()`,
+      `Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default)`,
+      `Task<DataOutput<T?>> GetByIdAsync(int id, CancellationToken ct = default)`.
+    - `IAsyncRepository<T> : IAsyncReadOnlyRepository<T>`: async mirrors with `Async` suffix +
+      `CancellationToken ct = default`.
 
 - [ ] **Step 1: Write the failing reflection tests**
 
@@ -485,23 +530,30 @@ public interface IAsyncRepository<T> : IAsyncReadOnlyRepository<T> where T : Ent
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `dotnet test tests/ArturRios.Data.Tests.csproj --filter "Interfaces"`
-Expected: PASS. Also run `dotnet build src/ArturRios.Data.csproj` — expect success (old interfaces gone, no dangling references).
+Expected: PASS. Also run `dotnet build src/ArturRios.Data.csproj` — expect success (old interfaces gone, no dangling
+references).
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 4: `DatabaseType` enum + `BaseDbContextOptions`
 
 **Files:**
+
 - Create: `src/Configuration/DatabaseType.cs`
 - Modify: `src/Configuration/BaseDbContextOptions.cs`
 - Test: `tests/Configuration/BaseDbContextOptionsTests.cs` *(extend existing file)*
 
 **Interfaces:**
-- Produces: `enum DatabaseType { PostgreSql, MySql, SQLite }` and `BaseDbContextOptions` with `DatabaseType DatabaseType { get; init; }` plus existing `string ConnectionString { get; init; }` (both in `namespace ArturRios.Data.Configuration`).
+
+- Produces: `enum DatabaseType { PostgreSql, MySql, SQLite }` and `BaseDbContextOptions` with
+  `DatabaseType DatabaseType { get; init; }` plus existing `string ConnectionString { get; init; }` (both in
+  `namespace ArturRios.Data.Configuration`).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -579,19 +631,25 @@ Expected: PASS.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 5: `DataAccessException`
 
 **Files:**
+
 - Create: `src/Exceptions/DataAccessException.cs`
 - Test: `tests/Exceptions/DataAccessExceptionTests.cs`
 
 **Interfaces:**
-- Consumes: `ArturRios.Output.CustomException` (ctor `CustomException(string[] messages)`, property `string[] Messages`).
-- Produces: `public class DataAccessException(string[] messages) : CustomException(messages)` in `namespace ArturRios.Data.Exceptions`.
+
+- Consumes: `ArturRios.Output.CustomException` (ctor `CustomException(string[] messages)`, property
+  `string[] Messages`).
+- Produces: `public class DataAccessException(string[] messages) : CustomException(messages)` in
+  `namespace ArturRios.Data.Exceptions`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -645,24 +703,34 @@ Expected: PASS.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 6: Add EF Core to core + `BaseDbContext` with concurrency-stamp bump
 
 **Files:**
+
 - Modify: `src/ArturRios.Data.csproj`
 - Create: `src/Configuration/BaseDbContext.cs`
 - Modify: `tests/ArturRios.Data.Tests.csproj`
-- Create: `tests/TestSupport/TestEntities.cs`, `tests/TestSupport/TestDbContext.cs`, `tests/TestSupport/SqliteTestContextFactory.cs`
+- Create: `tests/TestSupport/TestEntities.cs`, `tests/TestSupport/TestDbContext.cs`,
+  `tests/TestSupport/SqliteTestContextFactory.cs`
 - Test: `tests/Configuration/BaseDbContextTests.cs`
 
 **Interfaces:**
+
 - Consumes: `VersionedEntity`, EF Core `DbContext`, `DbContextOptions`.
 - Produces:
-  - `public abstract class BaseDbContext(DbContextOptions options) : DbContext(options)` in `namespace ArturRios.Data.Configuration`, overriding `SaveChanges()` and `SaveChangesAsync(CancellationToken)` to regenerate `ConcurrencyStamp` on modified `VersionedEntity` entries.
-  - Test support: `TestEntity : Entity { string Name }`, `VersionedTestEntity : VersionedEntity { string Name }`, `TestDbContext : BaseDbContext` exposing `DbSet<TestEntity> Items` and `DbSet<VersionedTestEntity> VersionedItems`, and `SqliteTestContextFactory.Create()` returning an open-connection in-memory `TestDbContext`.
+    - `public abstract class BaseDbContext(DbContextOptions options) : DbContext(options)` in
+      `namespace ArturRios.Data.Configuration`, overriding `SaveChanges()` and `SaveChangesAsync(CancellationToken)` to
+      regenerate `ConcurrencyStamp` on modified `VersionedEntity` entries.
+    - Test support: `TestEntity : Entity { string Name }`, `VersionedTestEntity : VersionedEntity { string Name }`,
+      `TestDbContext : BaseDbContext` exposing `DbSet<TestEntity> Items` and
+      `DbSet<VersionedTestEntity> VersionedItems`, and `SqliteTestContextFactory.Create()` returning an open-connection
+      in-memory `TestDbContext`.
 
 - [ ] **Step 1: Add EF Core package refs**
 
@@ -838,19 +906,27 @@ Expected: PASS (2 tests).
 
 - [ ] **Step 6: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 7: `EfRepository<T>` — synchronous CRUD + ranges + `Query`
 
 **Files:**
+
 - Create: `src/Repositories/EfRepository.cs`
 - Test: `tests/Repositories/EfRepositoryTests.cs`
 
 **Interfaces:**
+
 - Consumes: `BaseDbContext`, `IRepository<T>`, `IAsyncRepository<T>`, `Entity`, `DataAccessException`, `DataOutput<T>`.
-- Produces: `public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepository<T> where T : Entity` in `namespace ArturRios.Data.Repositories`. This task implements the **sync** members + `Query()`; async members are added in Task 8 (write them as `throw new NotImplementedException()` stubs now so the type compiles, then fill in Task 8). Sync members catch `DbUpdateConcurrencyException` → concurrency error, `DbUpdateException`/`DbException` → persistence error, returning envelopes.
+- Produces: `public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepository<T> where T : Entity`
+  in `namespace ArturRios.Data.Repositories`. This task implements the **sync** members + `Query()`; async members are
+  added in Task 8 (write them as `throw new NotImplementedException()` stubs now so the type compiles, then fill in Task
+  8). Sync members catch `DbUpdateConcurrencyException` → concurrency error, `DbUpdateException`/`DbException` →
+  persistence error, returning envelopes.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1123,19 +1199,25 @@ Expected: PASS (8 tests).
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 8: `EfRepository<T>` — asynchronous members
 
 **Files:**
+
 - Modify: `src/Repositories/EfRepository.cs`
 - Test: `tests/Repositories/EfRepositoryAsyncTests.cs`
 
 **Interfaces:**
-- Consumes: everything from Task 7, plus EF async extensions (`ToListAsync`, `FirstOrDefaultAsync`, `AddAsync`, `AddRangeAsync`, `SaveChangesAsync`).
-- Produces: real implementations of the eight async methods, replacing the `NotImplementedException` stubs, using an async `GuardedAsync` helper.
+
+- Consumes: everything from Task 7, plus EF async extensions (`ToListAsync`, `FirstOrDefaultAsync`, `AddAsync`,
+  `AddRangeAsync`, `SaveChangesAsync`).
+- Produces: real implementations of the eight async methods, replacing the `NotImplementedException` stubs, using an
+  async `GuardedAsync` helper.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1334,23 +1416,33 @@ Expected: PASS (all sync + async).
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 9: Transactions — `IDbTransactionHandle`, `IUnitOfWork`, `IAsyncUnitOfWork`, `EfUnitOfWork`
 
 **Files:**
+
 - Create: `src/Transactions/IDbTransactionHandle.cs`, `IUnitOfWork.cs`, `IAsyncUnitOfWork.cs`, `EfUnitOfWork.cs`
 - Test: `tests/Transactions/EfUnitOfWorkTests.cs`
 
 **Interfaces:**
+
 - Consumes: `BaseDbContext`, `DataOutput<T>`, `ProcessOutput`, EF `Database.BeginTransaction[Async]`.
 - Produces (namespace `ArturRios.Data.Transactions`):
-  - `IDbTransactionHandle : IDisposable, IAsyncDisposable` with `void Commit()`, `void Rollback()`, `Task CommitAsync(CancellationToken ct = default)`, `Task RollbackAsync(CancellationToken ct = default)`.
-  - `IUnitOfWork`: `ProcessOutput ExecuteInTransaction(Action work)`, `DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work)`, `IDbTransactionHandle BeginTransaction()`.
-  - `IAsyncUnitOfWork`: `Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)`, `Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work, CancellationToken ct = default)`, `Task<IDbTransactionHandle> BeginTransactionAsync(CancellationToken ct = default)`.
-  - `EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork`.
+    - `IDbTransactionHandle : IDisposable, IAsyncDisposable` with `void Commit()`, `void Rollback()`,
+      `Task CommitAsync(CancellationToken ct = default)`, `Task RollbackAsync(CancellationToken ct = default)`.
+    - `IUnitOfWork`: `ProcessOutput ExecuteInTransaction(Action work)`,
+      `DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work)`,
+      `IDbTransactionHandle BeginTransaction()`.
+    - `IAsyncUnitOfWork`:
+      `Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)`,
+      `Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work, CancellationToken ct = default)`,
+      `Task<IDbTransactionHandle> BeginTransactionAsync(CancellationToken ct = default)`.
+    - `EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1611,17 +1703,23 @@ Expected: PASS (3 tests).
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 10: Concurrency conflict → envelope error (integration)
 
 **Files:**
+
 - Test: `tests/Concurrency/ConcurrencyTests.cs`
 
 **Interfaces:**
-- Consumes: `EfRepository<VersionedTestEntity>`, `SqliteTestContextFactory`, `VersionedTestEntity`. No production code changes expected — this verifies the concurrency handling built in Tasks 6–8. If the test fails, fix `EfRepository`/`BaseDbContext`, not the test.
+
+- Consumes: `EfRepository<VersionedTestEntity>`, `SqliteTestContextFactory`, `VersionedTestEntity`. No production code
+  changes expected — this verifies the concurrency handling built in Tasks 6–8. If the test fails, fix `EfRepository`/
+  `BaseDbContext`, not the test.
 
 - [ ] **Step 1: Write the test**
 
@@ -1661,7 +1759,12 @@ public class ConcurrencyTests
 }
 ```
 
-> **Note for implementer:** EF tracks by key, so reusing one context can defeat the stale-copy simulation. If the shared-context approach does not produce a conflict, detach the original before the late write: `writer.Entry(entity).State = EntityState.Detached;` **before** `repo.Update(entity)`, and set `entity.ConcurrencyStamp` to the value captured right after `Create`. The behavior under test is: an update carrying an out-of-date `ConcurrencyStamp` returns `Success=false` with a "Concurrency conflict" error — adjust the *test setup* to trigger it, never the production message.
+> **Note for implementer:** EF tracks by key, so reusing one context can defeat the stale-copy simulation. If the
+> shared-context approach does not produce a conflict, detach the original before the late write:
+`writer.Entry(entity).State = EntityState.Detached;` **before** `repo.Update(entity)`, and set `entity.ConcurrencyStamp`
+> to the value captured right after `Create`. The behavior under test is: an update carrying an out-of-date
+`ConcurrencyStamp` returns `Success=false` with a "Concurrency conflict" error — adjust the *test setup* to trigger it,
+> never the production message.
 
 - [ ] **Step 2: Run the test**
 
@@ -1670,25 +1773,36 @@ Expected: PASS. If it fails because no conflict was triggered, apply the detach 
 
 - [ ] **Step 3: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 11: Provider seam + DI entry point (core)
 
 **Files:**
+
 - Create: `src/Providers/IDatabaseProvider.cs`
 - Create: `src/DependencyInjection/ServiceCollectionExtensions.cs`
 - Test: `tests/DependencyInjection/ServiceCollectionExtensionsTests.cs`
 
 **Interfaces:**
-- Consumes: `BaseDbContext`, `BaseDbContextOptions`, `DatabaseType`, `IRepository<>`/`IAsyncRepository<>`/`IReadOnlyRepository<>`/`IAsyncReadOnlyRepository<>`, `EfRepository<>`, `IUnitOfWork`/`IAsyncUnitOfWork`, `EfUnitOfWork`, `IConfiguration`, `IServiceCollection`.
+
+- Consumes: `BaseDbContext`, `BaseDbContextOptions`, `DatabaseType`, `IRepository<>`/`IAsyncRepository<>`/
+  `IReadOnlyRepository<>`/`IAsyncReadOnlyRepository<>`, `EfRepository<>`, `IUnitOfWork`/`IAsyncUnitOfWork`,
+  `EfUnitOfWork`, `IConfiguration`, `IServiceCollection`.
 - Produces:
-  - `IDatabaseProvider` (namespace `ArturRios.Data.Providers`): `DatabaseType Type { get; }`, `void Configure(DbContextOptionsBuilder builder, string connectionString)`.
-  - `ServiceCollectionExtensions` (namespace `ArturRios.Data.DependencyInjection`):
-    - `AddArturRiosData<TContext>(this IServiceCollection, IConfiguration, string sectionName = "ArturRios.Data")` where `TContext : BaseDbContext`.
-    - `AddArturRiosData<TContext>(this IServiceCollection, BaseDbContextOptions options)` where `TContext : BaseDbContext`. (Takes a ready-built options instance rather than an `Action`, because `BaseDbContextOptions` uses `init`-only setters.)
-  - Fail-fast: if no registered `IDatabaseProvider` matches `options.DatabaseType`, throw `DataAccessException` naming the missing type and the package to install.
+    - `IDatabaseProvider` (namespace `ArturRios.Data.Providers`): `DatabaseType Type { get; }`,
+      `void Configure(DbContextOptionsBuilder builder, string connectionString)`.
+    - `ServiceCollectionExtensions` (namespace `ArturRios.Data.DependencyInjection`):
+        - `AddArturRiosData<TContext>(this IServiceCollection, IConfiguration, string sectionName = "ArturRios.Data")`
+          where `TContext : BaseDbContext`.
+        - `AddArturRiosData<TContext>(this IServiceCollection, BaseDbContextOptions options)` where
+          `TContext : BaseDbContext`. (Takes a ready-built options instance rather than an `Action`, because
+          `BaseDbContextOptions` uses `init`-only setters.)
+    - Fail-fast: if no registered `IDatabaseProvider` matches `options.DatabaseType`, throw `DataAccessException` naming
+      the missing type and the package to install.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1917,7 +2031,10 @@ public static class ServiceCollectionExtensions
 }
 ```
 
-> **Implementer note:** `EnsureProviderRegistered` inspects the `IServiceCollection` descriptors (not a built provider) so the missing-provider case throws synchronously from `AddArturRiosData`, as the test expects. `ResolveProvider` (the `IEnumerable<IDatabaseProvider>` overload) is still used inside the `AddDbContext` callback at resolution time — keep both.
+> **Implementer note:** `EnsureProviderRegistered` inspects the `IServiceCollection` descriptors (not a built provider)
+> so the missing-provider case throws synchronously from `AddArturRiosData`, as the test expects. `ResolveProvider` (the
+`IEnumerable<IDatabaseProvider>` overload) is still used inside the `AddDbContext` callback at resolution time — keep
+> both.
 
 - [ ] **Step 4: Run to verify it passes**
 
@@ -1926,20 +2043,27 @@ Expected: PASS (2 tests). Then run the full suite: `dotnet test tests/ArturRios.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 12: `ArturRios.Data.Sqlite` provider package
 
 **Files:**
-- Create: `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`, `SqliteProvider.cs`, `ServiceCollectionExtensions.cs`
+
+- Create: `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`, `SqliteProvider.cs`,
+  `ServiceCollectionExtensions.cs`
 - Modify: `src/ArturRios.Data.sln`
 - Test: `tests/Providers/SqliteProviderTests.cs`
 
 **Interfaces:**
+
 - Consumes: `IDatabaseProvider`, `DatabaseType`.
-- Produces: `SqliteProvider : IDatabaseProvider` (`Type => DatabaseType.SQLite`, `Configure` → `builder.UseSqlite(connectionString)`) in `namespace ArturRios.Data.Sqlite`, and `ServiceCollectionExtensions.AddSqliteProvider(this IServiceCollection)` registering it as `IDatabaseProvider`.
+- Produces: `SqliteProvider : IDatabaseProvider` (`Type => DatabaseType.SQLite`, `Configure` →
+  `builder.UseSqlite(connectionString)`) in `namespace ArturRios.Data.Sqlite`, and
+  `ServiceCollectionExtensions.AddSqliteProvider(this IServiceCollection)` registering it as `IDatabaseProvider`.
 
 - [ ] **Step 1: Create the project + csproj**
 
@@ -1973,7 +2097,9 @@ Create `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`:
 </Project>
 ```
 
-> **Implementer note:** The core project file is `src/ArturRios.Data.csproj` (it lives directly in `src/`, not in a subfolder). Confirm the relative `ProjectReference` path resolves; adjust `..\ArturRios.Data.csproj` if the core csproj path differs.
+> **Implementer note:** The core project file is `src/ArturRios.Data.csproj` (it lives directly in `src/`, not in a
+> subfolder). Confirm the relative `ProjectReference` path resolves; adjust `..\ArturRios.Data.csproj` if the core csproj
+> path differs.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -2074,23 +2200,31 @@ Expected: PASS (2 tests).
 
 - [ ] **Step 7: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 13: `ArturRios.Data.PostgreSql` provider package
 
 **Files:**
-- Create: `src/ArturRios.Data.PostgreSql/ArturRios.Data.PostgreSql.csproj`, `PostgreSqlProvider.cs`, `ServiceCollectionExtensions.cs`
+
+- Create: `src/ArturRios.Data.PostgreSql/ArturRios.Data.PostgreSql.csproj`, `PostgreSqlProvider.cs`,
+  `ServiceCollectionExtensions.cs`
 - Modify: `src/ArturRios.Data.sln`
 - Test: `tests/Providers/PostgreSqlProviderTests.cs`
 
 **Interfaces:**
-- Produces: `PostgreSqlProvider : IDatabaseProvider` (`Type => DatabaseType.PostgreSql`, `Configure` → `builder.UseNpgsql(connectionString)`) in `namespace ArturRios.Data.PostgreSql`, and `AddPostgreSqlProvider(this IServiceCollection)`.
+
+- Produces: `PostgreSqlProvider : IDatabaseProvider` (`Type => DatabaseType.PostgreSql`, `Configure` →
+  `builder.UseNpgsql(connectionString)`) in `namespace ArturRios.Data.PostgreSql`, and
+  `AddPostgreSqlProvider(this IServiceCollection)`.
 
 - [ ] **Step 1: Create csproj**
 
-Create `src/ArturRios.Data.PostgreSql/ArturRios.Data.PostgreSql.csproj` (copy the Sqlite csproj, changing `PackageId`/`Description`/`PackageTags` to PostgreSql, and the provider reference):
+Create `src/ArturRios.Data.PostgreSql/ArturRios.Data.PostgreSql.csproj` (copy the Sqlite csproj, changing `PackageId`/
+`Description`/`PackageTags` to PostgreSql, and the provider reference):
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -2120,7 +2254,8 @@ Create `src/ArturRios.Data.PostgreSql/ArturRios.Data.PostgreSql.csproj` (copy th
 </Project>
 ```
 
-> **Implementer note:** If `Npgsql.EntityFrameworkCore.PostgreSQL` has no `10.*` release yet, use the newest published major that supports EF Core 10 and note it in the checkpoint. Do not target an EF9 provider against EF10.
+> **Implementer note:** If `Npgsql.EntityFrameworkCore.PostgreSQL` has no `10.*` release yet, use the newest published
+> major that supports EF Core 10 and note it in the checkpoint. Do not target an EF9 provider against EF10.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -2208,19 +2343,25 @@ Expected: PASS.
 
 - [ ] **Step 6: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 14: `ArturRios.Data.MySql` provider package
 
 **Files:**
+
 - Create: `src/ArturRios.Data.MySql/ArturRios.Data.MySql.csproj`, `MySqlProvider.cs`, `ServiceCollectionExtensions.cs`
 - Modify: `src/ArturRios.Data.sln`
 - Test: `tests/Providers/MySqlProviderTests.cs`
 
 **Interfaces:**
-- Produces: `MySqlProvider : IDatabaseProvider` (`Type => DatabaseType.MySql`, `Configure` → `builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`) in `namespace ArturRios.Data.MySql`, and `AddMySqlProvider(this IServiceCollection)`.
+
+- Produces: `MySqlProvider : IDatabaseProvider` (`Type => DatabaseType.MySql`, `Configure` →
+  `builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`) in `namespace ArturRios.Data.MySql`,
+  and `AddMySqlProvider(this IServiceCollection)`.
 
 - [ ] **Step 1: Create csproj**
 
@@ -2254,7 +2395,10 @@ Create `src/ArturRios.Data.MySql/ArturRios.Data.MySql.csproj`:
 </Project>
 ```
 
-> **Implementer note:** Pomelo's EF10 release may lag. Use the newest published `Pomelo.EntityFrameworkCore.MySql` that supports the highest available EF Core the core package resolves to. If Pomelo does not yet support EF10 at implementation time, this task may be temporarily skipped and noted in the checkpoint — the other two providers and the core are independent of it. Do NOT downgrade the core EF version to accommodate Pomelo.
+> **Implementer note:** Pomelo's EF10 release may lag. Use the newest published `Pomelo.EntityFrameworkCore.MySql` that
+> supports the highest available EF Core the core package resolves to. If Pomelo does not yet support EF10 at
+> implementation time, this task may be temporarily skipped and noted in the checkpoint — the other two providers and the
+> core are independent of it. Do NOT downgrade the core EF version to accommodate Pomelo.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -2342,16 +2486,20 @@ Expected: PASS.
 
 - [ ] **Step 6: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ### Task 15: Full build, full test run, README rewrite
 
 **Files:**
+
 - Modify: `README.md`
 
 **Interfaces:**
+
 - Consumes: everything built above. No new production types.
 
 - [ ] **Step 1: Full solution build & test**
@@ -2363,7 +2511,10 @@ Expected: entire suite green.
 
 - [ ] **Step 2: Rewrite README usage**
 
-Replace the "Overview" table and the numbered "Usage" sections (§1–§4) of `README.md` to reflect the v2 design. Include, verbatim, an accurate types table (the 4 interfaces, `Entity`, `VersionedEntity`, `BaseDbContext`, `BaseDbContextOptions`, `DatabaseType`, `IDatabaseProvider`, `IUnitOfWork`/`IAsyncUnitOfWork`, `EfRepository<T>`, `EfUnitOfWork`) and this end-to-end usage:
+Replace the "Overview" table and the numbered "Usage" sections (§1–§4) of `README.md` to reflect the v2 design. Include,
+verbatim, an accurate types table (the 4 interfaces, `Entity`, `VersionedEntity`, `BaseDbContext`,
+`BaseDbContextOptions`, `DatabaseType`, `IDatabaseProvider`, `IUnitOfWork`/`IAsyncUnitOfWork`, `EfRepository<T>`,
+`EfUnitOfWork`) and this end-to-end usage:
 
 ````markdown
 ### 1. Define entities
@@ -2435,9 +2586,13 @@ public class ProductService(
 ```
 ````
 
-Also update the "Requirements" section to note the provider packages (`ArturRios.Data.Sqlite` / `.PostgreSql` / `.MySql`) and that the installed provider must match the configured `DatabaseType`.
+Also update the "Requirements" section to note the provider packages (`ArturRios.Data.Sqlite` / `.PostgreSql` /
+`.MySql`) and that the installed provider must match the configured `DatabaseType`.
 
-Additionally, update the Hugo docs page `docs/content/_index.md`, which still references the removed `ICrudRepository`/`IRangeRepository`: replace those mentions with the v2 interface family (`IReadOnlyRepository`/`IRepository` + async mirrors) so the published docs match the code. Keep the edit minimal — just the stale type references and any old-usage snippet.
+Additionally, update the Hugo docs page `docs/content/_index.md`, which still references the removed `ICrudRepository`/
+`IRangeRepository`: replace those mentions with the v2 interface family (`IReadOnlyRepository`/`IRepository` + async
+mirrors) so the published docs match the code. Keep the edit minimal — just the stale type references and any old-usage
+snippet.
 
 - [ ] **Step 3: Final verification**
 
@@ -2446,13 +2601,18 @@ Expected: build + all tests green.
 
 - [ ] **Step 4: Commit (local branch)**
 
-Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist) to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit message. Do NOT push. Do NOT switch to `main`.
+Run the task's test filter plus `dotnet build src/ArturRios.Data.csproj` (or the solution, once provider projects exist)
+to confirm green, then commit the task's files locally on `feat/relational-data-access` with a conventional-commit
+message. Do NOT push. Do NOT switch to `main`.
 
 ---
 
 ## Notes for the implementer
 
-- **Commit locally after each task** on `feat/relational-data-access`; **never `git push`** and **never touch `main`** — the user does the final merge to `main` manually.
-- If a provider package's EF10-compatible version is unavailable at implementation time (Pomelo especially), note it at the checkpoint and continue — core + the other providers do not depend on it.
+- **Commit locally after each task** on `feat/relational-data-access`; **never `git push`** and **never touch `main`** —
+  the user does the final merge to `main` manually.
+- If a provider package's EF10-compatible version is unavailable at implementation time (Pomelo especially), note it at
+  the checkpoint and continue — core + the other providers do not depend on it.
 - Keep XML docs on every public member; the build has `GenerateDocumentationFile=true` and will warn otherwise.
-- The `Query()` method is deliberately un-enveloped and is the future seam for the Dapper query path (separate sub-project).
+- The `Query()` method is deliberately un-enveloped and is the future seam for the Dapper query path (separate
+  sub-project).

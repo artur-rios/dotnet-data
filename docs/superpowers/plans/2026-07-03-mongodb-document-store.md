@@ -1,36 +1,64 @@
 # MongoDB Document Store Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build `ArturRios.Data.MongoDb` — a `DataOutput`-enveloped document-repository stack over MongoDB with string/ObjectId identity, `Find`/`Query`, opt-in optimistic concurrency, and multi-document transactions via a unit of work using client sessions.
+**Goal:** Build `ArturRios.Data.MongoDb` — a `DataOutput`-enveloped document-repository stack over MongoDB with
+string/ObjectId identity, `Find`/`Query`, opt-in optimistic concurrency, and multi-document transactions via a unit of
+work using client sessions.
 
-**Architecture:** A new sibling package (no `ArturRios.Data.Core`/EF dependency) referencing `MongoDB.Driver` 3.x + `ArturRios.Output`. `MongoDocumentRepository<T>(MongoContext)` implements sync+async document-repository interfaces; `MongoContext` wraps `IMongoDatabase` and carries an ambient `IClientSessionHandle` so repo ops enlist in `MongoUnitOfWork` transactions. `AddMongoData(configuration)` wires it up.
+**Architecture:** A new sibling package (no `ArturRios.Data.Core`/EF dependency) referencing `MongoDB.Driver` 3.x +
+`ArturRios.Output`. `MongoDocumentRepository<T>(MongoContext)` implements sync+async document-repository interfaces;
+`MongoContext` wraps `IMongoDatabase` and carries an ambient `IClientSessionHandle` so repo ops enlist in
+`MongoUnitOfWork` transactions. `AddMongoData(configuration)` wires it up.
 
-**Tech Stack:** .NET 10, MongoDB.Driver 3.x, EphemeralMongo (single-node replica set for tests), xUnit, `ArturRios.Output` 2.0.1.
+**Tech Stack:** .NET 10, MongoDB.Driver 3.x, EphemeralMongo (single-node replica set for tests), xUnit,
+`ArturRios.Output` 2.0.1.
 
-**Design spec:** [docs/superpowers/specs/2026-07-03-mongodb-document-store-design.md](../specs/2026-07-03-mongodb-document-store-design.md)
+**Design spec:
+** [docs/superpowers/specs/2026-07-03-mongodb-document-store-design.md](../specs/2026-07-03-mongodb-document-store-design.md)
 
 ## Global Constraints
 
-- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable (in `src`; tests project has NO `ImplicitUsings` — add explicit `using`s there).
-- **XML documentation is mandatory** on every public type/member (`GenerateDocumentationFile=true`; build warns on missing docs).
-- **New package version → `1.0.0`.** Reuse the sibling-package csproj conventions (Authors/Company "Artur Rios", MIT, `PackageProjectUrl`/`RepositoryUrl` as in `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`). **No reference to `ArturRios.Data.Core`** — depend on `ArturRios.Output` + `MongoDB.Driver` only.
-- **Envelopes, not exceptions, cross the boundary.** No public repository/unit-of-work method may let an infrastructure exception propagate; catch and convert to `DataOutput`/`ProcessOutput`, EXCEPT `OperationCanceledException`, which must propagate.
-- **Namespaces:** package sources under `ArturRios.Data.MongoDb` (+ `.Interfaces`, `.Configuration`, `.Repositories`, `.Transactions`, `.Exceptions`, `.DependencyInjection`). Test namespaces under `ArturRios.Data.Tests.MongoDb`.
-- **Session plumbing:** every `MongoDocumentRepository` driver call passes `context.Session` when non-null (transaction) and uses the non-session overload when null. Transactions require a replica set (satisfied in tests by EphemeralMongo `UseSingleNodeReplicaSet = true`).
-- **Git policy:** Work on the local `feature/mongodb-document-store` branch. **Commit locally after each task** (TDD red-green-commit). **NEVER `git push`** during tasks and **never touch `main`** — the branch is pushed only at the very end (finishing step), and the user opens any PR manually. Stage ONLY the task's own files with explicit `git add <path>` (never `git add -A`/`.`). Conventional-commit messages, body ending with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
-- **Tests:** xUnit. Server-free tests (identity, interfaces, collection naming, context, DI resolution) run without Mongo. Integration tests (repository CRUD/find/concurrency, transactions) use a **shared EphemeralMongo single-node replica set fixture**. EphemeralMongo downloads a `mongod` binary on first run (needs network once); if it cannot restore or start `mongod`, STOP and report BLOCKED with the exact error — do not fall back to mocks.
-- **Driver API note:** MongoDB.Driver 3.x. Where an exact overload/return type differs from what a task shows, adjust to the real 3.x signature during the RED→GREEN cycle and note it (e.g. `session.StartTransaction()` is sync; commit/abort have async variants `CommitTransactionAsync`/`AbortTransactionAsync`). Do not change the observable behavior.
+- **Target framework:** `net10.0`. **LangVersion:** `latest`. `Nullable` enable, `ImplicitUsings` enable (in `src`;
+  tests project has NO `ImplicitUsings` — add explicit `using`s there).
+- **XML documentation is mandatory** on every public type/member (`GenerateDocumentationFile=true`; build warns on
+  missing docs).
+- **New package version → `1.0.0`.** Reuse the sibling-package csproj conventions (Authors/Company "Artur Rios", MIT,
+  `PackageProjectUrl`/`RepositoryUrl` as in `src/ArturRios.Data.Sqlite/ArturRios.Data.Sqlite.csproj`). **No reference
+  to `ArturRios.Data.Core`** — depend on `ArturRios.Output` + `MongoDB.Driver` only.
+- **Envelopes, not exceptions, cross the boundary.** No public repository/unit-of-work method may let an infrastructure
+  exception propagate; catch and convert to `DataOutput`/`ProcessOutput`, EXCEPT `OperationCanceledException`, which
+  must propagate.
+- **Namespaces:** package sources under `ArturRios.Data.MongoDb` (+ `.Interfaces`, `.Configuration`, `.Repositories`,
+  `.Transactions`, `.Exceptions`, `.DependencyInjection`). Test namespaces under `ArturRios.Data.Tests.MongoDb`.
+- **Session plumbing:** every `MongoDocumentRepository` driver call passes `context.Session` when non-null (transaction)
+  and uses the non-session overload when null. Transactions require a replica set (satisfied in tests by EphemeralMongo
+  `UseSingleNodeReplicaSet = true`).
+- **Git policy:** Work on the local `feature/mongodb-document-store` branch. **Commit locally after each task** (TDD
+  red-green-commit). **NEVER `git push`** during tasks and **never touch `main`** — the branch is pushed only at the
+  very end (finishing step), and the user opens any PR manually. Stage ONLY the task's own files with explicit
+  `git add <path>` (never `git add -A`/`.`). Conventional-commit messages, body ending with
+  `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
+- **Tests:** xUnit. Server-free tests (identity, interfaces, collection naming, context, DI resolution) run without
+  Mongo. Integration tests (repository CRUD/find/concurrency, transactions) use a **shared EphemeralMongo single-node
+  replica set fixture**. EphemeralMongo downloads a `mongod` binary on first run (needs network once); if it cannot
+  restore or start `mongod`, STOP and report BLOCKED with the exact error — do not fall back to mocks.
+- **Driver API note:** MongoDB.Driver 3.x. Where an exact overload/return type differs from what a task shows, adjust to
+  the real 3.x signature during the RED→GREEN cycle and note it (e.g. `session.StartTransaction()` is sync; commit/abort
+  have async variants `CommitTransactionAsync`/`AbortTransactionAsync`). Do not change the observable behavior.
 - Build/test with the .NET CLI.
 
 ## File Structure
 
 **`src/ArturRios.Data.MongoDb/`** (new package):
+
 - `ArturRios.Data.MongoDb.csproj`
 - `Document.cs`, `VersionedDocument.cs`
 - `CollectionAttribute.cs`, `CollectionName.cs`
 - `Configuration/MongoOptions.cs`
-- `Interfaces/IDocumentReadOnlyRepository.cs`, `IDocumentRepository.cs`, `IAsyncDocumentReadOnlyRepository.cs`, `IAsyncDocumentRepository.cs`
+- `Interfaces/IDocumentReadOnlyRepository.cs`, `IDocumentRepository.cs`, `IAsyncDocumentReadOnlyRepository.cs`,
+  `IAsyncDocumentRepository.cs`
 - `Exceptions/MongoDataException.cs`, `Exceptions/MongoConcurrencyException.cs`
 - `MongoContext.cs`
 - `Repositories/MongoDocumentRepository.cs`
@@ -38,9 +66,11 @@
 - `DependencyInjection/ServiceCollectionExtensions.cs`
 
 **Tests** (`tests/ArturRios.Data.Tests`):
+
 - `ArturRios.Data.Tests.csproj` *(modify — add ProjectReference + EphemeralMongo/MongoDB.Driver package refs)*
 - `MongoDb/TestSupport/{TestDocuments.cs, MongoReplicaSetFixture.cs, MongoTestCollection.cs}`
-- `MongoDb/{DocumentIdentityTests.cs, CollectionNameTests.cs, MongoContextTests.cs, MongoDocumentRepositoryTests.cs, MongoDocumentRepositoryAsyncTests.cs, MongoUnitOfWorkTests.cs, AddMongoDataTests.cs, MongoInterfacesTests.cs}`
+-
+`MongoDb/{DocumentIdentityTests.cs, CollectionNameTests.cs, MongoContextTests.cs, MongoDocumentRepositoryTests.cs, MongoDocumentRepositoryAsyncTests.cs, MongoUnitOfWorkTests.cs, AddMongoDataTests.cs, MongoInterfacesTests.cs}`
 
 **Solution:** `src/ArturRios.Data.sln` *(add the project)*.
 
@@ -51,12 +81,17 @@
 ### Task 1: Scaffold package + identity + options
 
 **Files:**
-- Create: `src/ArturRios.Data.MongoDb/ArturRios.Data.MongoDb.csproj`, `Document.cs`, `VersionedDocument.cs`, `Configuration/MongoOptions.cs`
+
+- Create: `src/ArturRios.Data.MongoDb/ArturRios.Data.MongoDb.csproj`, `Document.cs`, `VersionedDocument.cs`,
+  `Configuration/MongoOptions.cs`
 - Modify: `src/ArturRios.Data.sln`, `tests/ArturRios.Data.Tests.csproj`
 - Test: `tests/MongoDb/DocumentIdentityTests.cs`
 
 **Interfaces:**
-- Produces: `Document` (`string Id`, `[BsonId][BsonRepresentation(BsonType.ObjectId)]`), `VersionedDocument : Document` (`long Version`), `MongoOptions` (`ConnectionString`, `DatabaseName`, both `init`) — all in `ArturRios.Data.MongoDb` / `.Configuration`.
+
+- Produces: `Document` (`string Id`, `[BsonId][BsonRepresentation(BsonType.ObjectId)]`),
+  `VersionedDocument : Document` (`long Version`), `MongoOptions` (`ConnectionString`, `DatabaseName`, both `init`) —
+  all in `ArturRios.Data.MongoDb` / `.Configuration`.
 
 - [ ] **Step 1: Create the csproj**
 
@@ -90,7 +125,9 @@ Create `src/ArturRios.Data.MongoDb/ArturRios.Data.MongoDb.csproj`:
 </Project>
 ```
 
-> **Implementer note:** The core project `src/ArturRios.Data.Core.csproj` already excludes `ArturRios.Data.*\**` from its compile glob, so this new folder is auto-excluded — do NOT edit the core csproj. If `MongoDB.Driver` `3.*` fails to restore (network), STOP and report BLOCKED.
+> **Implementer note:** The core project `src/ArturRios.Data.Core.csproj` already excludes `ArturRios.Data.*\**` from
+> its compile glob, so this new folder is auto-excluded — do NOT edit the core csproj. If `MongoDB.Driver` `3.*` fails to
+> restore (network), STOP and report BLOCKED.
 
 - [ ] **Step 2: Write identity + options**
 
@@ -146,16 +183,21 @@ public class MongoOptions
 Run: `dotnet sln src/ArturRios.Data.sln add src/ArturRios.Data.MongoDb/ArturRios.Data.MongoDb.csproj`
 
 In `tests/ArturRios.Data.Tests.csproj`, add to the `ItemGroup` holding the other `ProjectReference`s:
+
 ```xml
 <ProjectReference Include="..\src\ArturRios.Data.MongoDb\ArturRios.Data.MongoDb.csproj" />
 ```
-And add to a `PackageReference` `ItemGroup` (the tests project will need the driver + EphemeralMongo in later tasks; add both now):
+
+And add to a `PackageReference` `ItemGroup` (the tests project will need the driver + EphemeralMongo in later tasks; add
+both now):
+
 ```xml
 <PackageReference Include="MongoDB.Driver" Version="3.*" />
 <PackageReference Include="EphemeralMongo" Version="*" />
 ```
 
-> **Implementer note:** `EphemeralMongo` `Version="*"` floats to the latest (the driver-3.x-compatible package is named `EphemeralMongo`). If restore fails, report BLOCKED with the exact version error.
+> **Implementer note:** `EphemeralMongo` `Version="*"` floats to the latest (the driver-3.x-compatible package is named
+`EphemeralMongo`). If restore fails, report BLOCKED with the exact version error.
 
 - [ ] **Step 4: Write the failing test**
 
@@ -213,22 +255,33 @@ Expected: PASS (4 tests).
 
 - [ ] **Step 6: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: scaffold ArturRios.Data.MongoDb package with document identity`). Do NOT push. Do NOT touch `main`.
+Stage only this task's files; commit locally (e.g.
+`feat: scaffold ArturRios.Data.MongoDb package with document identity`). Do NOT push. Do NOT touch `main`.
 
 ---
 
 ### Task 2: Interfaces + collection naming + exceptions
 
 **Files:**
-- Create: `src/ArturRios.Data.MongoDb/Interfaces/IDocumentReadOnlyRepository.cs`, `IDocumentRepository.cs`, `IAsyncDocumentReadOnlyRepository.cs`, `IAsyncDocumentRepository.cs`, `CollectionAttribute.cs`, `CollectionName.cs`, `Exceptions/MongoDataException.cs`, `Exceptions/MongoConcurrencyException.cs`
+
+- Create: `src/ArturRios.Data.MongoDb/Interfaces/IDocumentReadOnlyRepository.cs`, `IDocumentRepository.cs`,
+  `IAsyncDocumentReadOnlyRepository.cs`, `IAsyncDocumentRepository.cs`, `CollectionAttribute.cs`, `CollectionName.cs`,
+  `Exceptions/MongoDataException.cs`, `Exceptions/MongoConcurrencyException.cs`
 - Test: `tests/MongoDb/CollectionNameTests.cs`, `tests/MongoDb/MongoInterfacesTests.cs`
 
 **Interfaces:**
+
 - Consumes: `Document`, `DataOutput<T>` (`ArturRios.Output`), `System.Linq.Expressions.Expression`.
 - Produces:
-  - The four repository interfaces in `ArturRios.Data.MongoDb.Interfaces` exactly as in spec §5 (`T : Document`; sync + async; `Query()`, `GetAll`, `GetById(string)`, `Find(Expression<Func<T,bool>>)`, `Create`→`DataOutput<string>`, `CreateRange`→`DataOutput<IEnumerable<string>>`, `Update`→`DataOutput<T>`, `UpdateRange`→`DataOutput<IEnumerable<T>>`, `Delete(T)`→`DataOutput<string>`, `DeleteRange(IEnumerable<string>)`→`DataOutput<IEnumerable<string>>`; async mirrors with `Async` suffix + `CancellationToken`).
-  - `[Collection("name")]` attribute (`CollectionAttribute`), `CollectionName.For<T>()` → attribute name or `typeof(T).Name` (cached).
-  - `MongoDataException(string[]) : CustomException`; `MongoConcurrencyException() : CustomException` carrying a fixed concurrency message.
+    - The four repository interfaces in `ArturRios.Data.MongoDb.Interfaces` exactly as in spec §5 (`T : Document`;
+      sync + async; `Query()`, `GetAll`, `GetById(string)`, `Find(Expression<Func<T,bool>>)`, `Create`→
+      `DataOutput<string>`, `CreateRange`→`DataOutput<IEnumerable<string>>`, `Update`→`DataOutput<T>`, `UpdateRange`→
+      `DataOutput<IEnumerable<T>>`, `Delete(T)`→`DataOutput<string>`, `DeleteRange(IEnumerable<string>)`→
+      `DataOutput<IEnumerable<string>>`; async mirrors with `Async` suffix + `CancellationToken`).
+    - `[Collection("name")]` attribute (`CollectionAttribute`), `CollectionName.For<T>()` → attribute name or
+      `typeof(T).Name` (cached).
+    - `MongoDataException(string[]) : CustomException`; `MongoConcurrencyException() : CustomException` carrying a fixed
+      concurrency message.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -505,19 +558,24 @@ Expected: PASS. Also `dotnet build src/ArturRios.Data.MongoDb/ArturRios.Data.Mon
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: add MongoDb document repository interfaces and collection naming`). Do NOT push.
+Stage only this task's files; commit locally (e.g.
+`feat: add MongoDb document repository interfaces and collection naming`). Do NOT push.
 
 ---
 
 ### Task 3: `MongoContext`
 
 **Files:**
+
 - Create: `src/ArturRios.Data.MongoDb/MongoContext.cs`
 - Test: `tests/MongoDb/MongoContextTests.cs`
 
 **Interfaces:**
-- Consumes: `IMongoDatabase`/`IMongoCollection<T>`/`IClientSessionHandle` (`MongoDB.Driver`), `CollectionName`, `Document`.
-- Produces: `MongoContext(IMongoDatabase database)` with `IClientSessionHandle? Session { get; set; }` and `IMongoCollection<T> GetCollection<T>() where T : Document` (collection name from `CollectionName.For<T>()`).
+
+- Consumes: `IMongoDatabase`/`IMongoCollection<T>`/`IClientSessionHandle` (`MongoDB.Driver`), `CollectionName`,
+  `Document`.
+- Produces: `MongoContext(IMongoDatabase database)` with `IClientSessionHandle? Session { get; set; }` and
+  `IMongoCollection<T> GetCollection<T>() where T : Document` (collection name from `CollectionName.For<T>()`).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -587,7 +645,9 @@ public class MongoContext(IMongoDatabase database)
 }
 ```
 
-> **Implementer note:** The class-summary `<see cref="Transactions.IMongoUnitOfWork"/>` references a type created in Task 6; if this produces a CS1574 "cannot resolve cref" warning (0-warning gate), reword the summary to prose ("the Mongo unit of work") to avoid the dangling cref, matching how the Dapper task handled the same situation.
+> **Implementer note:** The class-summary `<see cref="Transactions.IMongoUnitOfWork"/>` references a type created in
+> Task 6; if this produces a CS1574 "cannot resolve cref" warning (0-warning gate), reword the summary to prose ("the
+> Mongo unit of work") to avoid the dangling cref, matching how the Dapper task handled the same situation.
 
 - [ ] **Step 4: Run to verify it passes**
 
@@ -596,22 +656,32 @@ Expected: PASS (2 tests). Build → 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: add MongoContext with collection resolution and ambient session`). Do NOT push.
+Stage only this task's files; commit locally (e.g.
+`feat: add MongoContext with collection resolution and ambient session`). Do NOT push.
 
 ---
 
 ### Task 4: EphemeralMongo fixture + `MongoDocumentRepository` (sync)
 
 **Files:**
-- Create: `tests/MongoDb/TestSupport/TestDocuments.cs`, `tests/MongoDb/TestSupport/MongoReplicaSetFixture.cs`, `tests/MongoDb/TestSupport/MongoTestCollection.cs`
+
+- Create: `tests/MongoDb/TestSupport/TestDocuments.cs`, `tests/MongoDb/TestSupport/MongoReplicaSetFixture.cs`,
+  `tests/MongoDb/TestSupport/MongoTestCollection.cs`
 - Create: `src/ArturRios.Data.MongoDb/Repositories/MongoDocumentRepository.cs`
 - Test: `tests/MongoDb/MongoDocumentRepositoryTests.cs`
 
 **Interfaces:**
-- Consumes: `MongoContext`, the four interfaces, `Document`/`VersionedDocument`, `MongoConcurrencyException`, `DataOutput<T>`, `MongoDB.Driver` (`IMongoCollection`, `Builders`, `FilterDefinition`, `ReplaceOneResult`, `DeleteResult`, `IClientSessionHandle`).
+
+- Consumes: `MongoContext`, the four interfaces, `Document`/`VersionedDocument`, `MongoConcurrencyException`,
+  `DataOutput<T>`, `MongoDB.Driver` (`IMongoCollection`, `Builders`, `FilterDefinition`, `ReplaceOneResult`,
+  `DeleteResult`, `IClientSessionHandle`).
 - Produces:
-  - Test support: `TestDoc : Document { string Name }`, `VersionedTestDoc : VersionedDocument { string Name }`; `MongoReplicaSetFixture` (starts one EphemeralMongo single-node replica set, exposes `ConnectionString` + a helper to make a fresh `MongoContext` on a unique database); an xUnit collection definition `MongoTestCollection`.
-  - `MongoDocumentRepository<T>(MongoContext context) : IDocumentRepository<T>, IAsyncDocumentRepository<T>` implementing all SYNC members + `Query()` + the `Guarded`/`Fail` helpers + private session-aware driver helpers. Async members are `throw new NotImplementedException()` STUBS (Task 5 fills them).
+    - Test support: `TestDoc : Document { string Name }`, `VersionedTestDoc : VersionedDocument { string Name }`;
+      `MongoReplicaSetFixture` (starts one EphemeralMongo single-node replica set, exposes `ConnectionString` + a helper
+      to make a fresh `MongoContext` on a unique database); an xUnit collection definition `MongoTestCollection`.
+    - `MongoDocumentRepository<T>(MongoContext context) : IDocumentRepository<T>, IAsyncDocumentRepository<T>`
+      implementing all SYNC members + `Query()` + the `Guarded`/`Fail` helpers + private session-aware driver helpers.
+      Async members are `throw new NotImplementedException()` STUBS (Task 5 fills them).
 
 - [ ] **Step 1: Write the test support**
 
@@ -674,7 +744,10 @@ public sealed class MongoReplicaSetFixture : IDisposable
 }
 ```
 
-> **Implementer note:** `MongoRunner.Run` returns an `IMongoRunner` (disposable) exposing `ConnectionString`. If the exact type/name differs in the resolved EphemeralMongo version, adjust (e.g. `IMongoRunner` vs a concrete type) — keep the behavior (start replica set, expose connection string, dispose to tear down). Starting the replica set may take several seconds and downloads a mongod binary on first run; if it cannot start, report BLOCKED with the exact error.
+> **Implementer note:** `MongoRunner.Run` returns an `IMongoRunner` (disposable) exposing `ConnectionString`. If the
+> exact type/name differs in the resolved EphemeralMongo version, adjust (e.g. `IMongoRunner` vs a concrete type) — keep
+> the behavior (start replica set, expose connection string, dispose to tear down). Starting the replica set may take
+> several seconds and downloads a mongod binary on first run; if it cannot start, report BLOCKED with the exact error.
 
 Create `tests/MongoDb/TestSupport/MongoTestCollection.cs`:
 
@@ -1007,7 +1080,12 @@ public class MongoDocumentRepository<T>(MongoContext context)
 }
 ```
 
-> **Implementer note:** MongoDB.Driver 3.x specifics to confirm during RED→GREEN: session overloads `Find(session, filter)`, `InsertOne(session, doc)`, `InsertMany(session, docs)`, `ReplaceOne(session, filter, doc)`, `DeleteMany(session, filter)` exist and take a non-null `IClientSessionHandle`; `ReplaceOneResult.MatchedCount` and `IFindFluent<T,T>.FirstOrDefault()/ToList()` are correct. `Builders<T>.Filter.Eq("Version", expected)` filters by the BSON field name `Version`. If a signature differs, adjust to the real 3.x API without changing behavior. `AsQueryable()` uses the driver's LINQ provider.
+> **Implementer note:** MongoDB.Driver 3.x specifics to confirm during RED→GREEN: session overloads
+`Find(session, filter)`, `InsertOne(session, doc)`, `InsertMany(session, docs)`, `ReplaceOne(session, filter, doc)`,
+`DeleteMany(session, filter)` exist and take a non-null `IClientSessionHandle`; `ReplaceOneResult.MatchedCount` and
+`IFindFluent<T,T>.FirstOrDefault()/ToList()` are correct. `Builders<T>.Filter.Eq("Version", expected)` filters by the
+> BSON field name `Version`. If a signature differs, adjust to the real 3.x API without changing behavior. `AsQueryable()`
+> uses the driver's LINQ provider.
 
 - [ ] **Step 5: Run to verify it passes**
 
@@ -1016,18 +1094,22 @@ Expected: PASS (7 tests) against the ephemeral replica set. Build → 0 warnings
 
 - [ ] **Step 6: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: add synchronous MongoDb document repository with optimistic concurrency`). Do NOT push.
+Stage only this task's files; commit locally (e.g.
+`feat: add synchronous MongoDb document repository with optimistic concurrency`). Do NOT push.
 
 ---
 
 ### Task 5: `MongoDocumentRepository` — asynchronous members
 
 **Files:**
+
 - Modify: `src/ArturRios.Data.MongoDb/Repositories/MongoDocumentRepository.cs`
 - Test: `tests/MongoDb/MongoDocumentRepositoryAsyncTests.cs`
 
 **Interfaces:**
-- Consumes: everything from Task 4 + driver async APIs (`ToListAsync`, `FirstOrDefaultAsync`, `InsertOneAsync`, `InsertManyAsync`, `ReplaceOneAsync`, `DeleteManyAsync`) and a `GuardedAsync` helper.
+
+- Consumes: everything from Task 4 + driver async APIs (`ToListAsync`, `FirstOrDefaultAsync`, `InsertOneAsync`,
+  `InsertManyAsync`, `ReplaceOneAsync`, `DeleteManyAsync`) and a `GuardedAsync` helper.
 - Produces: real implementations of the nine async members replacing the stubs, plus async session-aware helpers.
 
 - [ ] **Step 1: Write the failing tests**
@@ -1235,31 +1317,43 @@ Add these async helpers next to the sync helpers:
     }
 ```
 
-> **Implementer note:** Confirm the driver-3.x async overloads: `IFindFluent<T,T>.ToListAsync(ct)`/`FirstOrDefaultAsync(ct)` (extension methods in `MongoDB.Driver`), `InsertOneAsync(session, doc, options, ct)`, `InsertManyAsync(session, docs, options, ct)`, `ReplaceOneAsync(session, filter, doc, options, ct)` (here called with `cancellationToken:` named arg so the default options apply), `DeleteManyAsync(session, filter, options, ct)`. Adjust named/positional args to the real signatures if needed; keep behavior.
+> **Implementer note:** Confirm the driver-3.x async overloads: `IFindFluent<T,T>.ToListAsync(ct)`/
+`FirstOrDefaultAsync(ct)` (extension methods in `MongoDB.Driver`), `InsertOneAsync(session, doc, options, ct)`,
+`InsertManyAsync(session, docs, options, ct)`, `ReplaceOneAsync(session, filter, doc, options, ct)` (here called with
+`cancellationToken:` named arg so the default options apply), `DeleteManyAsync(session, filter, options, ct)`. Adjust
+> named/positional args to the real signatures if needed; keep behavior.
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `dotnet test tests/ArturRios.Data.Tests.csproj --filter "MongoDocumentRepositoryAsyncTests|MongoDocumentRepositoryTests"`
+Run:
+`dotnet test tests/ArturRios.Data.Tests.csproj --filter "MongoDocumentRepositoryAsyncTests|MongoDocumentRepositoryTests"`
 Expected: PASS (all sync + async). Build → 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: implement asynchronous MongoDb document repository members`). Do NOT push.
+Stage only this task's files; commit locally (e.g. `feat: implement asynchronous MongoDb document repository members`).
+Do NOT push.
 
 ---
 
 ### Task 6: `MongoUnitOfWork` — transactions
 
 **Files:**
-- Create: `src/ArturRios.Data.MongoDb/Transactions/IMongoUnitOfWork.cs`, `IAsyncMongoUnitOfWork.cs`, `MongoUnitOfWork.cs`
+
+- Create: `src/ArturRios.Data.MongoDb/Transactions/IMongoUnitOfWork.cs`, `IAsyncMongoUnitOfWork.cs`,
+  `MongoUnitOfWork.cs`
 - Test: `tests/MongoDb/MongoUnitOfWorkTests.cs`
 
 **Interfaces:**
+
 - Consumes: `IMongoClient`, `MongoContext`, `MongoDocumentRepository<T>`, `DataOutput<T>`/`ProcessOutput`.
 - Produces (namespace `ArturRios.Data.MongoDb.Transactions`):
-  - `IMongoUnitOfWork`: `ProcessOutput ExecuteInTransaction(Action work)`, `DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work)`.
-  - `IAsyncMongoUnitOfWork`: `Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)`, `Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work, CancellationToken ct = default)`.
-  - `MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongoUnitOfWork, IAsyncMongoUnitOfWork`.
+    - `IMongoUnitOfWork`: `ProcessOutput ExecuteInTransaction(Action work)`,
+      `DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work)`.
+    - `IAsyncMongoUnitOfWork`:
+      `Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)`,
+      `Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work, CancellationToken ct = default)`.
+    - `MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongoUnitOfWork, IAsyncMongoUnitOfWork`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1487,7 +1581,10 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
 }
 ```
 
-> **Implementer note:** Driver 3.x: `IMongoClient.StartSession()`/`StartSessionAsync(options?, ct)`; `IClientSessionHandle.StartTransaction()` is synchronous (no async variant), with `CommitTransactionAsync(ct)`/`AbortTransactionAsync(ct)` for the async path. `StartSessionAsync(cancellationToken: ct)` uses default session options. Confirm and adjust arg names if needed.
+> **Implementer note:** Driver 3.x: `IMongoClient.StartSession()`/`StartSessionAsync(options?, ct)`;
+`IClientSessionHandle.StartTransaction()` is synchronous (no async variant), with `CommitTransactionAsync(ct)`/
+`AbortTransactionAsync(ct)` for the async path. `StartSessionAsync(cancellationToken: ct)` uses default session options.
+> Confirm and adjust arg names if needed.
 
 - [ ] **Step 4: Run to verify it passes**
 
@@ -1496,19 +1593,25 @@ Expected: PASS (3 tests) against the replica set. Build → 0 warnings.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only this task's files; commit locally (e.g. `feat: add MongoDb unit-of-work transactions via client sessions`). Do NOT push.
+Stage only this task's files; commit locally (e.g. `feat: add MongoDb unit-of-work transactions via client sessions`).
+Do NOT push.
 
 ---
 
 ### Task 7: `AddMongoData` DI registration
 
 **Files:**
+
 - Create: `src/ArturRios.Data.MongoDb/DependencyInjection/ServiceCollectionExtensions.cs`
 - Test: `tests/MongoDb/AddMongoDataTests.cs`
 
 **Interfaces:**
-- Consumes: `MongoOptions`, `MongoContext`, the four repo interfaces, `MongoDocumentRepository<>`, `IMongoUnitOfWork`/`IAsyncMongoUnitOfWork`, `MongoUnitOfWork`, `IMongoClient`/`IMongoDatabase`, `IConfiguration`, `IServiceCollection`.
-- Produces: `ServiceCollectionExtensions` (namespace `ArturRios.Data.MongoDb.DependencyInjection`) with `AddMongoData(this IServiceCollection, IConfiguration, string sectionName = "ArturRios.Data.MongoDb")` and `AddMongoData(this IServiceCollection, MongoOptions options)`.
+
+- Consumes: `MongoOptions`, `MongoContext`, the four repo interfaces, `MongoDocumentRepository<>`, `IMongoUnitOfWork`/
+  `IAsyncMongoUnitOfWork`, `MongoUnitOfWork`, `IMongoClient`/`IMongoDatabase`, `IConfiguration`, `IServiceCollection`.
+- Produces: `ServiceCollectionExtensions` (namespace `ArturRios.Data.MongoDb.DependencyInjection`) with
+  `AddMongoData(this IServiceCollection, IConfiguration, string sectionName = "ArturRios.Data.MongoDb")` and
+  `AddMongoData(this IServiceCollection, MongoOptions options)`.
 
 - [ ] **Step 1: Write the failing test** (resolution only — no server needed; construction performs no I/O)
 
@@ -1622,17 +1725,21 @@ Stage only this task's files; commit locally (e.g. `feat: add AddMongoData DI re
 ### Task 8: Documentation + full verification
 
 **Files:**
+
 - Modify: `README.md`, `docs/content/_index.md`
 
 **Interfaces:**
+
 - Consumes: everything above. No new production types.
 
 - [ ] **Step 1: Full solution build & test**
 
 Run: `dotnet build src/ArturRios.Data.sln`
-Expected: all projects build (the tracked NU1903 SQLitePCLRaw advisory warnings from the relational test deps remain; 0 errors).
+Expected: all projects build (the tracked NU1903 SQLitePCLRaw advisory warnings from the relational test deps remain; 0
+errors).
 Run: `dotnet test tests/ArturRios.Data.Tests.csproj`
-Expected: entire suite green (previous count + the new Mongo tests). Note: the Mongo integration tests start an ephemeral replica set (a few seconds).
+Expected: entire suite green (previous count + the new Mongo tests). Note: the Mongo integration tests start an
+ephemeral replica set (a few seconds).
 
 - [ ] **Step 2: Add a MongoDB section to `README.md`**
 
@@ -1696,7 +1803,8 @@ server to be a **replica set**; optimistic concurrency is opt-in by deriving fro
 
 - [ ] **Step 3: Add the same to `docs/content/_index.md`**
 
-Add an equivalent "MongoDB document store" section to `docs/content/_index.md` (after the Dapper section), using the same samples, consistent with the README wording.
+Add an equivalent "MongoDB document store" section to `docs/content/_index.md` (after the Dapper section), using the
+same samples, consistent with the README wording.
 
 - [ ] **Step 4: Final verification**
 
@@ -1705,14 +1813,18 @@ Expected: build succeeds (only NU1903 warnings), all tests green.
 
 - [ ] **Step 5: Commit (local branch)**
 
-Stage only `README.md` and `docs/content/_index.md`; commit locally (e.g. `docs: document the MongoDB document store`). Do NOT push.
+Stage only `README.md` and `docs/content/_index.md`; commit locally (e.g. `docs: document the MongoDB document store`).
+Do NOT push.
 
 ---
 
 ## Notes for the implementer
 
-- **Commit locally after each task** on `feature/mongodb-document-store`; **never `git push`** during tasks and **never touch `main`** — the branch is pushed only at the very end (finishing step). Stage only each task's own files.
+- **Commit locally after each task** on `feature/mongodb-document-store`; **never `git push`** during tasks and **never
+  touch `main`** — the branch is pushed only at the very end (finishing step). Stage only each task's own files.
 - Keep XML docs on every public member; the build has `GenerateDocumentationFile=true` and warns otherwise.
-- The Mongo integration tests need a real ephemeral replica set (EphemeralMongo, `UseSingleNodeReplicaSet = true`); if `mongod` cannot start in this environment, report BLOCKED rather than mocking.
+- The Mongo integration tests need a real ephemeral replica set (EphemeralMongo, `UseSingleNodeReplicaSet = true`); if
+  `mongod` cannot start in this environment, report BLOCKED rather than mocking.
 - `OperationCanceledException` must propagate from the guards; everything else is enveloped.
-- Where MongoDB.Driver 3.x signatures differ from the shown code, adjust to the real API during RED→GREEN without changing behavior.
+- Where MongoDB.Driver 3.x signatures differ from the shown code, adjust to the real API during RED→GREEN without
+  changing behavior.

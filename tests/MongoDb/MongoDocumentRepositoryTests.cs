@@ -6,8 +6,10 @@ using MongoDB.Bson.Serialization.Conventions;
 
 namespace ArturRios.Data.Tests.MongoDb;
 
-/// <summary>A versioned document type scoped to a non-default (camelCase) element-name convention,
-/// used to prove the optimistic-concurrency filter resolves the real serialized element name.</summary>
+/// <summary>
+///     A versioned document type scoped to a non-default (camelCase) element-name convention,
+///     used to prove the optimistic-concurrency filter resolves the real serialized element name.
+/// </summary>
 public class CamelVersionedDoc : VersionedDocument
 {
     public string Name { get; set; } = string.Empty;
@@ -25,14 +27,17 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     private MongoDocumentRepository<CamelVersionedDoc> NewCamelVersionedRepo()
     {
         EnsureCamelConventionRegistered();
-        return new(fixture.NewContext());
+        return new MongoDocumentRepository<CamelVersionedDoc>(fixture.NewContext());
     }
 
     private static void EnsureCamelConventionRegistered()
     {
         lock (ConventionLock)
         {
-            if (_camelConventionRegistered) return;
+            if (_camelConventionRegistered)
+            {
+                return;
+            }
 
             ConventionRegistry.Register(
                 "camelCase_" + nameof(CamelVersionedDoc),

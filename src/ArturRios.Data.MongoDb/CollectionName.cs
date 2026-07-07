@@ -9,8 +9,8 @@ public static class CollectionName
     private static readonly ConcurrentDictionary<Type, string> Cache = new();
 
     /// <summary>
-    /// Returns the <see cref="MongoCollectionAttribute"/> name for <typeparamref name="T"/> if present,
-    /// otherwise the type name.
+    ///     Returns the <see cref="MongoCollectionAttribute" /> name for <typeparamref name="T" /> if present,
+    ///     otherwise the type name.
     /// </summary>
     public static string For<T>() where T : Document =>
         Cache.GetOrAdd(typeof(T), static t => t.GetCustomAttribute<MongoCollectionAttribute>()?.Name ?? t.Name);

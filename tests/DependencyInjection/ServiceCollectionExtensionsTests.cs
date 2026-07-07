@@ -13,14 +13,6 @@ namespace ArturRios.Data.Tests.DependencyInjection;
 
 public class ServiceCollectionExtensionsTests
 {
-    // Minimal in-test provider so the core DI test does not depend on a provider package.
-    private sealed class FakeSqliteProvider(SqliteConnection connection) : IDatabaseProvider
-    {
-        public DatabaseType Type => DatabaseType.SQLite;
-        public void Configure(DbContextOptionsBuilder builder, string connectionString) =>
-            builder.UseSqlite(connection);
-    }
-
     [Fact]
     public void AddArturRiosData_RegistersRepositoriesAndUnitOfWork()
     {
@@ -31,8 +23,7 @@ public class ServiceCollectionExtensionsTests
         services.AddSingleton<IDatabaseProvider>(new FakeSqliteProvider(connection));
         services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
         {
-            DatabaseType = DatabaseType.SQLite,
-            ConnectionString = "Filename=:memory:"
+            DatabaseType = DatabaseType.SQLite, ConnectionString = "Filename=:memory:"
         });
 
         using var provider = services.BuildServiceProvider();
@@ -50,10 +41,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection(); // no IDatabaseProvider registered
 
         Assert.Throws<DataAccessException>(() =>
-            services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
-            {
-                DatabaseType = DatabaseType.SQLite
-            }));
+            services.AddDataConfig<TestDbContext>(new BaseDbContextOptions { DatabaseType = DatabaseType.SQLite }));
     }
 
     [Fact]
@@ -70,8 +58,7 @@ public class ServiceCollectionExtensionsTests
         var exception = Record.Exception(() =>
             services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
             {
-                DatabaseType = DatabaseType.SQLite,
-                ConnectionString = "Filename=:memory:"
+                DatabaseType = DatabaseType.SQLite, ConnectionString = "Filename=:memory:"
             }));
 
         Assert.Null(exception);
@@ -80,5 +67,14 @@ public class ServiceCollectionExtensionsTests
         provider.GetRequiredService<TestDbContext>().Database.EnsureCreated();
 
         Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity>>());
+    }
+
+    // Minimal in-test provider so the core DI test does not depend on a provider package.
+    private sealed class FakeSqliteProvider(SqliteConnection connection) : IDatabaseProvider
+    {
+        public DatabaseType Type => DatabaseType.SQLite;
+
+        public void Configure(DbContextOptionsBuilder builder, string connectionString) =>
+            builder.UseSqlite(connection);
     }
 }

@@ -10,13 +10,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="EphemeralMongo" Version="3.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.100.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
-    <PackageReference Include="MongoDB.Driver" Version="3.9.0" />
-    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="EphemeralMongo" Version="3.2.0"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9"/>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.100.2"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0"/>
+    <PackageReference Include="MongoDB.Driver" Version="3.9.0"/>
+    <PackageReference Include="xunit" Version="2.9.3"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,16 +24,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <Using Include="Xunit"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ArturRios.Data.Relational.Core\ArturRios.Data.Core.csproj" />
-    <ProjectReference Include="..\src\ArturRios.Data.Sqlite\ArturRios.Data.Sqlite.csproj" />
-    <ProjectReference Include="..\src\ArturRios.Data.PostgreSql\ArturRios.Data.PostgreSql.csproj" />
-    <ProjectReference Include="..\src\ArturRios.Data.Dapper\ArturRios.Data.Dapper.csproj" />
-    <ProjectReference Include="..\src\ArturRios.Data.MongoDb\ArturRios.Data.MongoDb.csproj" />
-    <ProjectReference Include="..\src\ArturRios.Data.DynamoDb\ArturRios.Data.DynamoDb.csproj" />
+    <ProjectReference Include="..\src\ArturRios.Data.Relational.Core\ArturRios.Data.Relational.Core.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.Sqlite\ArturRios.Data.Sqlite.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.PostgreSql\ArturRios.Data.PostgreSql.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.Dapper\ArturRios.Data.Dapper.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.MongoDb\ArturRios.Data.MongoDb.csproj"/>
+    <ProjectReference Include="..\src\ArturRios.Data.DynamoDb\ArturRios.Data.DynamoDb.csproj"/>
   </ItemGroup>
 
   <!--
@@ -45,7 +45,7 @@
     EF Core 10-compatible release and the ProjectReference below can be restored.
   -->
   <ItemGroup>
-    <Compile Remove="Providers\MySqlProviderTests.cs" />
+    <Compile Remove="Providers\MySqlProviderTests.cs"/>
     <!-- <ProjectReference Include="..\src\ArturRios.Data.MySql\ArturRios.Data.MySql.csproj" /> -->
   </ItemGroup>
 </Project>

@@ -9,10 +9,7 @@ public class DynamoOptionsTests
     {
         var o = new DynamoOptions
         {
-            Region = "us-east-1",
-            ServiceUrl = "http://localhost:8000",
-            AccessKey = "ak",
-            SecretKey = "sk"
+            Region = "us-east-1", ServiceUrl = "http://localhost:8000", AccessKey = "ak", SecretKey = "sk"
         };
 
         Assert.Equal("us-east-1", o.Region);

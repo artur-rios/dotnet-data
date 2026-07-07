@@ -59,7 +59,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     {
         var repo = NewVersionedRepo();
         var item = new VersionedTestItem { Id = Guid.NewGuid().ToString(), Name = "A" };
-        await repo.SaveAsync(item);          // first save: item.Version is now set (SDK-managed)
+        await repo.SaveAsync(item); // first save: item.Version is now set (SDK-managed)
 
         // Load a fresh copy and update it — this advances the stored version.
         var fresh = (await repo.LoadAsync(item.Id)).Data!;

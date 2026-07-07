@@ -6,13 +6,9 @@ namespace ArturRios.Data.Tests.Entities;
 
 public class VersionedEntityTests
 {
-    private sealed class Sample : VersionedEntity;
-
     [Fact]
-    public void VersionedEntity_DerivesFromEntity()
-    {
+    public void VersionedEntity_DerivesFromEntity() =>
         Assert.True(typeof(Entity).IsAssignableFrom(typeof(VersionedEntity)));
-    }
 
     [Fact]
     public void ConcurrencyStamp_DefaultsToNonEmptyGuid()
@@ -27,4 +23,6 @@ public class VersionedEntityTests
         var prop = typeof(VersionedEntity).GetProperty(nameof(VersionedEntity.ConcurrencyStamp))!;
         Assert.NotEmpty(prop.GetCustomAttributes(typeof(ConcurrencyCheckAttribute), false));
     }
+
+    private sealed class Sample : VersionedEntity;
 }

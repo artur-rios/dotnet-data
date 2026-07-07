@@ -10,8 +10,6 @@ namespace ArturRios.Data.Tests.Dapper;
 
 public class DapperTransactionSharingTests
 {
-    private sealed record ItemRow(long Id, string Name);
-
     [Fact]
     public async Task DapperRead_SeesUncommittedEfWrite_WithinUnitOfWorkTransaction()
     {
@@ -49,4 +47,6 @@ public class DapperTransactionSharingTests
         Assert.True(after.Success);
         Assert.Empty(after.Data!);
     }
+
+    private sealed record ItemRow(long Id, string Name);
 }

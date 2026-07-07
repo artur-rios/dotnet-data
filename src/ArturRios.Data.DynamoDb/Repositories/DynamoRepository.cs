@@ -7,10 +7,10 @@ using ArturRios.Output;
 namespace ArturRios.Data.DynamoDb.Repositories;
 
 /// <summary>
-/// DynamoDB implementation of <see cref="IAsyncDynamoRepository{T}"/> over the AWS object-persistence
-/// model (<see cref="IDynamoDBContext"/>). Failures are returned as <see cref="DataOutput{T}"/> /
-/// <see cref="ProcessOutput"/>; a <see cref="ConditionalCheckFailedException"/> (from
-/// <c>[DynamoDBVersion]</c> optimistic locking) becomes a concurrency error.
+///     DynamoDB implementation of <see cref="IAsyncDynamoRepository{T}" /> over the AWS object-persistence
+///     model (<see cref="IDynamoDBContext" />). Failures are returned as <see cref="DataOutput{T}" /> /
+///     <see cref="ProcessOutput" />; a <see cref="ConditionalCheckFailedException" /> (from
+///     <c>[DynamoDBVersion]</c> optimistic locking) becomes a concurrency error.
 /// </summary>
 /// <typeparam name="T">The item type.</typeparam>
 /// <param name="context">The DynamoDB object-persistence context.</param>
@@ -23,10 +23,10 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
     protected const string ConcurrencyMessage = "Concurrency conflict: the item was modified by another process.";
 
     /// <summary>
-    /// The DynamoDB batch-write API rejects types with a <c>[DynamoDBVersion]</c> property unless
-    /// version checking is explicitly skipped (batch writes have no per-item conditional-check
-    /// support). Optimistic concurrency remains enforced on the single-item <see cref="SaveAsync"/>/
-    /// <see cref="DeleteAsync"/> paths.
+    ///     The DynamoDB batch-write API rejects types with a <c>[DynamoDBVersion]</c> property unless
+    ///     version checking is explicitly skipped (batch writes have no per-item conditional-check
+    ///     support). Optimistic concurrency remains enforced on the single-item <see cref="SaveAsync" />/
+    ///     <see cref="DeleteAsync" /> paths.
     /// </summary>
     private static readonly BatchWriteConfig BatchSkipVersionCheckConfig = new() { SkipVersionCheck = true };
 
@@ -55,11 +55,14 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey).GetRemainingAsync(ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op, IEnumerable<object> sortKeyValues, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey, op, sortKeyValues).GetRemainingAsync(ct));
+    public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op,
+        IEnumerable<object> sortKeyValues, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<T>>(async () =>
+            await context.QueryAsync<T>(hashKey, op, sortKeyValues).GetRemainingAsync(ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions, CancellationToken ct = default) =>
+    public Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions,
+        CancellationToken ct = default) =>
         GuardedAsync<IEnumerable<T>>(async () => await context.ScanAsync<T>(conditions).GetRemainingAsync(ct));
 
     /// <inheritdoc />
@@ -83,11 +86,16 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<T>>> LoadManyAsync(IEnumerable<object> hashKeys, CancellationToken ct = default) =>
+    public Task<DataOutput<IEnumerable<T>>>
+        LoadManyAsync(IEnumerable<object> hashKeys, CancellationToken ct = default) =>
         GuardedAsync<IEnumerable<T>>(async () =>
         {
             var batch = context.CreateBatchGet<T>();
-            foreach (var key in hashKeys) batch.AddKey(key);
+            foreach (var key in hashKeys)
+            {
+                batch.AddKey(key);
+            }
+
             await batch.ExecuteAsync(ct);
             return batch.Results;
         });

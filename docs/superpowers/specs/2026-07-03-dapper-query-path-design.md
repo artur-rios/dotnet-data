@@ -213,6 +213,7 @@ tests do (reuse the existing `SqliteTestContextFactory`/`TestDbContext`/test ent
 tests project references `ArturRios.Data.Dapper`, `ArturRios.Data.Core`, and the SQLite provider).
 
 Cover:
+
 1. `Query<T>` returns all matching rows mapped to a DTO; empty result → `Success=true`, empty sequence.
 2. `QueryFirstOrDefault<T>` / `QuerySingleOrDefault<T>` return the row, and `Success=true`+`null` on
    no match.

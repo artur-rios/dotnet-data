@@ -6,14 +6,13 @@ namespace ArturRios.Data.Tests.Dapper;
 
 public class DapperSqlQueryTests
 {
-    private sealed record ItemRow(long Id, string Name);
-
     private static void Seed(TestDbContext context, params string[] names)
     {
         foreach (var name in names)
         {
             context.Items.Add(new TestEntity { Name = name });
         }
+
         context.SaveChanges();
     }
 
@@ -49,11 +48,13 @@ public class DapperSqlQueryTests
         Seed(context, "only");
         var sut = new DapperSqlQuery(context);
 
-        var found = sut.QueryFirstOrDefault<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "only" });
+        var found = sut.QueryFirstOrDefault<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name",
+            new { Name = "only" });
         Assert.True(found.Success);
         Assert.Equal("only", found.Data!.Name);
 
-        var missing = sut.QueryFirstOrDefault<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "nope" });
+        var missing =
+            sut.QueryFirstOrDefault<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "nope" });
         Assert.True(missing.Success);
         Assert.Null(missing.Data);
     }
@@ -65,7 +66,8 @@ public class DapperSqlQueryTests
         Seed(context, "dup", "dup");
         var sut = new DapperSqlQuery(context);
 
-        var result = sut.QuerySingleOrDefault<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "dup" });
+        var result =
+            sut.QuerySingleOrDefault<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "dup" });
 
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
@@ -95,4 +97,6 @@ public class DapperSqlQueryTests
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
     }
+
+    private sealed record ItemRow(long Id, string Name);
 }

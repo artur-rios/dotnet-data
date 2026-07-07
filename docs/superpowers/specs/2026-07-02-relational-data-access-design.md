@@ -183,6 +183,7 @@ public class BaseDbContextOptions
 ```
 
 `appsettings.json`:
+
 ```json
 {
   "ArturRios.Data": {
@@ -207,7 +208,8 @@ public interface IDatabaseProvider
 Each provider package supplies one implementation and a registration extension:
 
 - `ArturRios.Data.PostgreSql` → `PostgreSqlProvider` (`builder.UseNpgsql(cs)`), `services.AddPostgreSqlProvider()`
-- `ArturRios.Data.MySql` → `MySqlProvider` (`builder.UseMySql(cs, ServerVersion.AutoDetect(cs))`, Pomelo), `services.AddMySqlProvider()`
+- `ArturRios.Data.MySql` → `MySqlProvider` (`builder.UseMySql(cs, ServerVersion.AutoDetect(cs))`, Pomelo),
+  `services.AddMySqlProvider()`
 - `ArturRios.Data.Sqlite` → `SqliteProvider` (`builder.UseSqlite(cs)`), `services.AddSqliteProvider()`
 
 Providers register into DI as `IDatabaseProvider` (multiple allowed; keyed by their `Type`).
@@ -233,10 +235,11 @@ public static class ServiceCollectionExtensions
 ```
 
 Behavior:
+
 1. Bind/obtain `BaseDbContextOptions`.
 2. From the registered `IDatabaseProvider` instances, pick the one whose `Type == options.DatabaseType`.
-   - If **none** matches (provider package not installed / `AddXProvider()` not called), throw a clear,
-     fail-fast configuration error naming the missing `DatabaseType` and the package to install.
+    - If **none** matches (provider package not installed / `AddXProvider()` not called), throw a clear,
+      fail-fast configuration error naming the missing `DatabaseType` and the package to install.
 3. `services.AddDbContext<TContext>((sp, builder) => provider.Configure(builder, options.ConnectionString))`.
 4. Register `AddScoped<BaseDbContext>(sp => sp.GetRequiredService<TContext>())` so generic repos and the
    unit of work depend only on `BaseDbContext`.
@@ -244,6 +247,7 @@ Behavior:
    `IAsyncReadOnlyRepository<>` → `EfRepository<>`, and `IUnitOfWork`/`IAsyncUnitOfWork` → `EfUnitOfWork`.
 
 **Consumer must call the provider registration too**, e.g.:
+
 ```csharp
 services.AddPostgreSqlProvider();
 services.AddArturRiosData<AppDbContext>(configuration);
@@ -275,6 +279,7 @@ public class EfRepository<T>(BaseDbContext context)
   out of a repository method.
 
 `DataAccessException` (core):
+
 ```csharp
 namespace ArturRios.Data.Exceptions;
 
@@ -339,11 +344,11 @@ Follow red-green TDD (`superpowers:test-driven-development`).
    (`Filename=:memory:` with an open connection kept alive for the test's lifetime; real SQL,
    fast, no external services). A test `AppDbContext : BaseDbContext` with a couple of sample
    entities (one `Entity`, one `VersionedEntity`). Cover:
-   - CRUD + range operations, sync and async, asserting `DataOutput` payloads and `Success`.
-   - Not-found returns `Success=true`, `Data=null`.
-   - Failure paths return `Success=false` with populated `Errors` (no thrown exceptions escape).
-   - `IUnitOfWork.ExecuteInTransaction[Async]` commit-on-success and rollback-on-failure.
-   - Concurrency: a simulated stale-stamp update yields a concurrency error envelope.
+    - CRUD + range operations, sync and async, asserting `DataOutput` payloads and `Success`.
+    - Not-found returns `Success=true`, `Data=null`.
+    - Failure paths return `Success=false` with populated `Errors` (no thrown exceptions escape).
+    - `IUnitOfWork.ExecuteInTransaction[Async]` commit-on-success and rollback-on-failure.
+    - Concurrency: a simulated stale-stamp update yields a concurrency error envelope.
 3. **DI/config tests** — `AddArturRiosData<TContext>` resolves repositories/UoW; a configured
    `DatabaseType` with no registered provider fails fast with a clear error.
 

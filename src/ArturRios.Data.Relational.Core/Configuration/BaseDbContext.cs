@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 namespace ArturRios.Data.Relational.Core.Configuration;
 
 /// <summary>
-/// Base <see cref="DbContext"/> that applies shared conventions and refreshes the
-/// optimistic-concurrency stamp of modified <see cref="VersionedEntity"/> instances on save.
+///     Base <see cref="DbContext" /> that applies shared conventions and refreshes the
+///     optimistic-concurrency stamp of modified <see cref="VersionedEntity" /> instances on save.
 /// </summary>
 /// <param name="options">The context options supplied by the configured provider.</param>
 public abstract class BaseDbContext(DbContextOptions options) : DbContext(options)

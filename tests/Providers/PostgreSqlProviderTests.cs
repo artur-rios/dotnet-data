@@ -6,8 +6,5 @@ namespace ArturRios.Data.Tests.Providers;
 public class PostgreSqlProviderTests
 {
     [Fact]
-    public void Type_IsPostgreSql()
-    {
-        Assert.Equal(DatabaseType.PostgreSql, new PostgreSqlProvider().Type);
-    }
+    public void Type_IsPostgreSql() => Assert.Equal(DatabaseType.PostgreSql, new PostgreSqlProvider().Type);
 }

@@ -5,12 +5,51 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace ArturRios.Data.Relational.Core.Transactions;
 
 /// <summary>
-/// Entity Framework Core implementation of <see cref="IUnitOfWork"/> and <see cref="IAsyncUnitOfWork"/>.
-/// Repository saves issued within the delegate flush but do not commit until the transaction commits.
+///     Entity Framework Core implementation of <see cref="IUnitOfWork" /> and <see cref="IAsyncUnitOfWork" />.
+///     Repository saves issued within the delegate flush but do not commit until the transaction commits.
 /// </summary>
-/// <param name="context">The application's <see cref="BaseDbContext"/>.</param>
+/// <param name="context">The application's <see cref="BaseDbContext" />.</param>
 public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
 {
+    /// <inheritdoc />
+    public async Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)
+    {
+        await using var tx = await context.Database.BeginTransactionAsync(ct);
+        try
+        {
+            await work();
+            await tx.CommitAsync(ct);
+            return ProcessOutput.New;
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync(ct);
+            return ProcessOutput.New.WithError(ex.GetBaseException().Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work,
+        CancellationToken ct = default)
+    {
+        await using var tx = await context.Database.BeginTransactionAsync(ct);
+        try
+        {
+            var result = await work();
+            await tx.CommitAsync(ct);
+            return DataOutput<TResult>.New.WithData(result);
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync(ct);
+            return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<IDbTransactionHandle> BeginTransactionAsync(CancellationToken ct = default) =>
+        new EfTransactionHandle(await context.Database.BeginTransactionAsync(ct));
+
     /// <inheritdoc />
     public ProcessOutput ExecuteInTransaction(Action work)
     {
@@ -48,44 +87,6 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
     /// <inheritdoc />
     public IDbTransactionHandle BeginTransaction() =>
         new EfTransactionHandle(context.Database.BeginTransaction());
-
-    /// <inheritdoc />
-    public async Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)
-    {
-        await using var tx = await context.Database.BeginTransactionAsync(ct);
-        try
-        {
-            await work();
-            await tx.CommitAsync(ct);
-            return ProcessOutput.New;
-        }
-        catch (Exception ex)
-        {
-            await tx.RollbackAsync(ct);
-            return ProcessOutput.New.WithError(ex.GetBaseException().Message);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work, CancellationToken ct = default)
-    {
-        await using var tx = await context.Database.BeginTransactionAsync(ct);
-        try
-        {
-            var result = await work();
-            await tx.CommitAsync(ct);
-            return DataOutput<TResult>.New.WithData(result);
-        }
-        catch (Exception ex)
-        {
-            await tx.RollbackAsync(ct);
-            return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<IDbTransactionHandle> BeginTransactionAsync(CancellationToken ct = default) =>
-        new EfTransactionHandle(await context.Database.BeginTransactionAsync(ct));
 
     private sealed class EfTransactionHandle(IDbContextTransaction transaction) : IDbTransactionHandle
     {

@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace ArturRios.Data.Relational.Core.Providers;
 
 /// <summary>
-/// Configures an EF Core <see cref="DbContextOptionsBuilder"/> for a specific database engine.
-/// Each provider package registers one implementation into DI, keyed by <see cref="Type"/>.
+///     Configures an EF Core <see cref="DbContextOptionsBuilder" /> for a specific database engine.
+///     Each provider package registers one implementation into DI, keyed by <see cref="Type" />.
 /// </summary>
 public interface IDatabaseProvider
 {

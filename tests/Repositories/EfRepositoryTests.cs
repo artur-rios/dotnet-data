@@ -7,8 +7,6 @@ namespace ArturRios.Data.Tests.Repositories;
 
 public class EfRepositoryTests
 {
-    private sealed class UnmappedEntity : Entity;
-
     [Fact]
     public void GetAll_OnUnmappedEntity_ReturnsErrorEnvelope_DoesNotThrow()
     {
@@ -126,4 +124,6 @@ public class EfRepositoryTests
 
         Assert.Single(kept);
     }
+
+    private sealed class UnmappedEntity : Entity;
 }

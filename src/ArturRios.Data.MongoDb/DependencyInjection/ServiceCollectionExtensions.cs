@@ -17,7 +17,8 @@ public static class ServiceCollectionExtensions
         /// <summary>Registers the MongoDB document store, binding options from configuration.</summary>
         /// <param name="configuration">Application configuration.</param>
         /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data.MongoDb".</param>
-        public IServiceCollection AddMongoData(IConfiguration configuration, string sectionName = "ArturRios.Data.MongoDb")
+        public IServiceCollection AddMongoData(IConfiguration configuration,
+            string sectionName = "ArturRios.Data.MongoDb")
         {
             var options = configuration.GetSection(sectionName).Get<MongoOptions>() ?? new MongoOptions();
             return services.AddMongoData(options);
@@ -28,7 +29,8 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddMongoData(MongoOptions options)
         {
             services.AddSingleton<IMongoClient>(_ => new MongoClient(options.ConnectionString));
-            services.AddScoped<IMongoDatabase>(sp => sp.GetRequiredService<IMongoClient>().GetDatabase(options.DatabaseName));
+            services.AddScoped<IMongoDatabase>(sp =>
+                sp.GetRequiredService<IMongoClient>().GetDatabase(options.DatabaseName));
             services.AddScoped<MongoContext>();
 
             services.AddScoped(typeof(IDocumentReadOnlyRepository<>), typeof(MongoDocumentRepository<>));

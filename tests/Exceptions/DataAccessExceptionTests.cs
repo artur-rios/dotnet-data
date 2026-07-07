@@ -10,7 +10,7 @@ public class DataAccessExceptionTests
     {
         var ex = new DataAccessException(["a", "b"]);
 
-        Assert.IsType<CustomException>(ex, exactMatch: false);
+        Assert.IsType<CustomException>(ex, false);
         Assert.Equal(["a", "b"], ex.Messages);
     }
 }

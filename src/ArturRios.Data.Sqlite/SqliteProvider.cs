@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ArturRios.Data.Sqlite;
 
 /// <summary>
-/// <see cref="IDatabaseProvider"/> that configures EF Core to use SQLite.
+///     <see cref="IDatabaseProvider" /> that configures EF Core to use SQLite.
 /// </summary>
 public class SqliteProvider : IDatabaseProvider
 {

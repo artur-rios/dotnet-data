@@ -10,61 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ArturRios.Data.Relational.Core.DependencyInjection;
 
 /// <summary>
-/// Dependency-injection registration for the ArturRios.Data.Relational.Core relational stack.
+///     Dependency-injection registration for the ArturRios.Data.Relational.Core relational stack.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <param name="services">The service collection.</param>
-    extension(IServiceCollection services)
-    {
-        /// <summary>
-        /// Registers the configured <typeparamref name="TContext"/>, repositories, and unit of work,
-        /// binding options from the given configuration section.
-        /// </summary>
-        /// <param name="configuration">Application configuration.</param>
-        /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data.Core".</param>
-        /// <typeparam name="TContext">The application's context type.</typeparam>
-        public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
-            string sectionName = "ArturRios.Data.Core")
-            where TContext : BaseDbContext
-        {
-            var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
-                          ?? new BaseDbContextOptions();
-            return services.AddDataConfig<TContext>(options);
-        }
-
-        /// <summary>
-        /// Registers the configured <typeparamref name="TContext"/>, repositories, and unit of work
-        /// from an explicit options instance.
-        /// </summary>
-        /// <param name="options">The database options.</param>
-        /// <typeparam name="TContext">The application's context type.</typeparam>
-        public IServiceCollection AddDataConfig<TContext>(BaseDbContextOptions options)
-            where TContext : BaseDbContext
-        {
-            services.AddDbContext<TContext>((sp, builder) =>
-            {
-                var provider = ResolveProvider(sp.GetServices<IDatabaseProvider>(), options.DatabaseType);
-                provider.Configure(builder, options.ConnectionString);
-            });
-
-            services.AddScoped<BaseDbContext>(sp => sp.GetRequiredService<TContext>());
-
-            services.AddScoped(typeof(IReadOnlyRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IAsyncReadOnlyRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
-
-            services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-            services.AddScoped<IAsyncUnitOfWork, EfUnitOfWork>();
-
-            // Validate provider availability eagerly so misconfiguration fails at registration, not first use.
-            EnsureProviderRegistered(services, options.DatabaseType);
-
-            return services;
-        }
-    }
-
     // Best-effort eager check: only throws when it can prove no provider matches.
     // Factory-registered providers (services.AddSingleton<IDatabaseProvider>(sp => ...)) expose
     // neither ImplementationInstance nor ImplementationType, so TryGetProviderType cannot inspect
@@ -130,5 +79,56 @@ public static class ServiceCollectionExtensions
         }
 
         return match;
+    }
+
+    /// <param name="services">The service collection.</param>
+    extension(IServiceCollection services)
+    {
+        /// <summary>
+        ///     Registers the configured <typeparamref name="TContext" />, repositories, and unit of work,
+        ///     binding options from the given configuration section.
+        /// </summary>
+        /// <param name="configuration">Application configuration.</param>
+        /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data.Core".</param>
+        /// <typeparam name="TContext">The application's context type.</typeparam>
+        public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
+            string sectionName = "ArturRios.Data.Core")
+            where TContext : BaseDbContext
+        {
+            var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
+                          ?? new BaseDbContextOptions();
+            return services.AddDataConfig<TContext>(options);
+        }
+
+        /// <summary>
+        ///     Registers the configured <typeparamref name="TContext" />, repositories, and unit of work
+        ///     from an explicit options instance.
+        /// </summary>
+        /// <param name="options">The database options.</param>
+        /// <typeparam name="TContext">The application's context type.</typeparam>
+        public IServiceCollection AddDataConfig<TContext>(BaseDbContextOptions options)
+            where TContext : BaseDbContext
+        {
+            services.AddDbContext<TContext>((sp, builder) =>
+            {
+                var provider = ResolveProvider(sp.GetServices<IDatabaseProvider>(), options.DatabaseType);
+                provider.Configure(builder, options.ConnectionString);
+            });
+
+            services.AddScoped<BaseDbContext>(sp => sp.GetRequiredService<TContext>());
+
+            services.AddScoped(typeof(IReadOnlyRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IAsyncReadOnlyRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+
+            services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+            services.AddScoped<IAsyncUnitOfWork, EfUnitOfWork>();
+
+            // Validate provider availability eagerly so misconfiguration fails at registration, not first use.
+            EnsureProviderRegistered(services, options.DatabaseType);
+
+            return services;
+        }
     }
 }

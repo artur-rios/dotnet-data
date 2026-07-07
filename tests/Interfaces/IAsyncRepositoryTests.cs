@@ -11,11 +11,9 @@ public class IAsyncRepositoryTests
     private static readonly Type Type = typeof(IAsyncRepository<>);
 
     [Fact]
-    public void ExtendsAsyncReadOnlyRepository()
-    {
+    public void ExtendsAsyncReadOnlyRepository() =>
         Assert.Contains(typeof(IAsyncReadOnlyRepository<>),
             Type.GetInterfaces().Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
-    }
 
     [Theory]
     [InlineData("CreateAsync")]

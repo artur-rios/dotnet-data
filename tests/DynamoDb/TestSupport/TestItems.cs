@@ -5,7 +5,7 @@ namespace ArturRios.Data.Tests.DynamoDb.TestSupport;
 [DynamoDBTable("TestItems")]
 public class TestItem
 {
-    [DynamoDBHashKey]  public string Category { get; set; } = string.Empty;
+    [DynamoDBHashKey] public string Category { get; set; } = string.Empty;
     [DynamoDBRangeKey] public string Sku { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
 }

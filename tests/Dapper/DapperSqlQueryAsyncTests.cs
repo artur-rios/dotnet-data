@@ -7,14 +7,13 @@ namespace ArturRios.Data.Tests.Dapper;
 
 public class DapperSqlQueryAsyncTests
 {
-    private sealed record ItemRow(long Id, string Name);
-
     private static void Seed(TestDbContext context, params string[] names)
     {
         foreach (var name in names)
         {
             context.Items.Add(new TestEntity { Name = name });
         }
+
         context.SaveChanges();
     }
 
@@ -37,7 +36,8 @@ public class DapperSqlQueryAsyncTests
         await using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
 
-        var result = await sut.QueryFirstOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Id = @Id", new { Id = 999 });
+        var result =
+            await sut.QueryFirstOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Id = @Id", new { Id = 999 });
 
         Assert.True(result.Success);
         Assert.Null(result.Data);
@@ -50,7 +50,8 @@ public class DapperSqlQueryAsyncTests
         Seed(context, "dup", "dup");
         var sut = new DapperSqlQuery(context);
 
-        var result = await sut.QuerySingleOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "dup" });
+        var result = await sut.QuerySingleOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name",
+            new { Name = "dup" });
 
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
@@ -80,4 +81,6 @@ public class DapperSqlQueryAsyncTests
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
     }
+
+    private sealed record ItemRow(long Id, string Name);
 }

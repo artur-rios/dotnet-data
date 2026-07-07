@@ -8,7 +8,8 @@ Utilities for data access layer on .net projects
 
 ## Installation
 
-Install via the [NuGet CLI](https://learn.microsoft.com/en-us/nuget/reference/nuget-exe-cli-reference) or the [.NET CLI](https://learn.microsoft.com/en-us/dotnet/core/tools/):
+Install via the [NuGet CLI](https://learn.microsoft.com/en-us/nuget/reference/nuget-exe-cli-reference) or
+the [.NET CLI](https://learn.microsoft.com/en-us/dotnet/core/tools/):
 
 ```bash
 dotnet add package ArturRios.Data
@@ -18,22 +19,28 @@ Or search for `ArturRios.Data` in the NuGet Package Manager inside Visual Studio
 
 ## Overview
 
-`ArturRios.Data` provides a provider-agnostic relational data-access layer built on Entity Framework Core: repository and unit-of-work abstractions, DI wiring, and thin per-engine provider packages.
+`ArturRios.Data` provides a provider-agnostic relational data-access layer built on Entity Framework Core: repository
+and unit-of-work abstractions, DI wiring, and thin per-engine provider packages.
 
-| Type | Description |
-|---|---|
-| `IReadOnlyRepository<T>` | Synchronous read-only contract — `Query()`, `GetAll()`, `GetById()`. |
-| `IRepository<T>` | Synchronous read/write contract — adds `Create`, `CreateRange`, `Update`, `UpdateRange`, `Delete`, `DeleteRange`. |
-| `IAsyncReadOnlyRepository<T>` | Asynchronous mirror of `IReadOnlyRepository<T>`. |
-| `IAsyncRepository<T>` | Asynchronous mirror of `IRepository<T>`. |
-| `Entity` | Abstract base class for all domain entities. Exposes an `int Id` property mapped as the first column. |
-| `VersionedEntity` | `Entity` plus a `ConcurrencyStamp` (`Guid`) used for optimistic concurrency checks. |
-| `BaseDbContext` | Abstract `DbContext` base class. Bumps the `ConcurrencyStamp` of modified `VersionedEntity` instances on every `SaveChanges`/`SaveChangesAsync`. |
-| `BaseDbContextOptions` | Options class carrying `DatabaseType` and `ConnectionString`, bindable from configuration. |
-| `IUnitOfWork` / `IAsyncUnitOfWork` | Coordinate repository operations within a single database transaction (sync and async). |
-| `EfRepository<T>` | Provider-agnostic EF Core implementation of all four repository interfaces. Registered automatically by DI. |
+| Type                               | Description                                                                                                                                      |
+|------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `IReadOnlyRepository<T>`           | Synchronous read-only contract — `Query()`, `GetAll()`, `GetById()`.                                                                             |
+| `IRepository<T>`                   | Synchronous read/write contract — adds `Create`, `CreateRange`, `Update`, `UpdateRange`, `Delete`, `DeleteRange`.                                |
+| `IAsyncReadOnlyRepository<T>`      | Asynchronous mirror of `IReadOnlyRepository<T>`.                                                                                                 |
+| `IAsyncRepository<T>`              | Asynchronous mirror of `IRepository<T>`.                                                                                                         |
+| `Entity`                           | Abstract base class for all domain entities. Exposes an `int Id` property mapped as the first column.                                            |
+| `VersionedEntity`                  | `Entity` plus a `ConcurrencyStamp` (`Guid`) used for optimistic concurrency checks.                                                              |
+| `BaseDbContext`                    | Abstract `DbContext` base class. Bumps the `ConcurrencyStamp` of modified `VersionedEntity` instances on every `SaveChanges`/`SaveChangesAsync`. |
+| `BaseDbContextOptions`             | Options class carrying `DatabaseType` and `ConnectionString`, bindable from configuration.                                                       |
+| `IUnitOfWork` / `IAsyncUnitOfWork` | Coordinate repository operations within a single database transaction (sync and async).                                                          |
+| `EfRepository<T>`                  | Provider-agnostic EF Core implementation of all four repository interfaces. Registered automatically by DI.                                      |
 
-Consumers do not hand-implement a repository. `ArturRios.Data` ships `EfRepository<T>`, which is wired up for you — you inject `IRepository<T>` / `IAsyncRepository<T>` (or the read-only variants) and `IUnitOfWork` / `IAsyncUnitOfWork` wherever you need them. All repository interfaces are constrained to `T : Entity`, enforcing a consistent identity contract across the data layer. Every read/write repository method returns a `DataOutput<T>` (or `Task<DataOutput<T>>`) envelope, so infrastructure failures surface as `.Errors` instead of unhandled exceptions. `Query()` is the one exception: it returns a plain `IQueryable<T>` for composable, deferred reads.
+Consumers do not hand-implement a repository. `ArturRios.Data` ships `EfRepository<T>`, which is wired up for you — you
+inject `IRepository<T>` / `IAsyncRepository<T>` (or the read-only variants) and `IUnitOfWork` / `IAsyncUnitOfWork`
+wherever you need them. All repository interfaces are constrained to `T : Entity`, enforcing a consistent identity
+contract across the data layer. Every read/write repository method returns a `DataOutput<T>` (or `Task<DataOutput<T>>`)
+envelope, so infrastructure failures surface as `.Errors` instead of unhandled exceptions. `Query()` is the one
+exception: it returns a plain `IQueryable<T>` for composable, deferred reads.
 
 ## Usage
 
@@ -97,7 +104,9 @@ builder.Services.AddPostgreSqlProvider();
 builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
 ```
 
-`AddDataConfig<TContext>` registers `TContext`, all four repository interfaces (backed by `EfRepository<T>`), and `IUnitOfWork` / `IAsyncUnitOfWork`. It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails fast at registration time if no matching provider was registered.
+`AddDataConfig<TContext>` registers `TContext`, all four repository interfaces (backed by `EfRepository<T>`), and
+`IUnitOfWork` / `IAsyncUnitOfWork`. It resolves the `IDatabaseProvider` matching the configured `DatabaseType` and fails
+fast at registration time if no matching provider was registered.
 
 ### 5. Use read-only or async interfaces when full CRUD is not needed
 
@@ -266,13 +275,15 @@ enforce it. Atomic multi-item transactions are a planned future addition.
 - .NET 10.0 or later
 - One provider package matching the `DatabaseType` configured above:
 
-| Provider package | `DatabaseType` | Status |
-|---|---|---|
-| `ArturRios.Data.Sqlite` | `SQLite` | Available |
-| `ArturRios.Data.PostgreSql` | `PostgreSql` | Available |
-| `ArturRios.Data.MySql` | `MySql` | Deferred — the package cannot ship until [Pomelo.EntityFrameworkCore.MySql](https://www.nuget.org/packages/Pomelo.EntityFrameworkCore.MySql) publishes a release supporting EF Core 10 |
+| Provider package            | `DatabaseType` | Status                                                                                                                                                                                 |
+|-----------------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ArturRios.Data.Sqlite`     | `SQLite`       | Available                                                                                                                                                                              |
+| `ArturRios.Data.PostgreSql` | `PostgreSql`   | Available                                                                                                                                                                              |
+| `ArturRios.Data.MySql`      | `MySql`        | Deferred — the package cannot ship until [Pomelo.EntityFrameworkCore.MySql](https://www.nuget.org/packages/Pomelo.EntityFrameworkCore.MySql) publishes a release supporting EF Core 10 |
 
-The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`, `AddPostgreSqlProvider()`) before `AddDataConfig<TContext>(...)`, and its `DatabaseType` must match the one configured in `appsettings.json`.
+The provider package you install must call its own registration extension (e.g. `AddSqliteProvider()`,
+`AddPostgreSqlProvider()`) before `AddDataConfig<TContext>(...)`, and its `DatabaseType` must match the one configured
+in `appsettings.json`.
 
 ## Versioning
 
@@ -281,7 +292,8 @@ changes increment the minor version; fixes or tweaks increment the patch.
 
 ## Build, test and publish
 
-Use the official [.NET CLI](https://learn.microsoft.com/en-us/dotnet/core/tools/) to build, test and publish the project and Git for source control.
+Use the official [.NET CLI](https://learn.microsoft.com/en-us/dotnet/core/tools/) to build, test and publish the project
+and Git for source control.
 If you want, optional helper toolsets I built to facilitate these tasks are available:
 
 - [Dotnet Tools](https://github.com/artur-rios/dotnet-tools)
@@ -289,4 +301,5 @@ If you want, optional helper toolsets I built to facilitate these tasks are avai
 
 ## Legal Details
 
-This project is licensed under the [MIT License](https://en.wikipedia.org/wiki/MIT_License). A copy of the license is available at [LICENSE](./LICENSE) in the repository.
+This project is licensed under the [MIT License](https://en.wikipedia.org/wiki/MIT_License). A copy of the license is
+available at [LICENSE](./LICENSE) in the repository.

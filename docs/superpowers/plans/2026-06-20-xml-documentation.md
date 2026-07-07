@@ -1,10 +1,13 @@
 # XML Documentation Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:
+> executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add `<summary>`, `<returns>`, and `<typeparam>` XML documentation comments to all public types and members in the `ArturRios.Data` library so IntelliSense and NuGet consumers get full descriptions.
+**Goal:** Add `<summary>`, `<returns>`, and `<typeparam>` XML documentation comments to all public types and members in
+the `ArturRios.Data` library so IntelliSense and NuGet consumers get full descriptions.
 
-**Architecture:** Edit each source file directly — no new files, no structural changes. Documentation-only changes; no logic is touched.
+**Architecture:** Edit each source file directly — no new files, no structural changes. Documentation-only changes; no
+logic is touched.
 
 **Tech Stack:** C# / .NET 10, XML doc comments
 
@@ -20,9 +23,11 @@
 ### Task 1: Document `Entity`
 
 **Files:**
+
 - Modify: `src/Entity.cs`
 
 **Interfaces:**
+
 - Produces: documented `Entity` base class
 
 - [ ] **Step 1: Add class-level `<summary>` to `Entity`**
@@ -66,9 +71,11 @@ git commit -m "docs: add XML summary to Entity class"
 ### Task 2: Document `BaseDbContextOptions`
 
 **Files:**
+
 - Modify: `src/Configuration/BaseDbContextOptions.cs`
 
 **Interfaces:**
+
 - Produces: documented `BaseDbContextOptions` class
 
 - [ ] **Step 1: Add `<summary>` to class and property**
@@ -110,9 +117,11 @@ git commit -m "docs: add XML summary to BaseDbContextOptions"
 ### Task 3: Document `IReadOnlyRepository<T>`
 
 **Files:**
+
 - Modify: `src/Interfaces/IReadOnlyRepository.cs`
 
 **Interfaces:**
+
 - Produces: documented `IReadOnlyRepository<T>` interface
 
 - [ ] **Step 1: Add `<summary>`, `<typeparam>`, and method docs**
@@ -162,9 +171,11 @@ git commit -m "docs: add XML documentation to IReadOnlyRepository"
 ### Task 4: Document `ICrudRepository<T>`
 
 **Files:**
+
 - Modify: `src/Interfaces/ICrudRepository.cs`
 
 **Interfaces:**
+
 - Produces: documented `ICrudRepository<T>` interface
 
 - [ ] **Step 1: Add `<summary>`, `<typeparam>`, and method docs**
@@ -232,9 +243,11 @@ git commit -m "docs: add XML documentation to ICrudRepository"
 ### Task 5: Document `IRangeRepository<T>`
 
 **Files:**
+
 - Modify: `src/Interfaces/IRangeRepository.cs`
 
 **Interfaces:**
+
 - Produces: documented `IRangeRepository<T>` interface
 
 - [ ] **Step 1: Add `<summary>`, `<typeparam>`, and method docs**

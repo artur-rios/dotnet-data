@@ -14,11 +14,7 @@ public class AddDynamoDataTests
     public void AddDynamoData_RegistersClientContextAndRepository_Resolvable()
     {
         var services = new ServiceCollection();
-        services.AddDynamoData(new DynamoOptions
-        {
-            Region = "us-east-1",
-            ServiceUrl = "http://localhost:8000"
-        });
+        services.AddDynamoData(new DynamoOptions { Region = "us-east-1", ServiceUrl = "http://localhost:8000" });
 
         using var provider = services.BuildServiceProvider();
         using var scope = provider.CreateScope();

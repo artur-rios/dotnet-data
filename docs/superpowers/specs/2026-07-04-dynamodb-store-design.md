@@ -8,6 +8,7 @@
 ## 1. Context & Scope
 
 `ArturRios.Data` is built as sequenced sub-projects. Done and merged to `main`:
+
 - **Relational core** (`ArturRios.Data.Core`, v2.0.0) — EF Core over PostgreSQL/MySQL/SQLite.
 - **Dapper query path** (`ArturRios.Data.Dapper`, v1.0.0) — read-only raw SQL.
 - **MongoDB document store** (`ArturRios.Data.MongoDb`, v1.0.0) — document repository + transactions.
@@ -191,6 +192,7 @@ public class DynamoOptions
 ```
 
 `appsettings.json`:
+
 ```json
 {
   "ArturRios.Data.DynamoDb": {
@@ -214,14 +216,22 @@ public static class ServiceCollectionExtensions
 ```
 
 Behavior:
+
 1. Bind/obtain `DynamoOptions`.
 2. Register `IAmazonDynamoDB` (**singleton**), built as:
-   - If `ServiceUrl` is set: `new AmazonDynamoDBClient(creds, new AmazonDynamoDBConfig { ServiceURL = ServiceUrl, AuthenticationRegion = Region })`, where `creds` are the explicit keys if provided, otherwise dummy `BasicAWSCredentials("dummy","dummy")` (DynamoDB Local ignores creds).
-   - Else: explicit `BasicAWSCredentials` if both keys are set, otherwise the default credential chain; region from `RegionEndpoint.GetBySystemName(Region)`.
-3. Register `IDynamoDBContext` (**singleton**) via `new DynamoDBContextBuilder().WithDynamoDBClient(() => sp.GetRequiredService<IAmazonDynamoDB>()).Build()` (or the equivalent constructor for the resolved SDK version — see plan).
+    - If `ServiceUrl` is set:
+      `new AmazonDynamoDBClient(creds, new AmazonDynamoDBConfig { ServiceURL = ServiceUrl, AuthenticationRegion = Region })`,
+      where `creds` are the explicit keys if provided, otherwise dummy `BasicAWSCredentials("dummy","dummy")` (DynamoDB
+      Local ignores creds).
+    - Else: explicit `BasicAWSCredentials` if both keys are set, otherwise the default credential chain; region from
+      `RegionEndpoint.GetBySystemName(Region)`.
+3. Register `IDynamoDBContext` (**singleton**) via
+   `new DynamoDBContextBuilder().WithDynamoDBClient(() => sp.GetRequiredService<IAmazonDynamoDB>()).Build()` (or the
+   equivalent constructor for the resolved SDK version — see plan).
 4. Register `IAsyncDynamoRepository<>` → `DynamoRepository<>` (**scoped**).
 
 Consumer:
+
 ```csharp
 services.AddDynamoData(configuration);
 // inject IAsyncDynamoRepository<Product>
@@ -270,13 +280,18 @@ whole Dynamo test collection). If DynamoDB Local cannot be downloaded or started
 STOP and report BLOCKED — do not fall back to mocks.
 
 Cover:
-1. `SaveAsync` + `LoadAsync(hash)` / `LoadAsync(hash, range)` round-trip; `LoadAsync` miss → `Success=true`, `Data=null`.
+
+1. `SaveAsync` + `LoadAsync(hash)` / `LoadAsync(hash, range)` round-trip; `LoadAsync` miss → `Success=true`,
+   `Data=null`.
 2. `DeleteAsync` removes an item; deleting a missing item is a success (idempotent).
-3. `QueryAsync(hashKey)` returns all items in a partition; `QueryAsync(hashKey, op, values)` applies the sort-key condition.
+3. `QueryAsync(hashKey)` returns all items in a partition; `QueryAsync(hashKey, op, values)` applies the sort-key
+   condition.
 4. `ScanAsync(conditions)` returns matching items; empty → success + empty.
 5. `SaveManyAsync`/`DeleteManyAsync` (batch write); `LoadManyAsync` (batch get by hash keys).
-6. Optimistic concurrency: a stale `[DynamoDBVersion]` `SaveAsync` → `Success=false` with a "Concurrency conflict" error (no throw).
-7. Failure path: an operation that errors (e.g. querying a non-existent table) → `Success=false`, populated `Errors`, no throw.
+6. Optimistic concurrency: a stale `[DynamoDBVersion]` `SaveAsync` → `Success=false` with a "Concurrency conflict"
+   error (no throw).
+7. Failure path: an operation that errors (e.g. querying a non-existent table) → `Success=false`, populated `Errors`, no
+   throw.
 
 ## 11. Documentation
 
