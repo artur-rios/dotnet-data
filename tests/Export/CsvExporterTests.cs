@@ -57,4 +57,13 @@ public class CsvExporterTests
             [new Widget { Id = 1, Name = "a", Price = 1m }]);
         Assert.Contains("Id;Name;Price", text);
     }
+
+    [Fact]
+    public async Task WriteAsync_QuotesFieldsContainingNewlines()
+    {
+        var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions()),
+            [new Widget { Id = 1, Name = "line1\nline2\rline3", Price = 0m }]);
+
+        Assert.Contains("\"line1\nline2\rline3\"", text);
+    }
 }

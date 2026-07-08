@@ -62,6 +62,7 @@ public class ExcelExporter<T>(ExcelExportOptions options) : ExporterBase<T> wher
             case DateTime dt:
                 cell.Value = dt;
                 break;
+            // xlsx stores all numbers as IEEE-754 double; long/ulong > 2^53 and high-precision decimals lose precision.
             case sbyte or byte or short or ushort or int or uint or long or ulong or float or double or decimal:
                 cell.Value = Convert.ToDouble(value, System.Globalization.CultureInfo.InvariantCulture);
                 break;
