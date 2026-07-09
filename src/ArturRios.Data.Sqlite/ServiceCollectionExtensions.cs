@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSqliteProvider(this IServiceCollection services)
     {
         services.AddSingleton<IDatabaseProvider, SqliteProvider>();
+
         return services;
     }
 }

@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton(options);
             services.AddSingleton(typeof(ExcelExporter<>));
             services.AddSingleton(new ExcelExporterRegistration(typeof(ExcelExporter<>)));
+
             return services;
         }
     }

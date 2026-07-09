@@ -40,6 +40,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         {
             await Set.AddAsync(entity, ct);
             await context.SaveChangesAsync(ct);
+
             return entity.Id;
         });
 
@@ -51,6 +52,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
             var list = entities.ToList();
             await Set.AddRangeAsync(list, ct);
             await context.SaveChangesAsync(ct);
+
             return list.Select(e => e.Id).ToList();
         });
 
@@ -60,6 +62,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         {
             Set.Update(entity);
             await context.SaveChangesAsync(ct);
+
             return entity;
         });
 
@@ -70,6 +73,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
             var list = entities.ToList();
             Set.UpdateRange(list);
             await context.SaveChangesAsync(ct);
+
             return list;
         });
 
@@ -79,6 +83,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         {
             Set.Remove(entity);
             await context.SaveChangesAsync(ct);
+
             return entity.Id;
         });
 
@@ -90,15 +95,16 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
             var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct);
             Set.RemoveRange(matches);
             await context.SaveChangesAsync(ct);
+
             return matches.Select(e => e.Id).ToList();
         });
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="Query" />
     public IQueryable<T> Query() => Set.AsQueryable();
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<T>> GetAll() =>
-        Guarded(() => (IEnumerable<T>)Set.ToList());
+        Guarded(IEnumerable<T> () => Set.ToList());
 
     /// <inheritdoc />
     public DataOutput<T?> GetById(int id) =>
@@ -113,12 +119,12 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<int>> CreateRange(IEnumerable<T> entities) => Guarded(() =>
+    public DataOutput<IEnumerable<int>> CreateRange(IEnumerable<T> entities) => Guarded(IEnumerable<int> () =>
     {
         var list = entities.ToList();
         Set.AddRange(list);
         context.SaveChanges();
-        return (IEnumerable<int>)list.Select(e => e.Id).ToList();
+        return list.Select(e => e.Id).ToList();
     });
 
     /// <inheritdoc />
@@ -130,12 +136,12 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities) => Guarded(() =>
+    public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities) => Guarded(IEnumerable<T> () =>
     {
         var list = entities.ToList();
         Set.UpdateRange(list);
         context.SaveChanges();
-        return (IEnumerable<T>)list;
+        return list;
     });
 
     /// <inheritdoc />
@@ -147,13 +153,13 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<int>> DeleteRange(IEnumerable<int> ids) => Guarded(() =>
+    public DataOutput<IEnumerable<int>> DeleteRange(IEnumerable<int> ids) => Guarded(IEnumerable<int> () =>
     {
         var idList = ids.ToList();
         var matches = Set.Where(e => idList.Contains(e.Id)).ToList();
         Set.RemoveRange(matches);
         context.SaveChanges();
-        return (IEnumerable<int>)matches.Select(e => e.Id).ToList();
+        return matches.Select(e => e.Id).ToList();
     });
 
     /// <summary>Maps an exception caught by a guard to an error envelope.</summary>

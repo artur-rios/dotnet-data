@@ -10,7 +10,7 @@ namespace ArturRios.Data.Sqlite;
 public class SqliteProvider : IDatabaseProvider
 {
     /// <inheritdoc />
-    public DatabaseType Type => DatabaseType.SQLite;
+    public DatabaseType Type => DatabaseType.SqLite;
 
     /// <inheritdoc />
     public void Configure(DbContextOptionsBuilder builder, string connectionString) =>

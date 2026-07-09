@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton(typeof(MessagePackExporter<>));
 
             services.AddSingleton<IExporterFactory, ExporterFactory>();
+
             return services;
         }
     }

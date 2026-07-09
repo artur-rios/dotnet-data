@@ -24,6 +24,7 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
         catch (Exception ex)
         {
             await tx.RollbackAsync(ct);
+
             return ProcessOutput.New.WithError(ex.GetBaseException().Message);
         }
     }
@@ -37,11 +38,13 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
         {
             var result = await work();
             await tx.CommitAsync(ct);
+
             return DataOutput<TResult>.New.WithData(result);
         }
         catch (Exception ex)
         {
             await tx.RollbackAsync(ct);
+
             return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
         }
     }
@@ -58,11 +61,13 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
         {
             work();
             tx.Commit();
+
             return ProcessOutput.New;
         }
         catch (Exception ex)
         {
             tx.Rollback();
+
             return ProcessOutput.New.WithError(ex.GetBaseException().Message);
         }
     }
@@ -75,11 +80,13 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
         {
             var result = work();
             tx.Commit();
+
             return DataOutput<TResult>.New.WithData(result);
         }
         catch (Exception ex)
         {
             tx.Rollback();
+
             return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
         }
     }

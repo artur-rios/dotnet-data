@@ -13,6 +13,7 @@ public abstract class BaseDbContext(DbContextOptions options) : DbContext(option
     public override int SaveChanges()
     {
         BumpConcurrencyStamps();
+
         return base.SaveChanges();
     }
 
@@ -20,6 +21,7 @@ public abstract class BaseDbContext(DbContextOptions options) : DbContext(option
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         BumpConcurrencyStamps();
+
         return base.SaveChangesAsync(cancellationToken);
     }
 

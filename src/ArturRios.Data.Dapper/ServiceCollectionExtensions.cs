@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ISqlQuery, DapperSqlQuery>();
         services.AddScoped<IAsyncSqlQuery, DapperSqlQuery>();
+
         return services;
     }
 }

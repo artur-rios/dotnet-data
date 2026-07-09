@@ -63,9 +63,10 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<IAmazonDynamoDB>(_ => CreateClient(options));
             services.AddSingleton<IDynamoDBContext>(sp =>
                 new DynamoDBContextBuilder()
-                    .WithDynamoDBClient(() => sp.GetRequiredService<IAmazonDynamoDB>())
+                    .WithDynamoDBClient(sp.GetRequiredService<IAmazonDynamoDB>)
                     .Build());
             services.AddScoped(typeof(IAsyncDynamoRepository<>), typeof(DynamoRepository<>));
+
             return services;
         }
     }

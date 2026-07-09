@@ -97,6 +97,7 @@ public static class ServiceCollectionExtensions
         {
             var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
                           ?? new BaseDbContextOptions();
+
             return services.AddDataConfig<TContext>(options);
         }
 

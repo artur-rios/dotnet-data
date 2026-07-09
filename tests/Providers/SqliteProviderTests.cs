@@ -7,7 +7,7 @@ namespace ArturRios.Data.Tests.Providers;
 public class SqliteProviderTests
 {
     [Fact]
-    public void Type_IsSqlite() => Assert.Equal(DatabaseType.SQLite, new SqliteProvider().Type);
+    public void Type_IsSqlite() => Assert.Equal(DatabaseType.SqLite, new SqliteProvider().Type);
 
     [Fact]
     public void Configure_UsesSqlite()

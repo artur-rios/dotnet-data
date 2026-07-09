@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPostgreSqlProvider(this IServiceCollection services)
     {
         services.AddSingleton<IDatabaseProvider, PostgreSqlProvider>();
+
         return services;
     }
 }

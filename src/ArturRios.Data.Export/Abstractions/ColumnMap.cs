@@ -57,6 +57,7 @@ public static class ColumnMap
         var typed = Expression.Convert(instance, property.DeclaringType!);
         var access = Expression.Property(typed, property);
         var boxed = Expression.Convert(access, typeof(object));
+
         return Expression.Lambda<Func<object, object?>>(boxed, instance).Compile();
     }
 }

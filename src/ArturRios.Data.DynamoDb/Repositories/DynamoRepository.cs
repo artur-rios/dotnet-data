@@ -35,6 +35,7 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         GuardedAsync(async () =>
         {
             await context.SaveAsync(item, ct);
+
             return item;
         });
 
@@ -97,6 +98,7 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
             }
 
             await batch.ExecuteAsync(ct);
+
             return batch.Results;
         });
 

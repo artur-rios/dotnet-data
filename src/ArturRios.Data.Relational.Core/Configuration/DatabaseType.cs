@@ -12,5 +12,5 @@ public enum DatabaseType
     MySql,
 
     /// <summary>SQLite via Microsoft.EntityFrameworkCore.Sqlite.</summary>
-    SQLite
+    SqLite
 }

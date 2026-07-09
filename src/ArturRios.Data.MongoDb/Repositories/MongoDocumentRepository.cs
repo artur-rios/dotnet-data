@@ -119,7 +119,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<T>> GetAll() =>
-        Guarded(() => (IEnumerable<T>)FindFluent(FilterDefinition<T>.Empty).ToList());
+        Guarded(IEnumerable<T> () => FindFluent(FilterDefinition<T>.Empty).ToList());
 
     /// <inheritdoc />
     public DataOutput<T?> GetById(string id) =>
@@ -127,7 +127,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate) =>
-        Guarded(() => (IEnumerable<T>)FindFluent(Builders<T>.Filter.Where(predicate)).ToList());
+        Guarded(IEnumerable<T> () => FindFluent(Builders<T>.Filter.Where(predicate)).ToList());
 
     /// <inheritdoc />
     public DataOutput<string> Create(T document) => Guarded(() =>
@@ -138,7 +138,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<string>> CreateRange(IEnumerable<T> documents) => Guarded(() =>
+    public DataOutput<IEnumerable<string>> CreateRange(IEnumerable<T> documents) => Guarded(IEnumerable<string> () =>
     {
         var list = documents.ToList();
         foreach (var d in list)
@@ -147,7 +147,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
         }
 
         InsertMany(list);
-        return (IEnumerable<string>)list.Select(d => d.Id).ToList();
+        return list.Select(d => d.Id).ToList();
     });
 
     /// <inheritdoc />
@@ -158,7 +158,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> documents) => Guarded(() =>
+    public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> documents) => Guarded(IEnumerable<T> () =>
     {
         var list = documents.ToList();
         foreach (var d in list)
@@ -166,7 +166,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
             Replace(d);
         }
 
-        return (IEnumerable<T>)list;
+        return list;
     });
 
     /// <inheritdoc />
@@ -177,11 +177,11 @@ public class MongoDocumentRepository<T>(MongoContext context)
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<string>> DeleteRange(IEnumerable<string> ids) => Guarded(() =>
+    public DataOutput<IEnumerable<string>> DeleteRange(IEnumerable<string> ids) => Guarded(IEnumerable<string> () =>
     {
         var idList = ids.ToList();
         DeleteMany(Builders<T>.Filter.In(d => d.Id, idList));
-        return (IEnumerable<string>)idList;
+        return idList;
     });
 
     // --- session-aware driver helpers (sync) ---
