@@ -11,7 +11,7 @@
     <PackageId>ArturRios.Data.MongoDb</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
-    <PackageTags>utilities, data access, .net, mongodb, nosql</PackageTags>
+    <PackageTags>utilities;data access;.net;mongodb;nosql</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
     <Version>1.0.0</Version>
   </PropertyGroup>

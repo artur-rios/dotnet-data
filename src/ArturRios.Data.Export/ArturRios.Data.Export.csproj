@@ -11,7 +11,7 @@
     <PackageId>ArturRios.Data.Export</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
-    <PackageTags>utilities, data access, .net, export, csv, json, messagepack</PackageTags>
+    <PackageTags>utilities;data access;.net;export;csv;json;messagepack</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
     <Version>1.0.0</Version>
   </PropertyGroup>
