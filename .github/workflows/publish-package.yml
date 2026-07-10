@@ -1,30 +1,43 @@
-﻿name: Publish Package
+name: Publish Package
+
+# Publishes a single NuGet package from this multi-package repository.
+#
+# Trigger: push a per-package tag of the form  <PackageId>@<version>
+#   e.g.  ArturRios.Data.Export@1.0.0
+#         ArturRios.Data.Relational.Core@2.0.0
+# The tag names which package to publish and at which version; the version
+# must match that project's <Version>. Packages are versioned independently,
+# so tag each release separately (dependencies first, e.g. Relational.Core
+# before Sqlite, or Export before Export.Excel).
+#
+# Manual runs: use "Run workflow" and supply the package id and version.
 
 permissions:
-  contents: write
+  contents: read
   packages: write
 
 on:
   push:
     tags:
-      - '*'
+      - '*@*'
   workflow_dispatch:
     inputs:
-      reason:
-        description: 'Reason for manual run'
-        required: false
-        default: 'Test run from GitHub UI'
+      package:
+        description: 'Package id to publish (e.g. ArturRios.Data.Export)'
+        required: true
+      version:
+        description: 'Version to publish (must match the project <Version>)'
+        required: true
 
 jobs:
-  package-and-publish-lib:
+  package-and-publish:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout tag
+      - name: Checkout ref
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          # Check out the ref (tag) that triggered the workflow
           ref: ${{ github.ref }}
 
       - name: Setup .NET SDK
@@ -32,29 +45,85 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Validate tag matches csproj version
+      - name: Resolve package and version
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_PACKAGE: ${{ github.event.inputs.package }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          TAG_NAME="${GITHUB_REF##*/}"
-          # Strip optional leading 'v' from tag, e.g., v1.2.3 -> 1.2.3
-          TAG_VERSION="${TAG_NAME#v}"
-          CS_PROJ_VERSION=$(grep -oP '<Version>\K[^<]+' src/ArturRios.Data.csproj)
-          echo "Tag version: $TAG_VERSION"
-          echo "csproj version: $CS_PROJ_VERSION"
-          if [ "$TAG_VERSION" != "$CS_PROJ_VERSION" ]; then
-            echo "Tag ($TAG_VERSION) does not match csproj Version ($CS_PROJ_VERSION)."
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PACKAGE="$INPUT_PACKAGE"
+            VERSION="$INPUT_VERSION"
+          else
+            # REF_NAME is the tag short name, e.g. ArturRios.Data.Export@1.0.0
+            TAG="$REF_NAME"
+            if [[ "$TAG" != *"@"* ]]; then
+              echo "Tag '$TAG' is not in the expected <PackageId>@<version> form." >&2
+              exit 1
+            fi
+            PACKAGE="${TAG%@*}"
+            VERSION="${TAG#*@}"
+          fi
+          if [ -z "$PACKAGE" ] || [ -z "$VERSION" ]; then
+            echo "Could not resolve a package ('$PACKAGE') and version ('$VERSION')." >&2
+            exit 1
+          fi
+          echo "package=$PACKAGE" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing $PACKAGE $VERSION"
+
+      - name: Locate project
+        id: proj
+        env:
+          PACKAGE: ${{ steps.resolve.outputs.package }}
+        run: |
+          set -euo pipefail
+          # ArturRios.Data.MySql is deferred: it depends on Pomelo.EntityFrameworkCore.MySql,
+          # which has no EF Core 10 release, so it is excluded from the build and cannot be packed.
+          if [ "$PACKAGE" = "ArturRios.Data.MySql" ]; then
+            echo "ArturRios.Data.MySql is deferred (no EF Core 10 MySQL provider yet) and cannot be published." >&2
+            exit 1
+          fi
+          CSPROJ="src/${PACKAGE}/${PACKAGE}.csproj"
+          if [ ! -f "$CSPROJ" ]; then
+            echo "No project found for package '$PACKAGE' (expected $CSPROJ)." >&2
+            exit 1
+          fi
+          echo "csproj=$CSPROJ" >> "$GITHUB_OUTPUT"
+
+      - name: Validate version matches project
+        env:
+          CSPROJ: ${{ steps.proj.outputs.csproj }}
+          WANT: ${{ steps.resolve.outputs.version }}
+        run: |
+          set -euo pipefail
+          CS_VERSION=$(grep -oP '<Version>\K[^<]+' "$CSPROJ" | head -1)
+          echo "Project <Version>: ${CS_VERSION:-<none>}  requested: $WANT"
+          if [ -z "${CS_VERSION:-}" ]; then
+            echo "No <Version> element found in $CSPROJ." >&2
+            exit 1
+          fi
+          if [ "$CS_VERSION" != "$WANT" ]; then
+            echo "Version mismatch: $CSPROJ has <Version>$CS_VERSION</Version> but the tag/input requests $WANT." >&2
+            echo "Bump the project <Version> to match the tag (or tag the correct version) and retry." >&2
             exit 1
           fi
 
       - name: Restore
-        run: |
-          dotnet restore src/ArturRios.Data.csproj
+        env:
+          CSPROJ: ${{ steps.proj.outputs.csproj }}
+        run: dotnet restore "$CSPROJ"
 
-      - name: Generate NuGet package
+      - name: Pack
+        env:
+          CSPROJ: ${{ steps.proj.outputs.csproj }}
         run: |
-          echo "Packing using csproj version"
-          dotnet pack src/ArturRios.Data.csproj \
+          dotnet pack "$CSPROJ" \
             --configuration Release \
-            -p:RepositoryUrl=https://github.com/artur-rios/dotnet-data \
+            --no-restore \
             -o packages
 
       - name: Publish to nuget.org
@@ -71,7 +140,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
         run: |
-          # GitHub Packages NuGet feed requires owner in the URL
+          # GitHub Packages NuGet feed requires the owner in the URL
           dotnet nuget push packages/*.nupkg \
             --api-key "$GITHUB_TOKEN" \
             --source "https://nuget.pkg.github.com/${OWNER}/index.json" \
