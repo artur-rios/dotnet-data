@@ -12,7 +12,12 @@ This script drives that flow:
   * create the ``<PackageId>@<version>`` tag from the committed version,
   * push the tag (which triggers the publish action).
 
-Run with no arguments for an interactive menu, or use subcommands:
+Run with no arguments for an interactive menu, which loops until you exit: every
+menu accepts ``q`` to quit, and sub-menus accept ``b`` to go back. Alongside the
+per-package actions it can tag every package at its current csproj version, and
+push the outstanding tags one at a time.
+
+Or use subcommands:
 
     python scripts/release.py list
     python scripts/release.py bump    <project> {patch|minor|major}
@@ -75,9 +80,24 @@ class Package:
 # --------------------------------------------------------------------------- #
 # Small utilities
 # --------------------------------------------------------------------------- #
+class ReleaseError(Exception):
+    """An operation could not be completed (aborted, or a precondition failed).
+
+    In CLI mode this is printed and exits non-zero; in interactive mode it is
+    caught by the menu loop, which reports it and redisplays the menu.
+    """
+
+
+class Back(Exception):
+    """The user chose to return to the previous menu."""
+
+
+class Quit(Exception):
+    """The user chose to exit the script."""
+
+
 def fail(message: str) -> "NoReturn":  # type: ignore[name-defined]
-    print(f"error: {message}", file=sys.stderr)
-    sys.exit(1)
+    raise ReleaseError(message)
 
 
 def rel(path: Path) -> str:
@@ -280,6 +300,107 @@ def do_release(pkg: Package, part: str, *, assume_yes: bool) -> None:
     do_push(pkg, assume_yes=assume_yes)
 
 
+def do_tag_all(packages: list[Package], *, assume_yes: bool) -> None:
+    """Create the <PackageId>@<version> tag for every publishable package.
+
+    Packages whose tag already exists - or whose csproj has uncommitted changes
+    (the tag would point at a commit without the version) - are logged and
+    skipped rather than treated as errors.
+    """
+    head = git("rev-parse", "--short", "HEAD", capture=True)
+    print(f"\nTagging packages at HEAD ({head}):")
+
+    pending: list[tuple[Package, str]] = []
+    for pkg in packages:
+        if pkg.deferred:
+            print(f"  skip    {pkg.package_id} (deferred - not publishable)")
+            continue
+        tag = pkg.tag_for(pkg.read_version())
+        if tag_exists(tag):
+            print(f"  skip    {tag} (tag already exists)")
+        elif path_is_dirty(pkg.csproj):
+            print(f"  skip    {tag} ({rel(pkg.csproj)} has uncommitted changes)")
+        else:
+            print(f"  create  {tag}")
+            pending.append((pkg, tag))
+
+    if not pending:
+        print("\nNothing to tag.")
+        return
+    if not confirm(f"\nCreate {len(pending)} tag(s) at {head}?", assume_yes):
+        fail("aborted")
+    for _pkg, tag in pending:
+        git("tag", tag)
+        print(f"created tag {tag}")
+
+
+def remote_tags() -> set[str]:
+    out = git("ls-remote", "--tags", "origin", capture=True, check=False)
+    tags: set[str] = set()
+    for line in out.splitlines():
+        _sha, _sep, ref = line.partition("\trefs/tags/")
+        if ref:
+            # Annotated tags also list a peeled `^{}` ref - same tag name.
+            tags.add(ref.removesuffix("^{}"))
+    return tags
+
+
+def local_package_tags(packages: list[Package]) -> list[str]:
+    tags: list[str] = []
+    for pkg in packages:
+        listed = git("tag", "--list", f"{pkg.package_id}@*", capture=True)
+        tags.extend(t for t in listed.splitlines() if t)
+    return sorted(tags)
+
+
+def do_push_all(packages: list[Package], *, assume_yes: bool) -> None:
+    """Push every package tag that origin does not have yet, one at a time.
+
+    Each tag is confirmed separately, so the user can watch one publish run
+    before releasing the next.
+    """
+    print("\nComparing local package tags against origin...")
+    known = local_package_tags(packages)
+    if not known:
+        print("No package tags exist locally.")
+        return
+
+    already = remote_tags()
+    pending = [t for t in known if t not in already]
+    for tag in known:
+        if tag in already:
+            print(f"  skip    {tag} (already on origin)")
+    if not pending:
+        print("\nNothing to push - origin has every local package tag.")
+        return
+
+    print(f"\n{len(pending)} tag(s) to push:")
+    for tag in pending:
+        print(f"  push    {tag}")
+
+    branch = current_branch()
+    if branch_has_unpushed_commits():
+        print(
+            f"\nnote: branch '{branch}' has commits not on its remote (including "
+            f"version bumps). Tags alone will publish, but origin/{branch} won't "
+            "reflect the bumps until the branch is pushed."
+        )
+        if confirm(f"Push branch '{branch}' to origin first?", assume_yes):
+            git("push", "origin", "HEAD")
+            print(f"pushed branch {branch}")
+
+    pushed = 0
+    for i, tag in enumerate(pending, start=1):
+        prompt = f"\n({i}/{len(pending)}) Push tag '{tag}' to origin (triggers publish)?"
+        if not confirm(prompt, assume_yes):
+            print(f"skipped {tag}")
+            continue
+        git("push", "origin", tag)
+        pushed += 1
+        print(f"pushed tag {tag} - the Publish Package workflow should now run.")
+    print(f"\nPushed {pushed} of {len(pending)} tag(s).")
+
+
 # --------------------------------------------------------------------------- #
 # `list`
 # --------------------------------------------------------------------------- #
@@ -293,52 +414,95 @@ def print_packages(packages: list[Package]) -> None:
 # --------------------------------------------------------------------------- #
 # Interactive mode
 # --------------------------------------------------------------------------- #
-def prompt_choice(prompt: str, count: int) -> int:
+def prompt_choice(prompt: str, count: int, *, back: bool = False) -> int:
+    """Read a 1-based menu choice; returns a 0-based index.
+
+    Always accepts 'q' (exit the script) and, when `back` is set, 'b' (return to
+    the previous menu) - both raise so callers unwind to the right menu loop.
+    """
+    hints = ["b) back"] if back else []
+    hints.append("q) exit")
     while True:
         try:
-            raw = input(f"{prompt} ").strip()
+            raw = input(f"{prompt} [{', '.join(hints)}] ").strip().lower()
         except EOFError:
-            fail("aborted")
+            raise Quit from None
+        if raw == "q":
+            raise Quit
+        if raw == "b" and back:
+            raise Back
         if raw.isdigit() and 1 <= int(raw) <= count:
-            return int(raw)
-        print(f"Please enter a number between 1 and {count}.")
+            return int(raw) - 1
+        options = f"a number between 1 and {count}"
+        print(f"Please enter {options}, {'b, ' if back else ''}or q.")
+
+
+def select_package(packages: list[Package]) -> Package:
+    """Package picker used by the per-package actions. 'b' returns to the menu."""
+    print("\nPackages:")
+    print_packages(packages)
+    pkg = packages[prompt_choice("\nSelect a package number:", len(packages), back=True)]
+    print(f"\nSelected: {pkg.package_id}  (current {pkg.read_version()})")
+    if pkg.deferred:
+        fail(f"{pkg.package_id} is deferred and cannot be published.")
+    return pkg
+
+
+def select_bump_part(pkg: Package) -> str:
+    print("\nBump:")
+    for i, part in enumerate(BUMP_PARTS, start=1):
+        example = bump_version(pkg.read_version(), part)
+        print(f"  {i}) {part:<6} -> {example}")
+    return BUMP_PARTS[prompt_choice("\nSelect bump type:", len(BUMP_PARTS), back=True)]
+
+
+ACTIONS = (
+    "List packages and current versions",
+    "Bump version + commit",
+    "Create tag from current version",
+    "Push tag (trigger publish)",
+    "Full release (bump -> tag -> push)",
+    "Tag all packages at their current versions",
+    "Push all package tags (one at a time)",
+)
+
+
+def run_action(index: int, packages: list[Package]) -> None:
+    if index == 0:
+        print("\nPackages:")
+        print_packages(packages)
+    elif index == 1:
+        pkg = select_package(packages)
+        do_bump(pkg, select_bump_part(pkg), commit=True, assume_yes=False)
+    elif index == 2:
+        do_tag(select_package(packages), assume_yes=False)
+    elif index == 3:
+        do_push(select_package(packages), assume_yes=False)
+    elif index == 4:
+        pkg = select_package(packages)
+        do_release(pkg, select_bump_part(pkg), assume_yes=False)
+    elif index == 5:
+        do_tag_all(packages, assume_yes=False)
+    elif index == 6:
+        do_push_all(packages, assume_yes=False)
 
 
 def interactive() -> None:
     packages = discover()
-    print("Packages:")
-    print_packages(packages)
-    pkg = packages[prompt_choice("\nSelect a package number:", len(packages)) - 1]
-    print(f"\nSelected: {pkg.package_id}  (current {pkg.read_version()})")
-    if pkg.deferred:
-        fail(f"{pkg.package_id} is deferred and cannot be published.")
-
-    actions = [
-        "Bump version + commit",
-        "Create tag from current version",
-        "Push tag (trigger publish)",
-        "Full release (bump -> tag -> push)",
-    ]
-    print("\nAction:")
-    for i, action in enumerate(actions, start=1):
-        print(f"  {i}) {action}")
-    action = prompt_choice("\nSelect an action:", len(actions))
-
-    if action in (1, 4):
-        print("\nBump:")
-        for i, part in enumerate(BUMP_PARTS, start=1):
-            example = bump_version(pkg.read_version(), part)
-            print(f"  {i}) {part:<6} -> {example}")
-        part = BUMP_PARTS[prompt_choice("\nSelect bump type:", len(BUMP_PARTS)) - 1]
-
-    if action == 1:
-        do_bump(pkg, part, commit=True, assume_yes=False)
-    elif action == 2:
-        do_tag(pkg, assume_yes=False)
-    elif action == 3:
-        do_push(pkg, assume_yes=False)
-    elif action == 4:
-        do_release(pkg, part, assume_yes=False)
+    while True:
+        print("\nAction:")
+        for i, action in enumerate(ACTIONS, start=1):
+            print(f"  {i}) {action}")
+        try:
+            run_action(prompt_choice("\nSelect an action:", len(ACTIONS)), packages)
+        except Back:
+            continue  # a sub-menu backed out; redisplay the action menu
+        except Quit:
+            print("bye")
+            return
+        except ReleaseError as exc:
+            # Keep the session alive: report and fall through to the menu again.
+            print(f"error: {exc}", file=sys.stderr)
 
 
 # --------------------------------------------------------------------------- #
@@ -412,6 +576,10 @@ def main(argv: list[str] | None = None) -> None:
 if __name__ == "__main__":
     try:
         main()
+    except ReleaseError as exc:
+        # Interactive mode handles these itself; this is the CLI path.
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(1)
     except KeyboardInterrupt:
         print("\naborted", file=sys.stderr)
         sys.exit(130)
