@@ -15,7 +15,7 @@ This script drives that flow:
 Run with no arguments for an interactive menu, which loops until you exit: every
 menu accepts ``q`` to quit, and sub-menus accept ``b`` to go back. Alongside the
 per-package actions it can tag every package at its current csproj version, and
-push the outstanding tags one at a time.
+push the outstanding tags - either one at a time, or all at once.
 
 Or use subcommands:
 
@@ -353,11 +353,14 @@ def local_package_tags(packages: list[Package]) -> list[str]:
     return sorted(tags)
 
 
-def do_push_all(packages: list[Package], *, assume_yes: bool) -> None:
-    """Push every package tag that origin does not have yet, one at a time.
+def do_push_all(packages: list[Package], *, assume_yes: bool,
+                one_at_a_time: bool = True) -> None:
+    """Push every package tag that origin does not have yet.
 
-    Each tag is confirmed separately, so the user can watch one publish run
-    before releasing the next.
+    With `one_at_a_time` (the default) each tag is confirmed separately, so the
+    user can watch one publish run before releasing the next. Otherwise all
+    pending tags go in a single `git push` after one confirmation, which starts
+    every publish run at once.
     """
     print("\nComparing local package tags against origin...")
     known = local_package_tags(packages)
@@ -388,6 +391,18 @@ def do_push_all(packages: list[Package], *, assume_yes: bool) -> None:
         if confirm(f"Push branch '{branch}' to origin first?", assume_yes):
             git("push", "origin", "HEAD")
             print(f"pushed branch {branch}")
+
+    if not one_at_a_time:
+        prompt = (f"\nPush all {len(pending)} tag(s) to origin now (this triggers "
+                  f"{len(pending)} publish run(s) at once)?")
+        if not confirm(prompt, assume_yes):
+            fail("aborted")
+        git("push", "origin", *pending)
+        for tag in pending:
+            print(f"pushed tag {tag}")
+        print(f"\nPushed {len(pending)} tag(s) - the Publish Package workflow "
+              "should now run for each.")
+        return
 
     pushed = 0
     for i, tag in enumerate(pending, start=1):
@@ -420,8 +435,8 @@ def prompt_choice(prompt: str, count: int, *, back: bool = False) -> int:
     Always accepts 'q' (exit the script) and, when `back` is set, 'b' (return to
     the previous menu) - both raise so callers unwind to the right menu loop.
     """
-    hints = ["b) back"] if back else []
-    hints.append("q) exit")
+    hints = ["b: back"] if back else []
+    hints.append("q: exit")
     while True:
         try:
             raw = input(f"{prompt} [{', '.join(hints)}] ").strip().lower()
@@ -464,6 +479,7 @@ ACTIONS = (
     "Full release (bump -> tag -> push)",
     "Tag all packages at their current versions",
     "Push all package tags (one at a time)",
+    "Push all package tags (all at once)",
 )
 
 
@@ -485,6 +501,8 @@ def run_action(index: int, packages: list[Package]) -> None:
         do_tag_all(packages, assume_yes=False)
     elif index == 6:
         do_push_all(packages, assume_yes=False)
+    elif index == 7:
+        do_push_all(packages, assume_yes=False, one_at_a_time=False)
 
 
 def interactive() -> None:
