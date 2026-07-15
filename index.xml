@@ -17,6 +17,11 @@ direction TB
 Mongo[&amp;#34;ArturRios.Data.MongoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;document repository + transactions&amp;lt;/i&amp;gt;&amp;#34;]
 Dynamo[&amp;#34;ArturRios.Data.DynamoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;async repository over IDynamoDBContext&amp;lt;/i&amp;gt;&amp;#34;]
 end
+subgraph Export[&amp;#34;File export — standalone&amp;#34;]
+direction TB
+ExportCore[&amp;#34;ArturRios.Data.Export&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;exporter factory, column map,&amp;lt;br/&amp;gt;CSV / JSON / TXT / MessagePack&amp;lt;/i&amp;gt;&amp;#34;]
+ExportExcel[&amp;#34;ArturRios.Data.Export.Excel&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;.xlsx add-on&amp;lt;/i&amp;gt;&amp;#34;]
+end
 Sqlite --&amp;gt; Core
 Postgres --&amp;gt; Core
 MySql --&amp;gt; Core
@@ -24,25 +29,33 @@ Dapper --&amp;gt; Core
 Core --&amp;gt; Output
 Mongo --&amp;gt; Output
 Dynamo --&amp;gt; Output
+ExportExcel --&amp;gt; ExportCore
+ExportCore --&amp;gt; Output
 EF[&amp;#34;Microsoft.EntityFrameworkCore&amp;#34;]:::ext
-Npgsql[&amp;#34;Npgsql / Pomelo / Sqlite provider&amp;#34;]:::ext
+EfProviders[&amp;#34;Npgsql / Pomelo / Sqlite EF provider&amp;#34;]:::ext
 DapperLib[&amp;#34;Dapper&amp;#34;]:::ext
 MongoLib[&amp;#34;MongoDB.Driver&amp;#34;]:::ext
 Aws[&amp;#34;AWSSDK.DynamoDBv2&amp;#34;]:::ext
+MsgPack[&amp;#34;MessagePack&amp;#34;]:::ext
+ClosedXml[&amp;#34;ClosedXML&amp;#34;]:::ext
 Core --&amp;gt; EF
-Sqlite --&amp;gt; Npgsql
-Postgres --&amp;gt; Npgsql
+Sqlite --&amp;gt; EfProviders
+Postgres --&amp;gt; EfProviders
+MySql --&amp;gt; EfProviders
 Dapper --&amp;gt; DapperLib
 Mongo --&amp;gt; MongoLib
 Dynamo --&amp;gt; Aws
+ExportCore --&amp;gt; MsgPack
+ExportExcel --&amp;gt; ClosedXml
 classDef ext fill:#8882,stroke-dasharray:3 3;
 &lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;The two families are deliberately separate.&lt;/strong&gt; The relational providers and the Dapper read path build
+&lt;p&gt;&lt;strong&gt;The families are deliberately separate.&lt;/strong&gt; The relational providers and the Dapper read path build
 on &lt;code&gt;ArturRios.Data.Relational.Core&lt;/code&gt; (EF Core). The NoSQL packages do &lt;strong&gt;not&lt;/strong&gt; depend on the relational
 core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on
 &lt;code&gt;ArturRios.Output&lt;/code&gt; and their native driver. MongoDB and DynamoDB are also separate from each other: their
 data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with
-LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.&lt;/p&gt;</description><content>&lt;h1 id="architecture"&gt;Architecture&lt;/h1&gt;
+LINQ/predicate queries in MongoDB) to share one interface without becoming leaky. The export packages
+are independent of all of it — they take any &lt;code&gt;IEnumerable&amp;lt;T&amp;gt;&lt;/code&gt;, so they need no store at all.&lt;/p&gt;</description><content>&lt;h1 id="architecture"&gt;Architecture&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ArturRios.Data&lt;/code&gt; is a family of small, focused NuGet packages. This page shows how they fit together,
 the key types in each, and the design principles they share.&lt;/p&gt;
 &lt;h2 id="package-dependencies"&gt;Package dependencies&lt;/h2&gt;
@@ -61,6 +74,11 @@ direction TB
 Mongo[&amp;#34;ArturRios.Data.MongoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;document repository + transactions&amp;lt;/i&amp;gt;&amp;#34;]
 Dynamo[&amp;#34;ArturRios.Data.DynamoDb&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;async repository over IDynamoDBContext&amp;lt;/i&amp;gt;&amp;#34;]
 end
+subgraph Export[&amp;#34;File export — standalone&amp;#34;]
+direction TB
+ExportCore[&amp;#34;ArturRios.Data.Export&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;exporter factory, column map,&amp;lt;br/&amp;gt;CSV / JSON / TXT / MessagePack&amp;lt;/i&amp;gt;&amp;#34;]
+ExportExcel[&amp;#34;ArturRios.Data.Export.Excel&amp;lt;br/&amp;gt;&amp;lt;i&amp;gt;.xlsx add-on&amp;lt;/i&amp;gt;&amp;#34;]
+end
 Sqlite --&amp;gt; Core
 Postgres --&amp;gt; Core
 MySql --&amp;gt; Core
@@ -68,25 +86,36 @@ Dapper --&amp;gt; Core
 Core --&amp;gt; Output
 Mongo --&amp;gt; Output
 Dynamo --&amp;gt; Output
+ExportExcel --&amp;gt; ExportCore
+ExportCore --&amp;gt; Output
 EF[&amp;#34;Microsoft.EntityFrameworkCore&amp;#34;]:::ext
-Npgsql[&amp;#34;Npgsql / Pomelo / Sqlite provider&amp;#34;]:::ext
+EfProviders[&amp;#34;Npgsql / Pomelo / Sqlite EF provider&amp;#34;]:::ext
 DapperLib[&amp;#34;Dapper&amp;#34;]:::ext
 MongoLib[&amp;#34;MongoDB.Driver&amp;#34;]:::ext
 Aws[&amp;#34;AWSSDK.DynamoDBv2&amp;#34;]:::ext
+MsgPack[&amp;#34;MessagePack&amp;#34;]:::ext
+ClosedXml[&amp;#34;ClosedXML&amp;#34;]:::ext
 Core --&amp;gt; EF
-Sqlite --&amp;gt; Npgsql
-Postgres --&amp;gt; Npgsql
+Sqlite --&amp;gt; EfProviders
+Postgres --&amp;gt; EfProviders
+MySql --&amp;gt; EfProviders
 Dapper --&amp;gt; DapperLib
 Mongo --&amp;gt; MongoLib
 Dynamo --&amp;gt; Aws
+ExportCore --&amp;gt; MsgPack
+ExportExcel --&amp;gt; ClosedXml
 classDef ext fill:#8882,stroke-dasharray:3 3;
 &lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;The two families are deliberately separate.&lt;/strong&gt; The relational providers and the Dapper read path build
+&lt;p&gt;&lt;strong&gt;The families are deliberately separate.&lt;/strong&gt; The relational providers and the Dapper read path build
 on &lt;code&gt;ArturRios.Data.Relational.Core&lt;/code&gt; (EF Core). The NoSQL packages do &lt;strong&gt;not&lt;/strong&gt; depend on the relational
 core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on
 &lt;code&gt;ArturRios.Output&lt;/code&gt; and their native driver. MongoDB and DynamoDB are also separate from each other: their
 data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with
-LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.&lt;/p&gt;
+LINQ/predicate queries in MongoDB) to share one interface without becoming leaky. The export packages
+are independent of all of it — they take any &lt;code&gt;IEnumerable&amp;lt;T&amp;gt;&lt;/code&gt;, so they need no store at all.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Excel is split out&lt;/strong&gt; for the same reason, one level down: ClosedXML is a heavy dependency, so it lives
+in an add-on that apps opt into. The core keeps no compile-time reference to it — the add-on registers a
+marker type that the exporter factory resolves at runtime.&lt;/p&gt;
 &lt;h2 id="the-result-envelope"&gt;The result envelope&lt;/h2&gt;
 &lt;p&gt;Every backend returns the same envelope types from &lt;code&gt;ArturRios.Output&lt;/code&gt;. A &lt;code&gt;ProcessOutput&lt;/code&gt; carries success
 state, error messages, and info messages; &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; adds a typed payload.&lt;/p&gt;
@@ -144,9 +173,12 @@ IAsyncUnitOfWork &amp;lt;|.. EfUnitOfWork
 &lt;/pre&gt;
 &lt;h3 id="the-provider-seam"&gt;The provider seam&lt;/h3&gt;
 &lt;p&gt;The core never references a specific EF provider. Each provider package implements &lt;code&gt;IDatabaseProvider&lt;/code&gt;
-and registers it (keyed by &lt;code&gt;DatabaseType&lt;/code&gt;); &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt; reads the configured &lt;code&gt;DatabaseType&lt;/code&gt;
-and resolves the matching provider to configure the &lt;code&gt;DbContext&lt;/code&gt;. This is why you call both
-&lt;code&gt;AddXProvider()&lt;/code&gt; and &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;()&lt;/code&gt;.&lt;/p&gt;
+and registers it as a singleton, exposing which &lt;code&gt;DatabaseType&lt;/code&gt; it handles; &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt;
+reads the configured &lt;code&gt;DatabaseType&lt;/code&gt; and picks the matching provider out of the registered set to
+configure the &lt;code&gt;DbContext&lt;/code&gt;. This is why you call both &lt;code&gt;AddXProvider()&lt;/code&gt; and &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Registration validates this eagerly: if it can prove no registered provider matches the configured
+&lt;code&gt;DatabaseType&lt;/code&gt;, it throws a &lt;code&gt;DataAccessException&lt;/code&gt; naming the missing package rather than failing on the
+first query.&lt;/p&gt;
 &lt;pre class="mermaid"&gt;classDiagram
 class IDatabaseProvider {
 +DatabaseType Type
@@ -195,6 +227,39 @@ class IAsyncDynamoRepository~T~ {
 class DynamoRepository~T~
 IAsyncDynamoRepository &amp;lt;|.. DynamoRepository
 &lt;/pre&gt;
+&lt;h2 id="export-model"&gt;Export model&lt;/h2&gt;
+&lt;p&gt;Export has no store and no entity base class — it takes any &lt;code&gt;IEnumerable&amp;lt;T&amp;gt;&lt;/code&gt;. &lt;code&gt;IExporter&amp;lt;T&amp;gt;&lt;/code&gt; is the one
+contract; &lt;code&gt;ExporterBase&amp;lt;T&amp;gt;&lt;/code&gt; centralizes the null-guarding, envelope conversion, and stream lifetime, so
+a concrete exporter only implements the format-specific write. &lt;code&gt;IExporterFactory&lt;/code&gt; maps an
+&lt;code&gt;ExportFormat&lt;/code&gt; to the right exporter out of the container.&lt;/p&gt;
+&lt;pre class="mermaid"&gt;classDiagram
+class IExporter~T~ {
++WriteAsync(data, stream) ProcessOutput
++WriteToFileAsync(data, path) ProcessOutput
+}
+class ExporterBase~T~ {
+#WriteCoreAsync(data, stream, ct)
+}
+IExporter &amp;lt;|.. ExporterBase
+class CsvExporter~T~
+class JsonExporter~T~
+class TxtExporter~T~
+class MessagePackExporter~T~
+class ExcelExporter~T~
+ExporterBase &amp;lt;|-- CsvExporter
+ExporterBase &amp;lt;|-- JsonExporter
+ExporterBase &amp;lt;|-- TxtExporter
+ExporterBase &amp;lt;|-- MessagePackExporter
+ExporterBase &amp;lt;|-- ExcelExporter
+class IExporterFactory {
++Resolve(format) IExporter~T~
+}
+class ExporterFactory
+IExporterFactory &amp;lt;|.. ExporterFactory
+ExporterFactory ..&amp;gt; IExporter : resolves
+&lt;/pre&gt;
+&lt;p&gt;The columnar formats (CSV, Excel) share one &lt;code&gt;ColumnMap&lt;/code&gt;, which compiles and caches a per-type column
+plan from the record&amp;rsquo;s public properties, honouring &lt;code&gt;[ExportColumn]&lt;/code&gt; and &lt;code&gt;[ExportIgnore]&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id="design-principles"&gt;Design principles&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Modular packaging.&lt;/strong&gt; One package per backend; install only what you use. NoSQL packages don&amp;rsquo;t drag
@@ -208,11 +273,11 @@ become a friendly &amp;ldquo;concurrency conflict&amp;rdquo; error. The one inte
 &lt;li&gt;&lt;strong&gt;Transactions where the engine supports them.&lt;/strong&gt; Relational and MongoDB expose a delegate-based unit
 of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
 planned addition.)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Consistent naming.&lt;/strong&gt; &lt;code&gt;AddDataConfig&lt;/code&gt; / &lt;code&gt;AddMongoData&lt;/code&gt; / &lt;code&gt;AddDynamoData&lt;/code&gt; for DI; &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; /
-&lt;code&gt;ProcessOutput&lt;/code&gt; everywhere; &lt;code&gt;Async&lt;/code&gt; suffix + &lt;code&gt;CancellationToken&lt;/code&gt; on async members.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Consistent naming.&lt;/strong&gt; &lt;code&gt;AddDataConfig&lt;/code&gt; / &lt;code&gt;AddMongoData&lt;/code&gt; / &lt;code&gt;AddDynamoData&lt;/code&gt; / &lt;code&gt;AddExport&lt;/code&gt; for DI;
+&lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; everywhere; &lt;code&gt;Async&lt;/code&gt; suffix + &lt;code&gt;CancellationToken&lt;/code&gt; on async members.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;See the &lt;a href="https://artur-rios.github.io/dotnet-data/relational/"&gt;Relational&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/mongodb/"&gt;MongoDB&lt;/a&gt;, and &lt;a href="https://artur-rios.github.io/dotnet-data/dynamodb/"&gt;DynamoDB&lt;/a&gt; guides for full
-usage.&lt;/p&gt;</content></item><item><title>DynamoDB</title><link>https://artur-rios.github.io/dotnet-data/dynamodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/dynamodb/</guid><description>&lt;h1 id="dynamodb-store"&gt;DynamoDB store&lt;/h1&gt;
+&lt;p&gt;See the &lt;a href="https://artur-rios.github.io/dotnet-data/relational/"&gt;Relational&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/mongodb/"&gt;MongoDB&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/dynamodb/"&gt;DynamoDB&lt;/a&gt;, and
+&lt;a href="https://artur-rios.github.io/dotnet-data/export/"&gt;Export&lt;/a&gt; guides for full usage.&lt;/p&gt;</content></item><item><title>DynamoDB</title><link>https://artur-rios.github.io/dotnet-data/dynamodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/dynamodb/</guid><description>&lt;h1 id="dynamodb-store"&gt;DynamoDB store&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ArturRios.Data.DynamoDb&lt;/code&gt; is a standalone, &lt;strong&gt;async-only&lt;/strong&gt; repository over the AWS SDK&amp;rsquo;s high-level
 object-persistence model (&lt;code&gt;IDynamoDBContext&lt;/code&gt;). It does not depend on the relational core. Every method
 returns a &lt;code&gt;DataOutput&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; envelope.&lt;/p&gt;
@@ -332,6 +397,155 @@ version returns a &lt;strong&gt;concurrency-conflict&lt;/strong&gt; error envelo
 wherever possible.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Deferred:&lt;/strong&gt; atomic multi-item transactions (&lt;code&gt;TransactWriteItems&lt;/code&gt;) and composite-key batch-get are
 planned future additions.&lt;/li&gt;
+&lt;/ul&gt;</content></item><item><title>Export</title><link>https://artur-rios.github.io/dotnet-data/export/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/export/</guid><description>&lt;h1 id="file-export"&gt;File export&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.Export&lt;/code&gt; turns any &lt;code&gt;IEnumerable&amp;lt;T&amp;gt;&lt;/code&gt; into &lt;strong&gt;CSV&lt;/strong&gt;, &lt;strong&gt;JSON&lt;/strong&gt;, &lt;strong&gt;TXT&lt;/strong&gt;, or &lt;strong&gt;MessagePack&lt;/strong&gt;,
+over a stream or straight to a file. &lt;code&gt;ArturRios.Data.Export.Excel&lt;/code&gt; adds &lt;strong&gt;.xlsx&lt;/strong&gt; as a separate add-on.&lt;/p&gt;
+&lt;p&gt;Both are standalone — they work with plain POCOs and depend on neither the relational core nor a
+database driver. They keep the same enveloped style as the rest of the family: every write returns a
+&lt;code&gt;ProcessOutput&lt;/code&gt;, so a locked file or a serialization failure comes back as an error on the result
+rather than an unhandled exception.&lt;/p&gt;</description><content>&lt;h1 id="file-export"&gt;File export&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ArturRios.Data.Export&lt;/code&gt; turns any &lt;code&gt;IEnumerable&amp;lt;T&amp;gt;&lt;/code&gt; into &lt;strong&gt;CSV&lt;/strong&gt;, &lt;strong&gt;JSON&lt;/strong&gt;, &lt;strong&gt;TXT&lt;/strong&gt;, or &lt;strong&gt;MessagePack&lt;/strong&gt;,
+over a stream or straight to a file. &lt;code&gt;ArturRios.Data.Export.Excel&lt;/code&gt; adds &lt;strong&gt;.xlsx&lt;/strong&gt; as a separate add-on.&lt;/p&gt;
+&lt;p&gt;Both are standalone — they work with plain POCOs and depend on neither the relational core nor a
+database driver. They keep the same enveloped style as the rest of the family: every write returns a
+&lt;code&gt;ProcessOutput&lt;/code&gt;, so a locked file or a serialization failure comes back as an error on the result
+rather than an unhandled exception.&lt;/p&gt;
+&lt;h2 id="install"&gt;Install&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Export
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Export.Excel &lt;span style="color:#75715e"&gt;# optional — adds ExportFormat.Excel&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Excel is a separate package on purpose: ClosedXML is a heavy dependency, and only apps that actually
+export spreadsheets should pay for it.&lt;/p&gt;
+&lt;h2 id="1-register"&gt;1. Register&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Export.DependencyInjection;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Export.Excel.DependencyInjection; &lt;span style="color:#75715e"&gt;// only with the add-on&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddExport();
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddExcelExport(); &lt;span style="color:#75715e"&gt;// only with the add-on&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;AddExport()&lt;/code&gt; registers the &lt;code&gt;IExporterFactory&lt;/code&gt; and the four core exporters. &lt;code&gt;AddExcelExport()&lt;/code&gt; registers
+the Excel exporter and makes the factory resolve &lt;code&gt;ExportFormat.Excel&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="2-write-something"&gt;2. Write something&lt;/h2&gt;
+&lt;p&gt;Inject &lt;code&gt;IExporterFactory&lt;/code&gt; and resolve by format:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Export.Abstractions;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Output;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ProductReport&lt;/span&gt;(IExporterFactory exporters)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;async&lt;/span&gt; Task&amp;lt;ProcessOutput&amp;gt; WriteCsvAsync(IEnumerable&amp;lt;Product&amp;gt; products, &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; path)
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;var&lt;/span&gt; exporter = exporters.Resolve&amp;lt;Product&amp;gt;(ExportFormat.Csv);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;return&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;await&lt;/span&gt; exporter.WriteToFileAsync(products, path);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;You can also inject a concrete exporter (&lt;code&gt;CsvExporter&amp;lt;Product&amp;gt;&lt;/code&gt;, &lt;code&gt;JsonExporter&amp;lt;Product&amp;gt;&lt;/code&gt;, …) when the
+format is fixed at compile time.&lt;/p&gt;
+&lt;p&gt;Each exporter has two methods:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Method&lt;/th&gt;
+&lt;th&gt;Behaviour&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;WriteAsync(data, stream, ct)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;writes to your stream — it is &lt;strong&gt;not&lt;/strong&gt; disposed&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;WriteToFileAsync(data, path, ct)&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;creates/truncates the file and writes to it&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="3-formats"&gt;3. Formats&lt;/h2&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;ExportFormat&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;Exporter&lt;/th&gt;
+&lt;th&gt;Notes&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Csv&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;CsvExporter&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;RFC 4180 quoting/escaping; configurable delimiter and encoding&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Json&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;JsonExporter&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;a JSON array via &lt;code&gt;System.Text.Json&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Txt&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;TxtExporter&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;one line per record; &lt;code&gt;ToString()&lt;/code&gt; or a custom line selector&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;MessagePack&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;MessagePackExporter&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;binary; contractless resolver, so no attributes required&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Excel&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;ExcelExporter&amp;lt;T&amp;gt;&lt;/code&gt; &lt;em&gt;(add-on)&lt;/em&gt;&lt;/td&gt;
+&lt;td&gt;.xlsx via ClosedXML; requires &lt;code&gt;AddExcelExport()&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Resolving &lt;code&gt;ExportFormat.Excel&lt;/code&gt; without the add-on registered throws a &lt;code&gt;NotSupportedException&lt;/code&gt; naming the
+missing package and call. The core has no compile-time reference to the Excel package — the add-on drops
+a registration marker in the container, and the factory picks it up.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;TxtExporter&amp;lt;T&amp;gt;&lt;/code&gt; has extra overloads taking a &lt;code&gt;Func&amp;lt;T, string&amp;gt;&lt;/code&gt; line selector, for when &lt;code&gt;ToString()&lt;/code&gt;
+isn&amp;rsquo;t the line you want.&lt;/p&gt;
+&lt;h2 id="4-shaping-columns"&gt;4. Shaping columns&lt;/h2&gt;
+&lt;p&gt;The columnar formats (&lt;strong&gt;CSV&lt;/strong&gt; and &lt;strong&gt;Excel&lt;/strong&gt;) build a column plan from the record&amp;rsquo;s public readable
+properties. Two attributes adjust it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Export.Attributes;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;Product&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt; [ExportColumn(Name = &amp;#34;Product name&amp;#34;, Order = 1)]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; Name { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt; [ExportColumn(Order = 2)]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;decimal&lt;/span&gt; Price { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; }
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#a6e22e"&gt; [ExportIgnore]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt; InternalNotes { &lt;span style="color:#66d9ef"&gt;get&lt;/span&gt;; &lt;span style="color:#66d9ef"&gt;set&lt;/span&gt;; } = &lt;span style="color:#66d9ef"&gt;string&lt;/span&gt;.Empty;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Columns sort by &lt;code&gt;Order&lt;/code&gt; ascending; unordered columns sort last. The plan compiles to delegate getters
+and is cached per type, so there&amp;rsquo;s no per-row reflection cost.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Json&lt;/code&gt; and &lt;code&gt;MessagePack&lt;/code&gt; ignore the column map — they serialize the object graph as-is.&lt;/p&gt;
+&lt;p&gt;Values in columnar output are rendered culture-invariantly: &lt;code&gt;null&lt;/code&gt; becomes empty, strings pass through,
+and anything &lt;code&gt;IFormattable&lt;/code&gt; is formatted with &lt;code&gt;CultureInfo.InvariantCulture&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id="5-options"&gt;5. Options&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddExport(options =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.Csv.Delimiter = &lt;span style="color:#e6db74"&gt;&amp;#39;;&amp;#39;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.Csv.IncludeHeader = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.Csv.Encoding = &lt;span style="color:#66d9ef"&gt;new&lt;/span&gt; UTF8Encoding(&lt;span style="color:#66d9ef"&gt;false&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.Json.WriteIndented = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.Txt.NewLine = &lt;span style="color:#e6db74"&gt;&amp;#34;\n&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;});
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddExcelExport(options =&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.SheetName = &lt;span style="color:#e6db74"&gt;&amp;#34;Products&amp;#34;&lt;/span&gt;; &lt;span style="color:#75715e"&gt;// default &amp;#34;Sheet1&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.IncludeHeader = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.BoldHeader = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; options.AutoFitColumns = &lt;span style="color:#66d9ef"&gt;true&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;});
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;Json&lt;/code&gt; and &lt;code&gt;MessagePack&lt;/code&gt; also accept explicit &lt;code&gt;SerializerOptions&lt;/code&gt;, used as-is when set. MessagePack
+otherwise defaults to the contractless standard resolver.&lt;/p&gt;
+&lt;h2 id="notes"&gt;Notes&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Excel numeric precision.&lt;/strong&gt; The .xlsx format stores every number as an IEEE-754 double, so
+&lt;code&gt;long&lt;/code&gt;/&lt;code&gt;ulong&lt;/code&gt; beyond 2^53 and high-precision &lt;code&gt;decimal&lt;/code&gt; values lose precision. Export those as strings
+if exactness matters.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cancellation&lt;/strong&gt; propagates as &lt;code&gt;OperationCanceledException&lt;/code&gt; rather than being folded into the
+envelope — consistent with the rest of the toolkit.&lt;/li&gt;
 &lt;/ul&gt;</content></item><item><title>MongoDB</title><link>https://artur-rios.github.io/dotnet-data/mongodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/mongodb/</guid><description>&lt;h1 id="mongodb-document-store"&gt;MongoDB document store&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ArturRios.Data.MongoDb&lt;/code&gt; is a standalone document-repository package over &lt;code&gt;MongoDB.Driver&lt;/code&gt; — it does
 &lt;strong&gt;not&lt;/strong&gt; depend on the relational core, so it pulls in no EF Core. It keeps the same enveloped style:
@@ -451,7 +665,7 @@ SQLite, or MySQL.&lt;/p&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;ArturRios.Data.Sqlite&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;SQLite&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;SqLite&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;Available&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -487,7 +701,7 @@ SQLite, or MySQL.&lt;/p&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;ArturRios.Data.Sqlite&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;SQLite&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;SqLite&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;Available&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -531,7 +745,9 @@ section name is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.Core&amp;quot
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ConnectionString&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;Host=localhost;Database=mydb;Username=app;Password=secret;&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; }
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;DatabaseType&lt;/code&gt; is an enum: &lt;code&gt;PostgreSql&lt;/code&gt;, &lt;code&gt;MySql&lt;/code&gt;, or &lt;code&gt;SQLite&lt;/code&gt;.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;DatabaseType&lt;/code&gt; is an enum: &lt;code&gt;PostgreSql&lt;/code&gt;, &lt;code&gt;MySql&lt;/code&gt;, or &lt;code&gt;SqLite&lt;/code&gt; — note the lowercase &lt;code&gt;q&lt;/code&gt; in &lt;code&gt;SqLite&lt;/code&gt;.
+(Configuration binding is case-insensitive, so &lt;code&gt;&amp;quot;SQLite&amp;quot;&lt;/code&gt; in JSON still binds, but the C# member is
+&lt;code&gt;DatabaseType.SqLite&lt;/code&gt;.)&lt;/p&gt;
 &lt;h2 id="4-register"&gt;4. Register&lt;/h2&gt;
 &lt;p&gt;Call your provider&amp;rsquo;s registration extension &lt;strong&gt;and&lt;/strong&gt; &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt;. The provider registers
 its &lt;code&gt;IDatabaseProvider&lt;/code&gt;; &lt;code&gt;AddDataConfig&lt;/code&gt; reads the configured &lt;code&gt;DatabaseType&lt;/code&gt;, resolves the matching
