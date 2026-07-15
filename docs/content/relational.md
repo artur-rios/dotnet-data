@@ -18,7 +18,7 @@ dotnet add package ArturRios.Data.Sqlite          # or ArturRios.Data.PostgreSql
 
 | Provider package | `DatabaseType` | Status |
 |---|---|---|
-| `ArturRios.Data.Sqlite` | `SQLite` | Available |
+| `ArturRios.Data.Sqlite` | `SqLite` | Available |
 | `ArturRios.Data.PostgreSql` | `PostgreSql` | Available |
 | `ArturRios.Data.MySql` | `MySql` | Deferred — see [MySQL status](#mysql-status) |
 
@@ -66,7 +66,9 @@ section name is **`"ArturRios.Data.Core"`** (you can pass a different `sectionNa
 }
 ```
 
-`DatabaseType` is an enum: `PostgreSql`, `MySql`, or `SQLite`.
+`DatabaseType` is an enum: `PostgreSql`, `MySql`, or `SqLite` — note the lowercase `q` in `SqLite`.
+(Configuration binding is case-insensitive, so `"SQLite"` in JSON still binds, but the C# member is
+`DatabaseType.SqLite`.)
 
 ## 4. Register
 

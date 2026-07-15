@@ -1,5 +1,5 @@
-using ArturRios.Data.Configuration;
-using ArturRios.Data.Providers;
+using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArturRios.Data.MySql;

@@ -6,7 +6,8 @@ title = 'Dotnet Data'
 
 **`ArturRios.Data`** is a modular data-access toolkit for .NET. It gives you one consistent,
 envelope-based repository style across **relational** databases (EF Core over PostgreSQL / MySQL /
-SQLite, plus a Dapper read path) and **NoSQL** stores (**MongoDB**, **DynamoDB**).
+SQLite, plus a Dapper read path) and **NoSQL** stores (**MongoDB**, **DynamoDB**), plus **file export**
+writers (CSV, JSON, TXT, MessagePack, Excel).
 
 Every read/write operation returns a [`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output)
 envelope, so infrastructure failures — including optimistic-concurrency conflicts — surface as errors
@@ -15,8 +16,8 @@ on the result rather than as unhandled exceptions.
 ## The package family
 
 Each backend is a separate NuGet package, so you install only what you use. The relational packages
-share a common core; the NoSQL packages are standalone. Everything depends on `ArturRios.Output` for the
-envelopes.
+share a common core; the NoSQL and export packages are standalone. Everything depends on
+`ArturRios.Output` for the envelopes.
 
 ```mermaid
 flowchart TB
@@ -37,6 +38,12 @@ flowchart TB
         Dynamo["ArturRios.Data.DynamoDb"]
     end
 
+    subgraph Export["File export — standalone"]
+        direction TB
+        ExportCore["ArturRios.Data.Export"]
+        ExportExcel["ArturRios.Data.Export.Excel"]
+    end
+
     Sqlite --> Core
     Postgres --> Core
     MySql --> Core
@@ -44,6 +51,8 @@ flowchart TB
     Core --> Output
     Mongo --> Output
     Dynamo --> Output
+    ExportExcel --> ExportCore
+    ExportCore --> Output
 ```
 
 | Package | Backend | Status |
@@ -55,6 +64,8 @@ flowchart TB
 | `ArturRios.Data.Dapper` | Raw-SQL reads over the EF connection | Available |
 | `ArturRios.Data.MongoDb` | MongoDB document store | Available |
 | `ArturRios.Data.DynamoDb` | AWS DynamoDB | Available |
+| `ArturRios.Data.Export` | CSV / JSON / TXT / MessagePack writers | Available |
+| `ArturRios.Data.Export.Excel` | Excel .xlsx export add-on | Available |
 
 ## Installation
 
@@ -71,6 +82,10 @@ dotnet add package ArturRios.Data.Dapper
 # NoSQL (standalone — no core needed):
 dotnet add package ArturRios.Data.MongoDb
 dotnet add package ArturRios.Data.DynamoDb
+
+# File export (standalone — no core needed):
+dotnet add package ArturRios.Data.Export
+dotnet add package ArturRios.Data.Export.Excel    # optional — adds ExportFormat.Excel
 ```
 
 ## The result envelope
@@ -102,6 +117,8 @@ classDiagram
   `Query()` escape hatch, transactions, and concurrency.
 - **[DynamoDB](/dynamodb/)** — item POCOs and keys, the async repository, Query/Scan/batch, and
   `[DynamoDBVersion]` concurrency.
+- **[Export](/export/)** — the exporter factory, the CSV/JSON/TXT/MessagePack/Excel formats, the column
+  map and its attributes, and the options.
 
 The source lives at [github.com/artur-rios/dotnet-data](https://github.com/artur-rios/dotnet-data),
 licensed under the MIT License.

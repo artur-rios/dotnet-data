@@ -8,10 +8,13 @@
 [![Dapper](https://img.shields.io/nuget/v/ArturRios.Data.Dapper.svg?label=Dapper)](https://www.nuget.org/packages/ArturRios.Data.Dapper)
 [![MongoDb](https://img.shields.io/nuget/v/ArturRios.Data.MongoDb.svg?label=MongoDb)](https://www.nuget.org/packages/ArturRios.Data.MongoDb)
 [![DynamoDb](https://img.shields.io/nuget/v/ArturRios.Data.DynamoDb.svg?label=DynamoDb)](https://www.nuget.org/packages/ArturRios.Data.DynamoDb)
+[![Export](https://img.shields.io/nuget/v/ArturRios.Data.Export.svg?label=Export)](https://www.nuget.org/packages/ArturRios.Data.Export)
+[![Export.Excel](https://img.shields.io/nuget/v/ArturRios.Data.Export.Excel.svg?label=Export.Excel)](https://www.nuget.org/packages/ArturRios.Data.Export.Excel)
 
 **`ArturRios.Data`** — a modular data-access toolkit for .NET. One consistent, envelope-based repository
 style across **relational** databases (EF Core over PostgreSQL / MySQL / SQLite, plus a Dapper read
-path) and **NoSQL** stores (**MongoDB**, **DynamoDB**). Every operation returns a
+path) and **NoSQL** stores (**MongoDB**, **DynamoDB**), plus **file export** writers (CSV, JSON, TXT,
+MessagePack, Excel). Every operation returns a
 [`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output) envelope, so
 infrastructure failures — including optimistic-concurrency conflicts — surface as errors on the result
 instead of unhandled exceptions.
@@ -25,8 +28,8 @@ instead of unhandled exceptions.
 ## The package family
 
 Each backend is a separate NuGet package so you install only what you use. The relational packages
-share a common core; the NoSQL packages are standalone. Everything depends on `ArturRios.Output` for the
-result envelopes.
+share a common core; the NoSQL and export packages are standalone. Everything depends on
+`ArturRios.Output` for the result envelopes.
 
 ```mermaid
 flowchart TB
@@ -47,6 +50,12 @@ flowchart TB
         Dynamo["ArturRios.Data.DynamoDb"]
     end
 
+    subgraph Export["File export — standalone"]
+        direction TB
+        ExportCore["ArturRios.Data.Export<br/><i>CSV, JSON, TXT, MessagePack</i>"]
+        ExportExcel["ArturRios.Data.Export.Excel<br/><i>.xlsx add-on</i>"]
+    end
+
     Sqlite --> Core
     Postgres --> Core
     MySql --> Core
@@ -54,6 +63,8 @@ flowchart TB
     Core --> Output
     Mongo --> Output
     Dynamo --> Output
+    ExportExcel --> ExportCore
+    ExportCore --> Output
 ```
 
 | Package | Backend | Depends on | Status |
@@ -65,6 +76,8 @@ flowchart TB
 | `ArturRios.Data.Dapper` | Raw-SQL reads over the EF connection | Relational.Core, Dapper | ✅ |
 | `ArturRios.Data.MongoDb` | MongoDB document store | `ArturRios.Output`, MongoDB.Driver | ✅ |
 | `ArturRios.Data.DynamoDb` | AWS DynamoDB | `ArturRios.Output`, AWSSDK.DynamoDBv2 | ✅ |
+| `ArturRios.Data.Export` | CSV / JSON / TXT / MessagePack writers | `ArturRios.Output`, MessagePack | ✅ |
+| `ArturRios.Data.Export.Excel` | Excel .xlsx export add-on | Export, ClosedXML | ✅ |
 
 ¹ Deferred until `Pomelo.EntityFrameworkCore.MySql` publishes an EF Core 10 release (its latest still
 targets EF Core 9). Source is written and excluded from the build. See
@@ -86,6 +99,10 @@ dotnet add package ArturRios.Data.Dapper
 # NoSQL (standalone — no core needed):
 dotnet add package ArturRios.Data.MongoDb
 dotnet add package ArturRios.Data.DynamoDb
+
+# File export (standalone — no core needed):
+dotnet add package ArturRios.Data.Export
+dotnet add package ArturRios.Data.Export.Excel    # optional — adds ExportFormat.Excel
 ```
 
 Requires **.NET 10.0** or later.

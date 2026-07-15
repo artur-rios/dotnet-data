@@ -37,6 +37,11 @@ name = "DynamoDB"
 url = "/dynamodb/"
 weight = 40
 [[menu.main]]
+identifier = "export"
+name = "Export"
+url = "/export/"
+weight = 45
+[[menu.main]]
 identifier = "author"
 name = "Author"
 url = "https://www.artur-rios.tech/"

@@ -28,6 +28,12 @@ flowchart TB
         Dynamo["ArturRios.Data.DynamoDb<br/><i>async repository over IDynamoDBContext</i>"]
     end
 
+    subgraph Export["File export — standalone"]
+        direction TB
+        ExportCore["ArturRios.Data.Export<br/><i>exporter factory, column map,<br/>CSV / JSON / TXT / MessagePack</i>"]
+        ExportExcel["ArturRios.Data.Export.Excel<br/><i>.xlsx add-on</i>"]
+    end
+
     Sqlite --> Core
     Postgres --> Core
     MySql --> Core
@@ -35,28 +41,40 @@ flowchart TB
     Core --> Output
     Mongo --> Output
     Dynamo --> Output
+    ExportExcel --> ExportCore
+    ExportCore --> Output
 
     EF["Microsoft.EntityFrameworkCore"]:::ext
-    Npgsql["Npgsql / Pomelo / Sqlite provider"]:::ext
+    EfProviders["Npgsql / Pomelo / Sqlite EF provider"]:::ext
     DapperLib["Dapper"]:::ext
     MongoLib["MongoDB.Driver"]:::ext
     Aws["AWSSDK.DynamoDBv2"]:::ext
+    MsgPack["MessagePack"]:::ext
+    ClosedXml["ClosedXML"]:::ext
     Core --> EF
-    Sqlite --> Npgsql
-    Postgres --> Npgsql
+    Sqlite --> EfProviders
+    Postgres --> EfProviders
+    MySql --> EfProviders
     Dapper --> DapperLib
     Mongo --> MongoLib
     Dynamo --> Aws
+    ExportCore --> MsgPack
+    ExportExcel --> ClosedXml
 
     classDef ext fill:#8882,stroke-dasharray:3 3;
 ```
 
-**The two families are deliberately separate.** The relational providers and the Dapper read path build
+**The families are deliberately separate.** The relational providers and the Dapper read path build
 on `ArturRios.Data.Relational.Core` (EF Core). The NoSQL packages do **not** depend on the relational
 core — pulling EF Core into a MongoDB or DynamoDB app would be wasteful — so they depend only on
 `ArturRios.Output` and their native driver. MongoDB and DynamoDB are also separate from each other: their
 data models diverge too much (composite keys and a key/scan access model in DynamoDB vs. documents with
-LINQ/predicate queries in MongoDB) to share one interface without becoming leaky.
+LINQ/predicate queries in MongoDB) to share one interface without becoming leaky. The export packages
+are independent of all of it — they take any `IEnumerable<T>`, so they need no store at all.
+
+**Excel is split out** for the same reason, one level down: ClosedXML is a heavy dependency, so it lives
+in an add-on that apps opt into. The core keeps no compile-time reference to it — the add-on registers a
+marker type that the exporter factory resolves at runtime.
 
 ## The result envelope
 
@@ -127,9 +145,13 @@ classDiagram
 ### The provider seam
 
 The core never references a specific EF provider. Each provider package implements `IDatabaseProvider`
-and registers it (keyed by `DatabaseType`); `AddDataConfig<TContext>` reads the configured `DatabaseType`
-and resolves the matching provider to configure the `DbContext`. This is why you call both
-`AddXProvider()` and `AddDataConfig<TContext>()`.
+and registers it as a singleton, exposing which `DatabaseType` it handles; `AddDataConfig<TContext>`
+reads the configured `DatabaseType` and picks the matching provider out of the registered set to
+configure the `DbContext`. This is why you call both `AddXProvider()` and `AddDataConfig<TContext>()`.
+
+Registration validates this eagerly: if it can prove no registered provider matches the configured
+`DatabaseType`, it throws a `DataAccessException` naming the missing package rather than failing on the
+first query.
 
 ```mermaid
 classDiagram
@@ -191,6 +213,46 @@ classDiagram
     IAsyncDynamoRepository <|.. DynamoRepository
 ```
 
+## Export model
+
+Export has no store and no entity base class — it takes any `IEnumerable<T>`. `IExporter<T>` is the one
+contract; `ExporterBase<T>` centralizes the null-guarding, envelope conversion, and stream lifetime, so
+a concrete exporter only implements the format-specific write. `IExporterFactory` maps an
+`ExportFormat` to the right exporter out of the container.
+
+```mermaid
+classDiagram
+    class IExporter~T~ {
+        +WriteAsync(data, stream) ProcessOutput
+        +WriteToFileAsync(data, path) ProcessOutput
+    }
+    class ExporterBase~T~ {
+        #WriteCoreAsync(data, stream, ct)
+    }
+    IExporter <|.. ExporterBase
+
+    class CsvExporter~T~
+    class JsonExporter~T~
+    class TxtExporter~T~
+    class MessagePackExporter~T~
+    class ExcelExporter~T~
+    ExporterBase <|-- CsvExporter
+    ExporterBase <|-- JsonExporter
+    ExporterBase <|-- TxtExporter
+    ExporterBase <|-- MessagePackExporter
+    ExporterBase <|-- ExcelExporter
+
+    class IExporterFactory {
+        +Resolve(format) IExporter~T~
+    }
+    class ExporterFactory
+    IExporterFactory <|.. ExporterFactory
+    ExporterFactory ..> IExporter : resolves
+```
+
+The columnar formats (CSV, Excel) share one `ColumnMap`, which compiles and caches a per-type column
+plan from the record's public properties, honouring `[ExportColumn]` and `[ExportIgnore]`.
+
 ## Design principles
 
 - **Modular packaging.** One package per backend; install only what you use. NoSQL packages don't drag
@@ -204,8 +266,8 @@ classDiagram
 - **Transactions where the engine supports them.** Relational and MongoDB expose a delegate-based unit
   of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
   planned addition.)
-- **Consistent naming.** `AddDataConfig` / `AddMongoData` / `AddDynamoData` for DI; `DataOutput<T>` /
-  `ProcessOutput` everywhere; `Async` suffix + `CancellationToken` on async members.
+- **Consistent naming.** `AddDataConfig` / `AddMongoData` / `AddDynamoData` / `AddExport` for DI;
+  `DataOutput<T>` / `ProcessOutput` everywhere; `Async` suffix + `CancellationToken` on async members.
 
-See the [Relational](/relational/), [MongoDB](/mongodb/), and [DynamoDB](/dynamodb/) guides for full
-usage.
+See the [Relational](/relational/), [MongoDB](/mongodb/), [DynamoDB](/dynamodb/), and
+[Export](/export/) guides for full usage.

@@ -1,4 +1,4 @@
-using ArturRios.Data.Configuration;
+using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.MySql;
 
 namespace ArturRios.Data.Tests.Providers;
