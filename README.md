@@ -1,5 +1,15 @@
 # Dotnet Data
 
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Relational.Core.svg)](https://www.nuget.org/packages/ArturRios.Data.Relational.Core)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Sqlite.svg)](https://www.nuget.org/packages/ArturRios.Data.Sqlite)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.PostgreSql.svg)](https://www.nuget.org/packages/ArturRios.Data.PostgreSql)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.MySql.svg)](https://www.nuget.org/packages/ArturRios.Data.MySql)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Dapper.svg)](https://www.nuget.org/packages/ArturRios.Data.Dapper)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.ArturRios.Data.MongoDb.svg)](https://www.nuget.org/packages/ArturRios.Data.ArturRios.Data.MongoDb)
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.DynamoDb.svg)](https://www.nuget.org/packages/ArturRios.Data.DynamoDb)
+
 **`ArturRios.Data`** — a modular data-access toolkit for .NET. One consistent, envelope-based repository
 style across **relational** databases (EF Core over PostgreSQL / MySQL / SQLite, plus a Dapper read
 path) and **NoSQL** stores (**MongoDB**, **DynamoDB**). Every operation returns a
@@ -7,7 +17,7 @@ path) and **NoSQL** stores (**MongoDB**, **DynamoDB**). Every operation returns 
 infrastructure failures — including optimistic-concurrency conflicts — surface as errors on the result
 instead of unhandled exceptions.
 
-- 📚 **Full documentation:** https://artur-rios.github.io/dotnet-data
+- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
 - 🧩 **Architecture & diagrams:** [Architecture](https://artur-rios.github.io/dotnet-data/architecture/)
 - 🗄️ **Guides:** [Relational](https://artur-rios.github.io/dotnet-data/relational/) ·
   [MongoDB](https://artur-rios.github.io/dotnet-data/mongodb/) ·
