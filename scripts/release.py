@@ -397,8 +397,13 @@ def do_push_all(packages: list[Package], *, assume_yes: bool,
                   f"{len(pending)} publish run(s) at once)?")
         if not confirm(prompt, assume_yes):
             fail("aborted")
-        git("push", "origin", *pending)
+        # One `git push` per tag, deliberately: GitHub drops the push event for
+        # tags when more than three arrive in a single push ("Events will not be
+        # created for tags when more than three tags are pushed at once"), so a
+        # batched `git push origin tag1 tag2 ...` uploads the tags but silently
+        # publishes nothing. Only the confirmation is batched, not the pushes.
         for tag in pending:
+            git("push", "origin", tag)
             print(f"pushed tag {tag}")
         print(f"\nPushed {len(pending)} tag(s) - the Publish Package workflow "
               "should now run for each.")
