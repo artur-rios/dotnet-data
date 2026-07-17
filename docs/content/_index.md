@@ -2,7 +2,7 @@
 title = 'Dotnet Data'
 +++
 
-# Dotnet Data
+# Documentation
 
 **`ArturRios.Data`** is a modular data-access toolkit for .NET. It gives you one consistent,
 envelope-based repository style across **relational** databases (EF Core over PostgreSQL / MySQL /
