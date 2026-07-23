@@ -173,9 +173,10 @@ IAsyncUnitOfWork &amp;lt;|.. EfUnitOfWork
 &lt;/pre&gt;
 &lt;h3 id="the-provider-seam"&gt;The provider seam&lt;/h3&gt;
 &lt;p&gt;The core never references a specific EF provider. Each provider package implements &lt;code&gt;IDatabaseProvider&lt;/code&gt;
-and registers it as a singleton, exposing which &lt;code&gt;DatabaseType&lt;/code&gt; it handles; &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt;
-reads the configured &lt;code&gt;DatabaseType&lt;/code&gt; and picks the matching provider out of the registered set to
-configure the &lt;code&gt;DbContext&lt;/code&gt;. This is why you call both &lt;code&gt;AddXProvider()&lt;/code&gt; and &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;()&lt;/code&gt;.&lt;/p&gt;
+and registers it as a singleton, exposing which &lt;code&gt;DatabaseType&lt;/code&gt; it handles; &lt;code&gt;AddDataConfigFromSettings&amp;lt;TContext&amp;gt;&lt;/code&gt;
+(or &lt;code&gt;AddDataConfigFromEnvironment&amp;lt;TContext&amp;gt;&lt;/code&gt;) reads the configured &lt;code&gt;DatabaseType&lt;/code&gt; and picks the matching
+provider out of the registered set to configure the &lt;code&gt;DbContext&lt;/code&gt;. This is why you call both &lt;code&gt;AddXProvider()&lt;/code&gt;
+and &lt;code&gt;AddDataConfigFromSettings&amp;lt;TContext&amp;gt;()&lt;/code&gt; / &lt;code&gt;AddDataConfigFromEnvironment&amp;lt;TContext&amp;gt;()&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Registration validates this eagerly: if it can prove no registered provider matches the configured
 &lt;code&gt;DatabaseType&lt;/code&gt;, it throws a &lt;code&gt;DataAccessException&lt;/code&gt; naming the missing package rather than failing on the
 first query.&lt;/p&gt;
@@ -273,7 +274,7 @@ become a friendly &amp;ldquo;concurrency conflict&amp;rdquo; error. The one inte
 &lt;li&gt;&lt;strong&gt;Transactions where the engine supports them.&lt;/strong&gt; Relational and MongoDB expose a delegate-based unit
 of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
 planned addition.)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Consistent naming.&lt;/strong&gt; &lt;code&gt;AddDataConfig&lt;/code&gt; / &lt;code&gt;AddMongoData&lt;/code&gt; / &lt;code&gt;AddDynamoData&lt;/code&gt; / &lt;code&gt;AddExport&lt;/code&gt; for DI;
+&lt;li&gt;&lt;strong&gt;Consistent naming.&lt;/strong&gt; &lt;code&gt;AddDataConfigFromSettings&lt;/code&gt; / &lt;code&gt;AddMongoData&lt;/code&gt; / &lt;code&gt;AddDynamoData&lt;/code&gt; / &lt;code&gt;AddExport&lt;/code&gt; for DI;
 &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; everywhere; &lt;code&gt;Async&lt;/code&gt; suffix + &lt;code&gt;CancellationToken&lt;/code&gt; on async members.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;See the &lt;a href="https://artur-rios.github.io/dotnet-data/relational"&gt;Relational&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/mongodb"&gt;MongoDB&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/dynamodb"&gt;DynamoDB&lt;/a&gt;, and
@@ -738,7 +739,7 @@ of modified &lt;code&gt;VersionedEntity&lt;/code&gt; rows on every &lt;code&gt;S
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="3-configure"&gt;3. Configure&lt;/h2&gt;
 &lt;p&gt;Bind a &lt;code&gt;BaseDbContextOptions&lt;/code&gt; (a &lt;code&gt;DatabaseType&lt;/code&gt; + a &lt;code&gt;ConnectionString&lt;/code&gt;) from configuration. The default
-section name is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.Core&amp;quot;&lt;/code&gt;&lt;/strong&gt; (you can pass a different &lt;code&gt;sectionName&lt;/code&gt; to &lt;code&gt;AddDataConfig&lt;/code&gt;):&lt;/p&gt;
+section name is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.Core&amp;quot;&lt;/code&gt;&lt;/strong&gt; (you can pass a different &lt;code&gt;sectionName&lt;/code&gt; to &lt;code&gt;AddDataConfigFromSettings&lt;/code&gt;):&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;{
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;ArturRios.Data.Core&amp;#34;&lt;/span&gt;: {
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#f92672"&gt;&amp;#34;DatabaseType&amp;#34;&lt;/span&gt;: &lt;span style="color:#e6db74"&gt;&amp;#34;PostgreSql&amp;#34;&lt;/span&gt;,
@@ -748,18 +749,27 @@ section name is &lt;strong&gt;&lt;code&gt;&amp;quot;ArturRios.Data.Core&amp;quot
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;DatabaseType&lt;/code&gt; is an enum: &lt;code&gt;PostgreSql&lt;/code&gt;, &lt;code&gt;MySql&lt;/code&gt;, or &lt;code&gt;SqLite&lt;/code&gt; — note the lowercase &lt;code&gt;q&lt;/code&gt; in &lt;code&gt;SqLite&lt;/code&gt;.
 (Configuration binding is case-insensitive, so &lt;code&gt;&amp;quot;SQLite&amp;quot;&lt;/code&gt; in JSON still binds, but the C# member is
 &lt;code&gt;DatabaseType.SqLite&lt;/code&gt;.)&lt;/p&gt;
+&lt;h3 id="registering-from-environment-variables"&gt;Registering from environment variables&lt;/h3&gt;
+&lt;p&gt;When configuration lives in environment variables rather than appsettings, call
+&lt;code&gt;AddDataConfigFromEnvironment&amp;lt;TContext&amp;gt;&lt;/code&gt; with a name prefix instead of
+&lt;code&gt;AddDataConfigFromSettings&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfigFromEnvironment&amp;lt;AppDbContext&amp;gt;(&lt;span style="color:#e6db74"&gt;&amp;#34;ARTURRIOS_DATA&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It reads &lt;code&gt;ARTURRIOS_DATA_DATABASETYPE&lt;/code&gt; (one of &lt;code&gt;PostgreSql&lt;/code&gt;, &lt;code&gt;MySql&lt;/code&gt;, &lt;code&gt;SqLite&lt;/code&gt;)
+and &lt;code&gt;ARTURRIOS_DATA_CONNECTIONSTRING&lt;/code&gt;. The appsettings section is not consulted on
+this path. A missing or invalid &lt;code&gt;..._DATABASETYPE&lt;/code&gt; throws; a missing
+&lt;code&gt;..._CONNECTIONSTRING&lt;/code&gt; defaults to an empty string.&lt;/p&gt;
 &lt;h2 id="4-register"&gt;4. Register&lt;/h2&gt;
-&lt;p&gt;Call your provider&amp;rsquo;s registration extension &lt;strong&gt;and&lt;/strong&gt; &lt;code&gt;AddDataConfig&amp;lt;TContext&amp;gt;&lt;/code&gt;. The provider registers
-its &lt;code&gt;IDatabaseProvider&lt;/code&gt;; &lt;code&gt;AddDataConfig&lt;/code&gt; reads the configured &lt;code&gt;DatabaseType&lt;/code&gt;, resolves the matching
+&lt;p&gt;Call your provider&amp;rsquo;s registration extension &lt;strong&gt;and&lt;/strong&gt; &lt;code&gt;AddDataConfigFromSettings&amp;lt;TContext&amp;gt;&lt;/code&gt;. The provider registers
+its &lt;code&gt;IDatabaseProvider&lt;/code&gt;; &lt;code&gt;AddDataConfigFromSettings&lt;/code&gt; reads the configured &lt;code&gt;DatabaseType&lt;/code&gt;, resolves the matching
 provider, wires up your &lt;code&gt;DbContext&lt;/code&gt;, and registers the repositories and unit of work. It fails fast at
 registration if no provider matches the configured &lt;code&gt;DatabaseType&lt;/code&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.PostgreSql; &lt;span style="color:#75715e"&gt;// brings AddPostgreSqlProvider()&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core.DependencyInjection;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddPostgreSqlProvider(); &lt;span style="color:#75715e"&gt;// or AddSqliteProvider()&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfig&amp;lt;AppDbContext&amp;gt;(builder.Configuration);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfigFromSettings&amp;lt;AppDbContext&amp;gt;(builder.Configuration, &lt;span style="color:#e6db74"&gt;&amp;#34;ArturRios.Data.Core&amp;#34;&lt;/span&gt;);
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="5-repositories"&gt;5. Repositories&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;AddDataConfig&lt;/code&gt; registers all four repository interfaces (backed by &lt;code&gt;EfRepository&amp;lt;T&amp;gt;&lt;/code&gt;). There are two
+&lt;p&gt;&lt;code&gt;AddDataConfigFromSettings&lt;/code&gt; registers all four repository interfaces (backed by &lt;code&gt;EfRepository&amp;lt;T&amp;gt;&lt;/code&gt;). There are two
 tiers — read-only and full read/write — each in a &lt;strong&gt;sync&lt;/strong&gt; and an &lt;strong&gt;async&lt;/strong&gt; flavour:&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -814,7 +824,7 @@ deferred &lt;code&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt; (not enveloped —
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .Skip(&lt;span style="color:#ae81ff"&gt;20&lt;/span&gt;).Take(&lt;span style="color:#ae81ff"&gt;10&lt;/span&gt;)
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; .ToList();
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="6-transactions-unit-of-work"&gt;6. Transactions (unit of work)&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;AddDataConfig&lt;/code&gt; also registers &lt;code&gt;IUnitOfWork&lt;/code&gt; / &lt;code&gt;IAsyncUnitOfWork&lt;/code&gt;. Run several repository operations
+&lt;p&gt;&lt;code&gt;AddDataConfigFromSettings&lt;/code&gt; also registers &lt;code&gt;IUnitOfWork&lt;/code&gt; / &lt;code&gt;IAsyncUnitOfWork&lt;/code&gt;. Run several repository operations
 atomically with the delegate helper — it commits on success and rolls back on any exception, returning
 an envelope:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Relational.Core.Transactions;
@@ -840,12 +850,12 @@ if another writer changed the row, the update returns a &lt;strong&gt;concurrenc
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="8-dapper-read-path-optional"&gt;8. Dapper read path (optional)&lt;/h2&gt;
 &lt;p&gt;For raw-SQL reads alongside EF-based persistence, add &lt;code&gt;ArturRios.Data.Dapper&lt;/code&gt; and register &lt;code&gt;AddDapper()&lt;/code&gt;
-after &lt;code&gt;AddDataConfig&lt;/code&gt;:&lt;/p&gt;
+after &lt;code&gt;AddDataConfigFromSettings&lt;/code&gt;:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;dotnet add package ArturRios.Data.Dapper
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;using&lt;/span&gt; ArturRios.Data.Dapper;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddSqliteProvider(); &lt;span style="color:#75715e"&gt;// or AddPostgreSqlProvider()&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfig&amp;lt;AppDbContext&amp;gt;(builder.Configuration);
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDataConfigFromSettings&amp;lt;AppDbContext&amp;gt;(builder.Configuration, &lt;span style="color:#e6db74"&gt;&amp;#34;ArturRios.Data.Core&amp;#34;&lt;/span&gt;);
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;builder.Services.AddDapper();
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Inject &lt;code&gt;IAsyncSqlQuery&lt;/code&gt; (or the sync &lt;code&gt;ISqlQuery&lt;/code&gt;) and run enveloped, &lt;strong&gt;parameterized&lt;/strong&gt; queries:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-csharp" data-lang="csharp"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#66d9ef"&gt;public&lt;/span&gt; &lt;span style="color:#66d9ef"&gt;class&lt;/span&gt; &lt;span style="color:#a6e22e"&gt;ReportService&lt;/span&gt;(IAsyncSqlQuery sql)

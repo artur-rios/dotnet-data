@@ -116,9 +116,10 @@ four; <code>EfUnitOfWork</code> implements both unit-of-work interfaces. Consume
     IUnitOfWork &lt;|.. EfUnitOfWork
     IAsyncUnitOfWork &lt;|.. EfUnitOfWork
 </pre><h3 id=the-provider-seam>The provider seam<a href=#the-provider-seam class=hanchor arialabel=Anchor>&#8983;</a></h3><p>The core never references a specific EF provider. Each provider package implements <code>IDatabaseProvider</code>
-and registers it as a singleton, exposing which <code>DatabaseType</code> it handles; <code>AddDataConfig&lt;TContext></code>
-reads the configured <code>DatabaseType</code> and picks the matching provider out of the registered set to
-configure the <code>DbContext</code>. This is why you call both <code>AddXProvider()</code> and <code>AddDataConfig&lt;TContext>()</code>.</p><p>Registration validates this eagerly: if it can prove no registered provider matches the configured
+and registers it as a singleton, exposing which <code>DatabaseType</code> it handles; <code>AddDataConfigFromSettings&lt;TContext></code>
+(or <code>AddDataConfigFromEnvironment&lt;TContext></code>) reads the configured <code>DatabaseType</code> and picks the matching
+provider out of the registered set to configure the <code>DbContext</code>. This is why you call both <code>AddXProvider()</code>
+and <code>AddDataConfigFromSettings&lt;TContext>()</code> / <code>AddDataConfigFromEnvironment&lt;TContext>()</code>.</p><p>Registration validates this eagerly: if it can prove no registered provider matches the configured
 <code>DatabaseType</code>, it throws a <code>DataAccessException</code> naming the missing package rather than failing on the
 first query.</p><pre class=mermaid>classDiagram
     class IDatabaseProvider {
@@ -201,7 +202,7 @@ become a friendly &ldquo;concurrency conflict&rdquo; error. The one intentional 
 <code>OperationCanceledException</code>, which propagates so cooperative cancellation stays idiomatic.</li><li><strong>Opt-in optimistic concurrency.</strong> Derive from <code>VersionedEntity</code> / <code>VersionedDocument</code>, or add
 <code>[DynamoDBVersion]</code>, to get conditional writes; without it, writes are last-writer-wins.</li><li><strong>Transactions where the engine supports them.</strong> Relational and MongoDB expose a delegate-based unit
 of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
-planned addition.)</li><li><strong>Consistent naming.</strong> <code>AddDataConfig</code> / <code>AddMongoData</code> / <code>AddDynamoData</code> / <code>AddExport</code> for DI;
+planned addition.)</li><li><strong>Consistent naming.</strong> <code>AddDataConfigFromSettings</code> / <code>AddMongoData</code> / <code>AddDynamoData</code> / <code>AddExport</code> for DI;
 <code>DataOutput&lt;T></code> / <code>ProcessOutput</code> everywhere; <code>Async</code> suffix + <code>CancellationToken</code> on async members.</li></ul><p>See the <a href=/dotnet-data/relational>Relational</a>, <a href=/dotnet-data/mongodb>MongoDB</a>, <a href=/dotnet-data/dynamodb>DynamoDB</a>, and
 <a href=/dotnet-data/export>Export</a> guides for full usage.</p></div></div></article></div><footer class=footer><div class=footer__inner><div class=copyright><span>© 2026 Powered by <a href=https://gohugo.io>Hugo</a></span>
 <span><a href=https://github.com/mirus-ua/hugo-theme-re-terminal target=_blank>Original theme</a> made by <a href=https://github.com/mirus-ua target=_blank>Mirus</a></span>
