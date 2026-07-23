@@ -80,14 +80,14 @@ state, error messages, and info messages; <code>DataOutput&lt;T></code> adds a t
 each in a sync and an async flavour), all constrained to <code>T : Entity</code>. <code>EfRepository&lt;T></code> implements all
 four; <code>EfUnitOfWork</code> implements both unit-of-work interfaces. Consumers derive their entities from
 <code>Entity</code> (or <code>VersionedEntity</code> for optimistic concurrency) and their <code>DbContext</code> from <code>BaseDbContext</code>.</p><pre class=mermaid>classDiagram
-    class Entity { +int Id }
+    class Entity { +long Id }
     class VersionedEntity { +Guid ConcurrencyStamp }
     Entity &lt;|-- VersionedEntity
 
     class IReadOnlyRepository~T~ {
         +Query() IQueryable~T~
         +GetAll() DataOutput
-        +GetById(int) DataOutput
+        +GetById(long) DataOutput
     }
     class IRepository~T~ {
         +Create(T) DataOutput
@@ -202,8 +202,8 @@ become a friendly &ldquo;concurrency conflict&rdquo; error. The one intentional 
 <code>[DynamoDBVersion]</code>, to get conditional writes; without it, writes are last-writer-wins.</li><li><strong>Transactions where the engine supports them.</strong> Relational and MongoDB expose a delegate-based unit
 of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
 planned addition.)</li><li><strong>Consistent naming.</strong> <code>AddDataConfig</code> / <code>AddMongoData</code> / <code>AddDynamoData</code> / <code>AddExport</code> for DI;
-<code>DataOutput&lt;T></code> / <code>ProcessOutput</code> everywhere; <code>Async</code> suffix + <code>CancellationToken</code> on async members.</li></ul><p>See the <a href=/relational/>Relational</a>, <a href=/mongodb/>MongoDB</a>, <a href=/dynamodb/>DynamoDB</a>, and
-<a href=/export/>Export</a> guides for full usage.</p></div></div></article></div><footer class=footer><div class=footer__inner><div class=copyright><span>© 2026 Powered by <a href=https://gohugo.io>Hugo</a></span>
+<code>DataOutput&lt;T></code> / <code>ProcessOutput</code> everywhere; <code>Async</code> suffix + <code>CancellationToken</code> on async members.</li></ul><p>See the <a href=/dotnet-data/relational>Relational</a>, <a href=/dotnet-data/mongodb>MongoDB</a>, <a href=/dotnet-data/dynamodb>DynamoDB</a>, and
+<a href=/dotnet-data/export>Export</a> guides for full usage.</p></div></div></article></div><footer class=footer><div class=footer__inner><div class=copyright><span>© 2026 Powered by <a href=https://gohugo.io>Hugo</a></span>
 <span><a href=https://github.com/mirus-ua/hugo-theme-re-terminal target=_blank>Original theme</a> made by <a href=https://github.com/mirus-ua target=_blank>Mirus</a></span>
 <span><a href=https://github.com/artur-rios/hugo-theme-re-terminal target=_blank>This version</a> is made by <a href=https://github.com/artur-rios target=_blank>Artur Rios</a></span></div></div></footer><script type=text/javascript src=/dotnet-data/bundle.min.js></script></div><script type=module>
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';

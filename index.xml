@@ -138,13 +138,13 @@ each in a sync and an async flavour), all constrained to &lt;code&gt;T : Entity&
 four; &lt;code&gt;EfUnitOfWork&lt;/code&gt; implements both unit-of-work interfaces. Consumers derive their entities from
 &lt;code&gt;Entity&lt;/code&gt; (or &lt;code&gt;VersionedEntity&lt;/code&gt; for optimistic concurrency) and their &lt;code&gt;DbContext&lt;/code&gt; from &lt;code&gt;BaseDbContext&lt;/code&gt;.&lt;/p&gt;
 &lt;pre class="mermaid"&gt;classDiagram
-class Entity { +int Id }
+class Entity { +long Id }
 class VersionedEntity { +Guid ConcurrencyStamp }
 Entity &amp;lt;|-- VersionedEntity
 class IReadOnlyRepository~T~ {
 +Query() IQueryable~T~
 +GetAll() DataOutput
-+GetById(int) DataOutput
++GetById(long) DataOutput
 }
 class IRepository~T~ {
 +Create(T) DataOutput
@@ -276,8 +276,8 @@ planned addition.)&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Consistent naming.&lt;/strong&gt; &lt;code&gt;AddDataConfig&lt;/code&gt; / &lt;code&gt;AddMongoData&lt;/code&gt; / &lt;code&gt;AddDynamoData&lt;/code&gt; / &lt;code&gt;AddExport&lt;/code&gt; for DI;
 &lt;code&gt;DataOutput&amp;lt;T&amp;gt;&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; everywhere; &lt;code&gt;Async&lt;/code&gt; suffix + &lt;code&gt;CancellationToken&lt;/code&gt; on async members.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;See the &lt;a href="https://artur-rios.github.io/dotnet-data/relational/"&gt;Relational&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/mongodb/"&gt;MongoDB&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/dynamodb/"&gt;DynamoDB&lt;/a&gt;, and
-&lt;a href="https://artur-rios.github.io/dotnet-data/export/"&gt;Export&lt;/a&gt; guides for full usage.&lt;/p&gt;</content></item><item><title>DynamoDB</title><link>https://artur-rios.github.io/dotnet-data/dynamodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/dynamodb/</guid><description>&lt;h1 id="dynamodb-store"&gt;DynamoDB store&lt;/h1&gt;
+&lt;p&gt;See the &lt;a href="https://artur-rios.github.io/dotnet-data/relational"&gt;Relational&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/mongodb"&gt;MongoDB&lt;/a&gt;, &lt;a href="https://artur-rios.github.io/dotnet-data/dynamodb"&gt;DynamoDB&lt;/a&gt;, and
+&lt;a href="https://artur-rios.github.io/dotnet-data/export"&gt;Export&lt;/a&gt; guides for full usage.&lt;/p&gt;</content></item><item><title>DynamoDB</title><link>https://artur-rios.github.io/dotnet-data/dynamodb/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>arturdev@duck.com (Artur Rios)</author><guid>https://artur-rios.github.io/dotnet-data/dynamodb/</guid><description>&lt;h1 id="dynamodb-store"&gt;DynamoDB store&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ArturRios.Data.DynamoDb&lt;/code&gt; is a standalone, &lt;strong&gt;async-only&lt;/strong&gt; repository over the AWS SDK&amp;rsquo;s high-level
 object-persistence model (&lt;code&gt;IDynamoDBContext&lt;/code&gt;). It does not depend on the relational core. Every method
 returns a &lt;code&gt;DataOutput&lt;/code&gt; / &lt;code&gt;ProcessOutput&lt;/code&gt; envelope.&lt;/p&gt;
