@@ -28,7 +28,7 @@
       Microsoft.EntityFrameworkCore.Sqlite still pins bundle_e_sqlite3 2.1.11, so upgrading EF Core
       alone does not clear it. Drop this line once EF Core's own pin moves past 2.1.11.
     -->
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12"/>
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArturRios.Data.Relational.Core\ArturRios.Data.Relational.Core.csproj"/>

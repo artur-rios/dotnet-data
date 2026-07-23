@@ -20,8 +20,8 @@
     <None Include="README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.101.2"/>
-    <PackageReference Include="ArturRios.Output" Version="2.0.1"/>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.101.4" />
+    <PackageReference Include="ArturRios.Output" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.10"/>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10"/>
