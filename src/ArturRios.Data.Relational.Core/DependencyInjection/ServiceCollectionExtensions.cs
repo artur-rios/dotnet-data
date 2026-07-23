@@ -89,10 +89,10 @@ public static class ServiceCollectionExtensions
         ///     binding options from the given configuration section.
         /// </summary>
         /// <param name="configuration">Application configuration.</param>
-        /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data.Core".</param>
+        /// <param name="sectionName">Configuration section holding the options.</param>
         /// <typeparam name="TContext">The application's context type.</typeparam>
-        public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
-            string sectionName = "ArturRios.Data.Core")
+        public IServiceCollection AddDataConfigFromSettings<TContext>(IConfiguration configuration,
+            string sectionName)
             where TContext : BaseDbContext
         {
             var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
