@@ -145,9 +145,10 @@ classDiagram
 ### The provider seam
 
 The core never references a specific EF provider. Each provider package implements `IDatabaseProvider`
-and registers it as a singleton, exposing which `DatabaseType` it handles; `AddDataConfig<TContext>`
-reads the configured `DatabaseType` and picks the matching provider out of the registered set to
-configure the `DbContext`. This is why you call both `AddXProvider()` and `AddDataConfig<TContext>()`.
+and registers it as a singleton, exposing which `DatabaseType` it handles; `AddDataConfigFromSettings<TContext>`
+(or `AddDataConfigFromEnvironment<TContext>`) reads the configured `DatabaseType` and picks the matching
+provider out of the registered set to configure the `DbContext`. This is why you call both `AddXProvider()`
+and `AddDataConfigFromSettings<TContext>()` / `AddDataConfigFromEnvironment<TContext>()`.
 
 Registration validates this eagerly: if it can prove no registered provider matches the configured
 `DatabaseType`, it throws a `DataAccessException` naming the missing package rather than failing on the
@@ -266,7 +267,7 @@ plan from the record's public properties, honouring `[ExportColumn]` and `[Expor
 - **Transactions where the engine supports them.** Relational and MongoDB expose a delegate-based unit
   of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a
   planned addition.)
-- **Consistent naming.** `AddDataConfig` / `AddMongoData` / `AddDynamoData` / `AddExport` for DI;
+- **Consistent naming.** `AddDataConfigFromSettings` / `AddMongoData` / `AddDynamoData` / `AddExport` for DI;
   `DataOutput<T>` / `ProcessOutput` everywhere; `Async` suffix + `CancellationToken` on async members.
 
 See the [Relational](/dotnet-data/relational), [MongoDB](/dotnet-data/mongodb), [DynamoDB](/dotnet-data/dynamodb), and

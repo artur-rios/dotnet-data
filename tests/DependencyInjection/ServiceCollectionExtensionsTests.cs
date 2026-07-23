@@ -112,11 +112,14 @@ public class ServiceCollectionExtensionsTests
             services.AddDataConfigFromEnvironment<TestDbContext>(prefix));
     }
 
-    [Fact]
-    public void GivenDatabaseTypeEnvVarInvalid_WhenAddDataConfigFromEnvironment_ThenThrowsDataAccessException()
+    [Theory]
+    [InlineData("NotARealDb")]
+    [InlineData("99")]
+    [InlineData("")]
+    public void GivenDatabaseTypeEnvVarInvalid_WhenAddDataConfigFromEnvironment_ThenThrowsDataAccessException(string databaseTypeValue)
     {
         const string prefix = "ARTURRIOS_TEST_INVALID";
-        Environment.SetEnvironmentVariable($"{prefix}_DATABASETYPE", "NotARealDb");
+        Environment.SetEnvironmentVariable($"{prefix}_DATABASETYPE", databaseTypeValue);
 
         try
         {
