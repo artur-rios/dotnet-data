@@ -13,7 +13,8 @@ overload so the configuration section name must be supplied explicitly.
 ## Motivation
 
 Today `AddDataConfig<TContext>(IConfiguration, sectionName)` binds
-`BaseDbContextOptions` from an appsettings section. In some deployments the
+`BaseDbContextOptions` from an appsettings section (renamed to
+`AddDataConfigFromSettings` by this work). In some deployments the
 connection string and database type live only in environment variables (e.g.
 containers, CI, secret stores) and no appsettings file is present. Callers should
 be able to opt into an env-only source. Separately, the default section name
@@ -25,10 +26,13 @@ silent binding against the wrong section.
 In scope:
 
 1. New public overload `AddDataConfigFromEnvironment<TContext>(string prefix)`.
-2. Remove the default value from `sectionName` on the existing
-   `AddDataConfig<TContext>(IConfiguration, string sectionName)` overload, making
-   it required.
-3. Update documentation examples that relied on the default section name.
+2. Rename the existing `AddDataConfig<TContext>(IConfiguration, string sectionName)`
+   overload to `AddDataConfigFromSettings<TContext>`, and remove the default value
+   from `sectionName`, making it required. The explicit-options overload
+   `AddDataConfig<TContext>(BaseDbContextOptions)` keeps its name (it is the shared
+   delegation target, not a configuration source).
+3. Update documentation examples that used the old name and/or relied on the
+   default section name.
 4. Unit tests for the new overload.
 
 Out of scope:
@@ -88,19 +92,22 @@ public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
     string sectionName = "ArturRios.Data.Core")
 
 // after
-public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
+public IServiceCollection AddDataConfigFromSettings<TContext>(IConfiguration configuration,
     string sectionName)
 ```
 
-This is a breaking change (2.x already shipped, so a minor/major bump applies per
-the repo's versioning). The `AddDataConfig<TContext>(IConfiguration, string)` and
-`AddDataConfig<TContext>(BaseDbContextOptions)` bodies are otherwise unchanged.
+This renames the method and makes `sectionName` required — both breaking changes
+(2.x already shipped, so a major bump applies per the repo's versioning). The
+method body is otherwise unchanged, and it still delegates to
+`AddDataConfig<TContext>(BaseDbContextOptions)`, which keeps its name.
 
 ### Documentation updates
 
-Examples that call `AddDataConfig<AppDbContext>(builder.Configuration)` without a
-section name will no longer compile. Update them to pass an explicit section name,
-and add a short note documenting `AddDataConfigFromEnvironment`. Affected files:
+Examples that call `AddDataConfig<AppDbContext>(builder.Configuration)` will no
+longer compile: the method is renamed to `AddDataConfigFromSettings` and the
+section name is now required. Update them to the new name with an explicit section
+name, and add a short note documenting `AddDataConfigFromEnvironment`. Affected
+files:
 
 - `README.md`
 - `docs/content/relational.md`
