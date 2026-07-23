@@ -37,7 +37,7 @@ using ArturRios.Data.Dapper;                           // brings AddDapper()
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddPostgreSqlProvider();
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 builder.Services.AddDapper();
 ```
 

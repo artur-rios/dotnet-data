@@ -55,7 +55,7 @@ public class AppDbContext(DbContextOptions options) : BaseDbContext(options)
 ## 3. Configure
 
 Bind a `BaseDbContextOptions` (a `DatabaseType` + a `ConnectionString`) from configuration. The default
-section name is **`"ArturRios.Data.Core"`** (you can pass a different `sectionName` to `AddDataConfig`):
+section name is **`"ArturRios.Data.Core"`** (you can pass a different `sectionName` to `AddDataConfigFromSettings`):
 
 ```json
 {
@@ -70,10 +70,25 @@ section name is **`"ArturRios.Data.Core"`** (you can pass a different `sectionNa
 (Configuration binding is case-insensitive, so `"SQLite"` in JSON still binds, but the C# member is
 `DatabaseType.SqLite`.)
 
+### Registering from environment variables
+
+When configuration lives in environment variables rather than appsettings, call
+`AddDataConfigFromEnvironment<TContext>` with a name prefix instead of
+`AddDataConfigFromSettings`:
+
+```csharp
+builder.Services.AddDataConfigFromEnvironment<AppDbContext>("ARTURRIOS_DATA");
+```
+
+It reads `ARTURRIOS_DATA_DATABASETYPE` (one of `PostgreSql`, `MySql`, `SqLite`)
+and `ARTURRIOS_DATA_CONNECTIONSTRING`. The appsettings section is not consulted on
+this path. A missing or invalid `..._DATABASETYPE` throws; a missing
+`..._CONNECTIONSTRING` defaults to an empty string.
+
 ## 4. Register
 
-Call your provider's registration extension **and** `AddDataConfig<TContext>`. The provider registers
-its `IDatabaseProvider`; `AddDataConfig` reads the configured `DatabaseType`, resolves the matching
+Call your provider's registration extension **and** `AddDataConfigFromSettings<TContext>`. The provider registers
+its `IDatabaseProvider`; `AddDataConfigFromSettings` reads the configured `DatabaseType`, resolves the matching
 provider, wires up your `DbContext`, and registers the repositories and unit of work. It fails fast at
 registration if no provider matches the configured `DatabaseType`.
 
@@ -82,12 +97,12 @@ using ArturRios.Data.PostgreSql;                       // brings AddPostgreSqlPr
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddPostgreSqlProvider();               // or AddSqliteProvider()
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
 ## 5. Repositories
 
-`AddDataConfig` registers all four repository interfaces (backed by `EfRepository<T>`). There are two
+`AddDataConfigFromSettings` registers all four repository interfaces (backed by `EfRepository<T>`). There are two
 tiers — read-only and full read/write — each in a **sync** and an **async** flavour:
 
 | Interface | Members |
@@ -133,7 +148,7 @@ var page = repo.Query()
 
 ## 6. Transactions (unit of work)
 
-`AddDataConfig` also registers `IUnitOfWork` / `IAsyncUnitOfWork`. Run several repository operations
+`AddDataConfigFromSettings` also registers `IUnitOfWork` / `IAsyncUnitOfWork`. Run several repository operations
 atomically with the delegate helper — it commits on success and rolls back on any exception, returning
 an envelope:
 
@@ -169,7 +184,7 @@ if (!result.Success)
 ## 8. Dapper read path (optional)
 
 For raw-SQL reads alongside EF-based persistence, add `ArturRios.Data.Dapper` and register `AddDapper()`
-after `AddDataConfig`:
+after `AddDataConfigFromSettings`:
 
 ```bash
 dotnet add package ArturRios.Data.Dapper
@@ -179,7 +194,7 @@ dotnet add package ArturRios.Data.Dapper
 using ArturRios.Data.Dapper;
 
 builder.Services.AddSqliteProvider();                  // or AddPostgreSqlProvider()
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 builder.Services.AddDapper();
 ```
 

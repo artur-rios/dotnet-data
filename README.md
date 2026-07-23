@@ -170,7 +170,7 @@ using ArturRios.Data.PostgreSql;                       // brings AddPostgreSqlPr
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddPostgreSqlProvider();
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
 **5. Inject and use** the enveloped repository / unit of work:

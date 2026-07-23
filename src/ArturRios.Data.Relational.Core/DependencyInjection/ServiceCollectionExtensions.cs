@@ -89,10 +89,10 @@ public static class ServiceCollectionExtensions
         ///     binding options from the given configuration section.
         /// </summary>
         /// <param name="configuration">Application configuration.</param>
-        /// <param name="sectionName">Configuration section holding the options. Defaults to "ArturRios.Data.Core".</param>
+        /// <param name="sectionName">Configuration section holding the options.</param>
         /// <typeparam name="TContext">The application's context type.</typeparam>
-        public IServiceCollection AddDataConfig<TContext>(IConfiguration configuration,
-            string sectionName = "ArturRios.Data.Core")
+        public IServiceCollection AddDataConfigFromSettings<TContext>(IConfiguration configuration,
+            string sectionName)
             where TContext : BaseDbContext
         {
             var options = configuration.GetSection(sectionName).Get<BaseDbContextOptions>()
@@ -130,6 +130,46 @@ public static class ServiceCollectionExtensions
             EnsureProviderRegistered(services, options.DatabaseType);
 
             return services;
+        }
+
+        /// <summary>
+        ///     Registers the configured <typeparamref name="TContext" />, repositories, and unit of work,
+        ///     reading options entirely from environment variables. The appsettings section is not consulted.
+        /// </summary>
+        /// <param name="prefix">
+        ///     Environment-variable name prefix. Variables are read as
+        ///     <c>{prefix}_DATABASETYPE</c> and <c>{prefix}_CONNECTIONSTRING</c>.
+        /// </param>
+        /// <typeparam name="TContext">The application's context type.</typeparam>
+        public IServiceCollection AddDataConfigFromEnvironment<TContext>(string prefix)
+            where TContext : BaseDbContext
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+            {
+                throw new ArgumentException(
+                    "Environment-variable prefix must not be null or whitespace.", nameof(prefix));
+            }
+
+            var databaseTypeValue = Environment.GetEnvironmentVariable($"{prefix}_DATABASETYPE");
+
+            if (!Enum.TryParse<DatabaseType>(databaseTypeValue, ignoreCase: true, out var databaseType) ||
+                !Enum.IsDefined(databaseType))
+            {
+                throw new DataAccessException(
+                [
+                    $"Environment variable '{prefix}_DATABASETYPE' is unset or not a valid DatabaseType. " +
+                    $"Allowed values: {string.Join(", ", Enum.GetNames<DatabaseType>())}."
+                ]);
+            }
+
+            var connectionString =
+                Environment.GetEnvironmentVariable($"{prefix}_CONNECTIONSTRING") ?? string.Empty;
+
+            return services.AddDataConfig<TContext>(new BaseDbContextOptions
+            {
+                DatabaseType = databaseType,
+                ConnectionString = connectionString
+            });
         }
     }
 }

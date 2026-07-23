@@ -42,7 +42,7 @@ using ArturRios.Data.PostgreSql;                       // brings AddPostgreSqlPr
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddPostgreSqlProvider();
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
 That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
@@ -52,7 +52,7 @@ That's the whole provider-specific surface. From here on you use `IAsyncReposito
 ## What it does
 
 `AddPostgreSqlProvider()` registers `PostgreSqlProvider` as a singleton `IDatabaseProvider` with
-`Type => DatabaseType.PostgreSql`. When `AddDataConfig<TContext>` builds your context and the configured
+`Type => DatabaseType.PostgreSql`. When `AddDataConfigFromSettings<TContext>` builds your context and the configured
 `DatabaseType` is `PostgreSql`, this provider is selected and calls `UseNpgsql(connectionString)`.
 
 If the configured `DatabaseType` has no matching provider registered, registration fails fast with a
