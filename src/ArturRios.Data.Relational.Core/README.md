@@ -73,12 +73,22 @@ using ArturRios.Data.PostgreSql;                       // brings AddPostgreSqlPr
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddPostgreSqlProvider();
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
-`AddDataConfig<TContext>` registers your context, the repositories, and the unit of work. It validates
+`AddDataConfigFromSettings<TContext>` registers your context, the repositories, and the unit of work. It validates
 eagerly that a provider matching the configured `DatabaseType` is registered, so misconfiguration fails
 at startup rather than on first query.
+
+When configuration lives in environment variables rather than appsettings, call
+`AddDataConfigFromEnvironment<TContext>` with a name prefix instead of `AddDataConfigFromSettings`:
+
+```csharp
+builder.Services.AddDataConfigFromEnvironment<AppDbContext>("ARTURRIOS_DATA");
+```
+
+It reads `ARTURRIOS_DATA_DATABASETYPE` (one of `PostgreSql`, `MySql`, `SqLite`) and
+`ARTURRIOS_DATA_CONNECTIONSTRING`; the appsettings section is not consulted on this path.
 
 **5. Inject and use:**
 

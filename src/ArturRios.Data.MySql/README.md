@@ -44,7 +44,7 @@ using ArturRios.Data.MySql;                            // brings AddMySqlProvide
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddMySqlProvider();
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
 `AddMySqlProvider()` registers `MySqlProvider` as a singleton `IDatabaseProvider` with

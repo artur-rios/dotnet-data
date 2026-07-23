@@ -43,7 +43,7 @@ using ArturRios.Data.Sqlite;                           // brings AddSqliteProvid
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddSqliteProvider();
-builder.Services.AddDataConfig<AppDbContext>(builder.Configuration);
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
 That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
@@ -53,7 +53,7 @@ That's the whole provider-specific surface. From here on you use `IAsyncReposito
 ## What it does
 
 `AddSqliteProvider()` registers `SqliteProvider` as a singleton `IDatabaseProvider` with
-`Type => DatabaseType.SqLite`. When `AddDataConfig<TContext>` builds your context and the configured
+`Type => DatabaseType.SqLite`. When `AddDataConfigFromSettings<TContext>` builds your context and the configured
 `DatabaseType` is `SqLite`, this provider is selected and calls `UseSqlite(connectionString)`.
 
 If the configured `DatabaseType` has no matching provider registered, registration fails fast with a
