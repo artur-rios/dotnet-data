@@ -1,3 +1,4 @@
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Relational.Core.Interfaces;
@@ -22,5 +23,5 @@ public interface IReadOnlyRepository<T> where T : Entity
     ///     Returns the entity with the given identifier, or a successful result with
     ///     <c>null</c> data when none matches.
     /// </summary>
-    DataOutput<T?> GetById(int id);
+    DataOutput<T?> GetById(long id);
 }

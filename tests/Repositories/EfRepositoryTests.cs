@@ -1,5 +1,5 @@
 using System.Linq;
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Data.Tests.TestSupport;
 

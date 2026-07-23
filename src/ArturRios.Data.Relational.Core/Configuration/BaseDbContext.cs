@@ -1,3 +1,4 @@
+using ArturRios.Data.Relational.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArturRios.Data.Relational.Core.Configuration;

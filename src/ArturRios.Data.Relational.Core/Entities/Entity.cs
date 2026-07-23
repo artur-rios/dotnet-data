@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ArturRios.Data.Relational.Core;
+namespace ArturRios.Data.Relational.Core.Entities;
 
 /// <summary>
 ///     Abstract base class for all data entities. Provides a primary key identifier.
@@ -11,5 +11,5 @@ public abstract class Entity
     ///     The unique identifier for the entity.
     /// </summary>
     [Column(Order = 1)]
-    public int Id { get; set; }
+    public long Id { get; set; }
 }

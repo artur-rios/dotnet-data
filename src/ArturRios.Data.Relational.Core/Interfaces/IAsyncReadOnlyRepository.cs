@@ -1,3 +1,4 @@
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Relational.Core.Interfaces;
@@ -20,5 +21,5 @@ public interface IAsyncReadOnlyRepository<T> where T : Entity
     ///     Returns the entity with the given identifier, or a successful result with
     ///     <c>null</c> data when none matches.
     /// </summary>
-    Task<DataOutput<T?>> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<DataOutput<T?>> GetByIdAsync(long id, CancellationToken ct = default);
 }

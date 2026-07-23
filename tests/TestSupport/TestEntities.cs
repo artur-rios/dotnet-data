@@ -1,4 +1,4 @@
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 
 namespace ArturRios.Data.Tests.TestSupport;
 

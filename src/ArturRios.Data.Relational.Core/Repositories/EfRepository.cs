@@ -1,5 +1,6 @@
 using System.Data.Common;
 using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Output;
 using Microsoft.EntityFrameworkCore;
@@ -31,11 +32,11 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         GuardedAsync<IEnumerable<T>>(async () => await Set.ToListAsync(ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<T?>> GetByIdAsync(int id, CancellationToken ct = default) =>
+    public Task<DataOutput<T?>> GetByIdAsync(long id, CancellationToken ct = default) =>
         GuardedAsync(async () => await Set.FirstOrDefaultAsync(e => e.Id == id, ct));
 
     /// <inheritdoc />
-    public Task<DataOutput<int>> CreateAsync(T entity, CancellationToken ct = default) =>
+    public Task<DataOutput<long>> CreateAsync(T entity, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
             await Set.AddAsync(entity, ct);
@@ -45,9 +46,9 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<int>>>
+    public Task<DataOutput<IEnumerable<long>>>
         CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<int>>(async () =>
+        GuardedAsync<IEnumerable<long>>(async () =>
         {
             var list = entities.ToList();
             await Set.AddRangeAsync(list, ct);
@@ -78,7 +79,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<int>> DeleteAsync(T entity, CancellationToken ct = default) =>
+    public Task<DataOutput<long>> DeleteAsync(T entity, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
             Set.Remove(entity);
@@ -88,8 +89,8 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<int>>> DeleteRangeAsync(IEnumerable<int> ids, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<int>>(async () =>
+    public Task<DataOutput<IEnumerable<long>>> DeleteRangeAsync(IEnumerable<long> ids, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<long>>(async () =>
         {
             var idList = ids.ToList();
             var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct);
@@ -107,11 +108,11 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         Guarded(IEnumerable<T> () => Set.ToList());
 
     /// <inheritdoc />
-    public DataOutput<T?> GetById(int id) =>
+    public DataOutput<T?> GetById(long id) =>
         Guarded(() => Set.FirstOrDefault(e => e.Id == id));
 
     /// <inheritdoc />
-    public DataOutput<int> Create(T entity) => Guarded(() =>
+    public DataOutput<long> Create(T entity) => Guarded(() =>
     {
         Set.Add(entity);
         context.SaveChanges();
@@ -119,7 +120,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<int>> CreateRange(IEnumerable<T> entities) => Guarded(IEnumerable<int> () =>
+    public DataOutput<IEnumerable<long>> CreateRange(IEnumerable<T> entities) => Guarded(IEnumerable<long> () =>
     {
         var list = entities.ToList();
         Set.AddRange(list);
@@ -145,7 +146,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<int> Delete(T entity) => Guarded(() =>
+    public DataOutput<long> Delete(T entity) => Guarded(() =>
     {
         Set.Remove(entity);
         context.SaveChanges();
@@ -153,7 +154,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<int>> DeleteRange(IEnumerable<int> ids) => Guarded(IEnumerable<int> () =>
+    public DataOutput<IEnumerable<long>> DeleteRange(IEnumerable<long> ids) => Guarded(IEnumerable<long> () =>
     {
         var idList = ids.ToList();
         var matches = Set.Where(e => idList.Contains(e.Id)).ToList();

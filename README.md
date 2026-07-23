@@ -206,14 +206,14 @@ transactions, and the Dapper read path) is at
 
 ```mermaid
 classDiagram
-    class Entity { +int Id }
+    class Entity { +long Id }
     class VersionedEntity { +Guid ConcurrencyStamp }
     Entity <|-- VersionedEntity
 
     class IReadOnlyRepository~T~ {
         +Query() IQueryable~T~
         +GetAll() DataOutput
-        +GetById(int) DataOutput
+        +GetById(long) DataOutput
     }
     class IRepository~T~ {
         +Create(T) DataOutput

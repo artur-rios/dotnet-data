@@ -1,3 +1,4 @@
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Relational.Core.Interfaces;
@@ -9,10 +10,10 @@ namespace ArturRios.Data.Relational.Core.Interfaces;
 public interface IAsyncRepository<T> : IAsyncReadOnlyRepository<T> where T : Entity
 {
     /// <summary>Persists a new entity and returns its generated identifier.</summary>
-    Task<DataOutput<int>> CreateAsync(T entity, CancellationToken ct = default);
+    Task<DataOutput<long>> CreateAsync(T entity, CancellationToken ct = default);
 
     /// <summary>Persists multiple new entities and returns their generated identifiers.</summary>
-    Task<DataOutput<IEnumerable<int>>> CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
+    Task<DataOutput<IEnumerable<long>>> CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
 
     /// <summary>Applies changes to an existing entity.</summary>
     Task<DataOutput<T>> UpdateAsync(T entity, CancellationToken ct = default);
@@ -21,8 +22,8 @@ public interface IAsyncRepository<T> : IAsyncReadOnlyRepository<T> where T : Ent
     Task<DataOutput<IEnumerable<T>>> UpdateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
 
     /// <summary>Removes an entity and returns its identifier.</summary>
-    Task<DataOutput<int>> DeleteAsync(T entity, CancellationToken ct = default);
+    Task<DataOutput<long>> DeleteAsync(T entity, CancellationToken ct = default);
 
     /// <summary>Removes entities by identifier and returns the deleted identifiers.</summary>
-    Task<DataOutput<IEnumerable<int>>> DeleteRangeAsync(IEnumerable<int> ids, CancellationToken ct = default);
+    Task<DataOutput<IEnumerable<long>>> DeleteRangeAsync(IEnumerable<long> ids, CancellationToken ct = default);
 }

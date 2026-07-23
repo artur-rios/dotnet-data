@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Output;
 
@@ -34,10 +34,10 @@ public class IReadOnlyRepositoryTests
     }
 
     [Fact]
-    public void GetById_TakesInt_ReturnsDataOutput()
+    public void GetById_TakesLong_ReturnsDataOutput()
     {
         var m = Type.GetMethod("GetById")!;
-        Assert.Equal(typeof(int), m.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(long), m.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(DataOutput<>), m.ReturnType.GetGenericTypeDefinition());
     }
 }

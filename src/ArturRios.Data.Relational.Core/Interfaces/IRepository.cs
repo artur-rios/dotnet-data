@@ -1,3 +1,4 @@
+using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Output;
 
 namespace ArturRios.Data.Relational.Core.Interfaces;
@@ -9,10 +10,10 @@ namespace ArturRios.Data.Relational.Core.Interfaces;
 public interface IRepository<T> : IReadOnlyRepository<T> where T : Entity
 {
     /// <summary>Persists a new entity and returns its generated identifier.</summary>
-    DataOutput<int> Create(T entity);
+    DataOutput<long> Create(T entity);
 
     /// <summary>Persists multiple new entities and returns their generated identifiers.</summary>
-    DataOutput<IEnumerable<int>> CreateRange(IEnumerable<T> entities);
+    DataOutput<IEnumerable<long>> CreateRange(IEnumerable<T> entities);
 
     /// <summary>Applies changes to an existing entity.</summary>
     DataOutput<T> Update(T entity);
@@ -21,8 +22,8 @@ public interface IRepository<T> : IReadOnlyRepository<T> where T : Entity
     DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities);
 
     /// <summary>Removes an entity and returns its identifier.</summary>
-    DataOutput<int> Delete(T entity);
+    DataOutput<long> Delete(T entity);
 
     /// <summary>Removes entities by identifier and returns the deleted identifiers.</summary>
-    DataOutput<IEnumerable<int>> DeleteRange(IEnumerable<int> ids);
+    DataOutput<IEnumerable<long>> DeleteRange(IEnumerable<long> ids);
 }

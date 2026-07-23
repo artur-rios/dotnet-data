@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 
 namespace ArturRios.Data.Tests;
 
@@ -14,12 +14,12 @@ public class EntityTests
     }
 
     [Fact]
-    public void Entity_HasId_OfTypeInt()
+    public void Entity_HasId_OfTypeLong()
     {
         var prop = typeof(Entity).GetProperty("Id");
 
         Assert.NotNull(prop);
-        Assert.Equal(typeof(int), prop.PropertyType);
+        Assert.Equal(typeof(long), prop.PropertyType);
     }
 
     [Fact]

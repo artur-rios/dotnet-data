@@ -109,15 +109,15 @@ classDiagram
 
 ## Where to next
 
-- **[Architecture](/architecture/)** — package diagram, class diagrams, the envelope model, and the
+- **[Architecture](/dotnet-data/architecture)** — package diagram, class diagrams, the envelope model, and the
   design principles (modular packaging, envelopes-not-exceptions, the provider seam).
-- **[Relational](/relational/)** — EF Core setup, provider packages, sync + async repositories, the
+- **[Relational](/dotnet-data/relational)** — EF Core setup, provider packages, sync + async repositories, the
   unit of work, optimistic concurrency, and the Dapper read path.
-- **[MongoDB](/mongodb/)** — document identity, the document repository, server-side `Find`, the LINQ
+- **[MongoDB](/dotnet-data/mongodb)** — document identity, the document repository, server-side `Find`, the LINQ
   `Query()` escape hatch, transactions, and concurrency.
-- **[DynamoDB](/dynamodb/)** — item POCOs and keys, the async repository, Query/Scan/batch, and
+- **[DynamoDB](/dotnet-data/dynamodb)** — item POCOs and keys, the async repository, Query/Scan/batch, and
   `[DynamoDBVersion]` concurrency.
-- **[Export](/export/)** — the exporter factory, the CSV/JSON/TXT/MessagePack/Excel formats, the column
+- **[Export](/dotnet-data/export)** — the exporter factory, the CSV/JSON/TXT/MessagePack/Excel formats, the column
   map and its attributes, and the options.
 
 The source lives at [github.com/artur-rios/dotnet-data](https://github.com/artur-rios/dotnet-data),
