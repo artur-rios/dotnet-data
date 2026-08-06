@@ -1,8 +1,9 @@
-+++
-title = 'DynamoDB'
-+++
-
-# DynamoDB store
+---
+title: DynamoDB
+weight: 40
+description: >-
+  `ArturRios.Data.DynamoDb` is a standalone, **async-only** repository over the AWS SDK's high-level object-persistence model (`IDynamoDBContext`). It does not...
+---
 
 `ArturRios.Data.DynamoDb` is a standalone, **async-only** repository over the AWS SDK's high-level
 object-persistence model (`IDynamoDBContext`). It does not depend on the relational core. Every method

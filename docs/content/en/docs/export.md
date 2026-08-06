@@ -1,8 +1,9 @@
-+++
-title = 'Export'
-+++
-
-# File export
+---
+title: Export
+weight: 45
+description: >-
+  `ArturRios.Data.Export` turns any `IEnumerable<T>` into **CSV**, **JSON**, **TXT**, or **MessagePack**, over a stream or straight to a file....
+---
 
 `ArturRios.Data.Export` turns any `IEnumerable<T>` into **CSV**, **JSON**, **TXT**, or **MessagePack**,
 over a stream or straight to a file. `ArturRios.Data.Export.Excel` adds **.xlsx** as a separate add-on.

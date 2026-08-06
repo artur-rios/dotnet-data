@@ -1,8 +1,9 @@
-+++
-title = 'MongoDB'
-+++
-
-# MongoDB document store
+---
+title: MongoDB
+weight: 30
+description: >-
+  `ArturRios.Data.MongoDb` is a standalone document-repository package over `MongoDB.Driver` — it does **not** depend on the relational core, so it pulls in no...
+---
 
 `ArturRios.Data.MongoDb` is a standalone document-repository package over `MongoDB.Driver` — it does
 **not** depend on the relational core, so it pulls in no EF Core. It keeps the same enveloped style:

@@ -1,8 +1,10 @@
-+++
-title = 'Dotnet Data'
-+++
-
-# Documentation
+---
+title: Documentation
+linkTitle: Documentation
+weight: 20
+description: >-
+  Every read/write operation returns a [`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output) envelope, so infrastructure failures —...
+---
 
 **`ArturRios.Data`** is a modular data-access toolkit for .NET. It gives you one consistent,
 envelope-based repository style across **relational** databases (EF Core over PostgreSQL / MySQL /
@@ -109,15 +111,15 @@ classDiagram
 
 ## Where to next
 
-- **[Architecture](/dotnet-data/architecture)** — package diagram, class diagrams, the envelope model, and the
+- **[Architecture](architecture/)** — package diagram, class diagrams, the envelope model, and the
   design principles (modular packaging, envelopes-not-exceptions, the provider seam).
-- **[Relational](/dotnet-data/relational)** — EF Core setup, provider packages, sync + async repositories, the
+- **[Relational](relational/)** — EF Core setup, provider packages, sync + async repositories, the
   unit of work, optimistic concurrency, and the Dapper read path.
-- **[MongoDB](/dotnet-data/mongodb)** — document identity, the document repository, server-side `Find`, the LINQ
+- **[MongoDB](mongodb/)** — document identity, the document repository, server-side `Find`, the LINQ
   `Query()` escape hatch, transactions, and concurrency.
-- **[DynamoDB](/dotnet-data/dynamodb)** — item POCOs and keys, the async repository, Query/Scan/batch, and
+- **[DynamoDB](dynamodb/)** — item POCOs and keys, the async repository, Query/Scan/batch, and
   `[DynamoDBVersion]` concurrency.
-- **[Export](/dotnet-data/export)** — the exporter factory, the CSV/JSON/TXT/MessagePack/Excel formats, the column
+- **[Export](export/)** — the exporter factory, the CSV/JSON/TXT/MessagePack/Excel formats, the column
   map and its attributes, and the options.
 
 The source lives at [github.com/artur-rios/dotnet-data](https://github.com/artur-rios/dotnet-data),

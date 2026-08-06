@@ -1,8 +1,9 @@
-+++
-title = 'Architecture'
-+++
-
-# Architecture
+---
+title: Architecture
+weight: 10
+description: >-
+  `ArturRios.Data` is a family of small, focused NuGet packages. This page shows how they fit together, the key types in each, and the design principles they...
+---
 
 `ArturRios.Data` is a family of small, focused NuGet packages. This page shows how they fit together,
 the key types in each, and the design principles they share.
@@ -270,5 +271,5 @@ plan from the record's public properties, honouring `[ExportColumn]` and `[Expor
 - **Consistent naming.** `AddDataConfigFromSettings` / `AddMongoData` / `AddDynamoData` / `AddExport` for DI;
   `DataOutput<T>` / `ProcessOutput` everywhere; `Async` suffix + `CancellationToken` on async members.
 
-See the [Relational](/dotnet-data/relational), [MongoDB](/dotnet-data/mongodb), [DynamoDB](/dotnet-data/dynamodb), and
-[Export](/dotnet-data/export) guides for full usage.
+See the [Relational](../relational/), [MongoDB](../mongodb/), [DynamoDB](../dynamodb/), and
+[Export](../export/) guides for full usage.

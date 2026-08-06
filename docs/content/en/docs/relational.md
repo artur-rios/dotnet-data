@@ -1,8 +1,9 @@
-+++
-title = 'Relational'
-+++
-
-# Relational (EF Core)
+---
+title: Relational
+weight: 20
+description: >-
+  The relational stack is a provider-agnostic data-access layer over Entity Framework Core. You install the **core** plus a **provider** for your engine; the...
+---
 
 The relational stack is a provider-agnostic data-access layer over Entity Framework Core. You install
 the **core** plus a **provider** for your engine; the core gives you enveloped repositories, a unit of
