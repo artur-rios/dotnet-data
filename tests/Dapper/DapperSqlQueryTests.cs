@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using ArturRios.Data.Dapper;
 using ArturRios.Data.Tests.TestSupport;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.Dapper;
 
@@ -96,6 +98,75 @@ public class DapperSqlQueryTests
 
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
+    }
+
+    [Fact]
+    public void ExecuteScalar_DuplicateUniqueValue_ReturnsConflict_WithoutLeakingConstraintText()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var sut = new DapperSqlQuery(context);
+        const string insert = "INSERT INTO UniqueItems (Email) VALUES (@Email)";
+        Assert.True(sut.ExecuteScalar<long>(insert, new { Email = "a@b.com" }).Success);
+
+        var result = sut.ExecuteScalar<long>(insert, new { Email = "a@b.com" });
+
+        Assert.False(result.Success);
+        Assert.Contains(result.Errors, e => e.Contains("same unique value already exists"));
+        Assert.DoesNotContain(result.Errors, e =>
+            e.Contains("IX_UniqueItems_Email") || e.Contains("Email") || e.Contains("a@b.com"));
+    }
+
+    [Fact]
+    public void ExecuteScalar_NotNullViolation_ReturnsIntegrityConflict_WithoutLeakingColumn()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var sut = new DapperSqlQuery(context);
+
+        var result = sut.ExecuteScalar<long>("INSERT INTO UniqueItems (Email) VALUES (NULL)");
+
+        Assert.False(result.Success);
+        Assert.Equal(["Conflict: the operation violates a data-integrity rule."], result.Errors);
+    }
+
+    [Fact]
+    public void Query_MalformedSql_DoesNotLeakProviderText()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var sut = new DapperSqlQuery(context);
+
+        var result = sut.Query<ItemRow>("SELECT Id, Name FROM NoSuchTable");
+
+        Assert.False(result.Success);
+        Assert.Equal(["A data-access error occurred."], result.Errors);
+    }
+
+    [Fact]
+    public void Query_WithLogger_LogsProviderDetail_ButEnvelopeStaysGeneric()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var logger = new ListLogger<DapperSqlQuery>();
+        var sut = new DapperSqlQuery(context, logger);
+
+        var result = sut.Query<ItemRow>("SELECT Id, Name FROM NoSuchTable");
+
+        Assert.Equal(["A data-access error occurred."], result.Errors);
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Error, entry.Level);
+        Assert.Contains("NoSuchTable", entry.Message);
+        Assert.Contains("no such table", entry.Exception!.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Query_WithoutLogger_Succeeds()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        Seed(context, "a");
+        var sut = new DapperSqlQuery(context);
+
+        var result = sut.Query<ItemRow>("SELECT Id, Name FROM Items");
+
+        Assert.True(result.Success);
     }
 
     private sealed record ItemRow(long Id, string Name);

@@ -45,6 +45,23 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddArturRiosData_DoesNotThrow_WhenProviderTypeHasConstructorDependencies()
+    {
+        var services = new ServiceCollection();
+        // Type registration whose implementation cannot be instantiated by the eager validation
+        // (no parameterless constructor): absence cannot be proven, so it must defer, not crash.
+        services.AddSingleton<IDatabaseProvider, FakeSqliteProvider>();
+
+        var exception = Record.Exception(() =>
+            services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
+            {
+                DatabaseType = DatabaseType.SqLite, ConnectionString = "Filename=:memory:"
+            }));
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
     public void AddArturRiosData_DoesNotThrow_WhenProviderRegisteredViaFactory()
     {
         var connection = new SqliteConnection("Filename=:memory:");

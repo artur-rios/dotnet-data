@@ -1,12 +1,15 @@
 using ArturRios.Data.Export.Configuration;
 using ArturRios.Output;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Export.Exporters;
 
 /// <summary>Writes one line per record: default <see cref="object.ToString" />, or a custom selector.</summary>
 /// <typeparam name="T">The record type.</typeparam>
 /// <param name="options">TXT options.</param>
-public class TxtExporter<T>(TxtOptions options) : ExporterBase<T> where T : class
+/// <param name="logger">Optional logger; see <see cref="ExporterBase{T}" />.</param>
+public class TxtExporter<T>(TxtOptions options, ILogger<TxtExporter<T>>? logger = null)
+    : ExporterBase<T>(logger) where T : class
 {
     /// <inheritdoc />
     protected override Task WriteCoreAsync(IEnumerable<T> data, Stream destination, CancellationToken ct) =>

@@ -125,5 +125,33 @@ public class EfRepositoryTests
         Assert.Single(kept);
     }
 
+    [Fact]
+    public void Create_DuplicateUniqueValue_ReturnsConflict_WithoutLeakingConstraintText()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<UniqueTestEntity>(context);
+        Assert.True(repo.Create(new UniqueTestEntity { Email = "a@b.com" }).Success);
+
+        var result = repo.Create(new UniqueTestEntity { Email = "a@b.com" });
+
+        Assert.False(result.Success);
+        Assert.Contains(result.Errors, e => e.Contains("same unique value already exists"));
+        Assert.DoesNotContain(result.Errors, e =>
+            e.Contains("IX_UniqueItems_Email") || e.Contains("Email") || e.Contains("a@b.com"));
+    }
+
+    [Fact]
+    public void GetAll_OnUnmappedEntity_DoesNotLeakProviderText()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<UnmappedEntity>(context);
+
+        var result = repo.GetAll();
+
+        Assert.False(result.Success);
+        Assert.All(result.Errors, e => Assert.DoesNotContain("UnmappedEntity", e));
+        Assert.All(result.Errors, e => Assert.DoesNotContain("SQLite", e));
+    }
+
     private sealed class UnmappedEntity : Entity;
 }

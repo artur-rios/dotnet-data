@@ -1,7 +1,10 @@
+using System;
 using System.Linq;
 using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Data.Tests.MongoDb.TestSupport;
+using ArturRios.Data.Tests.TestSupport;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson.Serialization.Conventions;
 
 namespace ArturRios.Data.Tests.MongoDb;
@@ -123,7 +126,29 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
         var result = repo.Create(duplicate); // duplicate _id -> write error, enveloped
 
         Assert.False(result.Success);
-        Assert.NotEmpty(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("same unique value already exists"));
+        // The driver text names the violated index and the conflicting key -- must not leak.
+        Assert.DoesNotContain(result.Errors, e =>
+            e.Contains("_id_") || e.Contains("507f1f77bcf86cd799439099"));
+    }
+
+    [Fact]
+    public void Create_DuplicateId_WithLogger_LogsDriverDetail_ButEnvelopeStaysGeneric()
+    {
+        var logger = new ListLogger<MongoDocumentRepository<TestDoc>>();
+        var repo = new MongoDocumentRepository<TestDoc>(fixture.NewContext(), logger);
+        var first = new TestDoc { Id = "507f1f77bcf86cd799439098", Name = "a" };
+        Assert.True(repo.Create(first).Success);
+
+        var result = repo.Create(new TestDoc { Id = "507f1f77bcf86cd799439098", Name = "b" });
+
+        Assert.Contains(result.Errors, e => e.Contains("same unique value already exists"));
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Error, entry.Level);
+        Assert.Contains("TestDoc", entry.Message);
+        Assert.Contains("Create", entry.Message);
+        Assert.Contains("duplicate key", entry.Exception!.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using ArturRios.Data.DynamoDb.Repositories;
 using ArturRios.Data.Tests.DynamoDb.TestSupport;
+using ArturRios.Data.Tests.TestSupport;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 
@@ -81,6 +83,23 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
         var repo = new DynamoRepository<UnmappedItem>(fixture.CreateContext());
         var result = await repo.SaveAsync(new UnmappedItem { Id = "x" });
         Assert.False(result.Success);
-        Assert.NotEmpty(result.Errors);
+        Assert.Equal(["A data-access error occurred."], result.Errors);
+    }
+
+    [Fact]
+    public async Task Save_OnMissingTable_WithLogger_LogsServiceDetail_ButEnvelopeStaysGeneric()
+    {
+        var logger = new ListLogger<DynamoRepository<UnmappedItem>>();
+        var repo = new DynamoRepository<UnmappedItem>(fixture.CreateContext(), logger);
+
+        var result = await repo.SaveAsync(new UnmappedItem { Id = "x" });
+
+        Assert.Equal(["A data-access error occurred."], result.Errors);
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Error, entry.Level);
+        Assert.Contains("UnmappedItem", entry.Message);
+        Assert.Contains("SaveAsync", entry.Message);
+        Assert.NotNull(entry.Exception);
     }
 }

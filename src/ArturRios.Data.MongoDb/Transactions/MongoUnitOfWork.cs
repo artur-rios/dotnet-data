@@ -1,3 +1,4 @@
+using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Output;
 using MongoDB.Driver;
 
@@ -15,6 +16,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     public async Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)
     {
         using var session = await client.StartSessionAsync(cancellationToken: ct);
+        var previousSession = context.Session;
         context.Session = session;
         session.StartTransaction();
         try
@@ -25,12 +27,18 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
         }
         catch (Exception ex)
         {
-            await session.AbortTransactionAsync(ct);
-            return ProcessOutput.New.WithError(ex.GetBaseException().Message);
+            await AbortQuietlyAsync(session);
+
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            return ProcessOutput.New.WithError(MongoErrors.Describe(ex));
         }
         finally
         {
-            context.Session = null;
+            context.Session = previousSession;
         }
     }
 
@@ -39,6 +47,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
         CancellationToken ct = default)
     {
         using var session = await client.StartSessionAsync(cancellationToken: ct);
+        var previousSession = context.Session;
         context.Session = session;
         session.StartTransaction();
         try
@@ -49,12 +58,18 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
         }
         catch (Exception ex)
         {
-            await session.AbortTransactionAsync(ct);
-            return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
+            await AbortQuietlyAsync(session);
+
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            return DataOutput<TResult>.New.WithError(MongoErrors.Describe(ex));
         }
         finally
         {
-            context.Session = null;
+            context.Session = previousSession;
         }
     }
 
@@ -62,6 +77,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     public ProcessOutput ExecuteInTransaction(Action work)
     {
         using var session = client.StartSession();
+        var previousSession = context.Session;
         context.Session = session;
         session.StartTransaction();
         try
@@ -70,14 +86,21 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
             session.CommitTransaction();
             return ProcessOutput.New;
         }
+        catch (OperationCanceledException)
+        {
+            AbortQuietly(session);
+
+            throw;
+        }
         catch (Exception ex)
         {
-            session.AbortTransaction();
-            return ProcessOutput.New.WithError(ex.GetBaseException().Message);
+            AbortQuietly(session);
+
+            return ProcessOutput.New.WithError(MongoErrors.Describe(ex));
         }
         finally
         {
-            context.Session = null;
+            context.Session = previousSession;
         }
     }
 
@@ -85,6 +108,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     public DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work)
     {
         using var session = client.StartSession();
+        var previousSession = context.Session;
         context.Session = session;
         session.StartTransaction();
         try
@@ -93,14 +117,48 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
             session.CommitTransaction();
             return DataOutput<TResult>.New.WithData(result);
         }
+        catch (OperationCanceledException)
+        {
+            AbortQuietly(session);
+
+            throw;
+        }
         catch (Exception ex)
         {
-            session.AbortTransaction();
-            return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
+            AbortQuietly(session);
+
+            return DataOutput<TResult>.New.WithError(MongoErrors.Describe(ex));
         }
         finally
         {
-            context.Session = null;
+            context.Session = previousSession;
+        }
+    }
+
+    // Abort must never mask the failure that triggered it: the server aborts the transaction itself
+    // on a write conflict, so an explicit abort can fail on a transaction that is already gone. It
+    // also runs untied to the caller's token, which may already be canceled.
+    private static async Task AbortQuietlyAsync(IClientSessionHandle session)
+    {
+        try
+        {
+            await session.AbortTransactionAsync(CancellationToken.None);
+        }
+        catch
+        {
+            // Already aborted, or the session is gone. Disposing the session completes the cleanup.
+        }
+    }
+
+    private static void AbortQuietly(IClientSessionHandle session)
+    {
+        try
+        {
+            session.AbortTransaction();
+        }
+        catch
+        {
+            // Already aborted, or the session is gone. Disposing the session completes the cleanup.
         }
     }
 }

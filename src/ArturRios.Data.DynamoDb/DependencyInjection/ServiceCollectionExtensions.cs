@@ -56,7 +56,11 @@ public static class ServiceCollectionExtensions
             return services.AddDynamoData(options);
         }
 
-        /// <summary>Registers the DynamoDB store from an explicit options instance.</summary>
+        /// <summary>
+        ///     Registers the DynamoDB store from an explicit options instance.
+        ///     Failures are logged in full when logging is registered (<c>AddLogging</c>); without
+        ///     it the repositories still run and error envelopes carry no service text.
+        /// </summary>
         /// <param name="options">The DynamoDB options.</param>
         public IServiceCollection AddDynamoData(DynamoOptions options)
         {

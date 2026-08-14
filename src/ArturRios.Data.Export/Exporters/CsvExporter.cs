@@ -1,12 +1,15 @@
 using ArturRios.Data.Export.Abstractions;
 using ArturRios.Data.Export.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Export.Exporters;
 
 /// <summary>Writes records as RFC 4180 CSV using the shared column map.</summary>
 /// <typeparam name="T">The record type.</typeparam>
 /// <param name="options">CSV options.</param>
-public class CsvExporter<T>(CsvOptions options) : ExporterBase<T> where T : class
+/// <param name="logger">Optional logger; see <see cref="ExporterBase{T}" />.</param>
+public class CsvExporter<T>(CsvOptions options, ILogger<CsvExporter<T>>? logger = null)
+    : ExporterBase<T>(logger) where T : class
 {
     /// <inheritdoc />
     protected override async Task WriteCoreAsync(IEnumerable<T> data, Stream destination, CancellationToken ct)

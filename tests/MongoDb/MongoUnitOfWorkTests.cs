@@ -45,6 +45,40 @@ public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
+    public async Task NestedTransaction_RestoresOuterAmbientSession()
+    {
+        var context = fixture.NewContext(out var client);
+        var uow = new MongoUnitOfWork(client, context);
+
+        var result = await uow.ExecuteInTransactionAsync(async () =>
+        {
+            var outerSession = context.Session;
+            Assert.NotNull(outerSession);
+
+            // An inner unit of work must not leave the context session-less for the outer one.
+            await new MongoUnitOfWork(client, context).ExecuteInTransactionAsync(() => Task.CompletedTask);
+
+            Assert.Same(outerSession, context.Session);
+        });
+
+        Assert.True(result.Success);
+        Assert.Null(context.Session);
+    }
+
+    [Fact]
+    public async Task Rollback_OnException_DoesNotLeakDriverText()
+    {
+        var context = fixture.NewContext(out var client);
+        var uow = new MongoUnitOfWork(client, context);
+
+        var result = await uow.ExecuteInTransactionAsync(() =>
+            throw new InvalidOperationException("connection to cluster0.internal:27017 refused"));
+
+        Assert.False(result.Success);
+        Assert.Equal(["A data-access error occurred."], result.Errors);
+    }
+
+    [Fact]
     public async Task ReadInsideTransaction_SeesUncommittedWrite()
     {
         var context = fixture.NewContext(out var client);

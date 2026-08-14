@@ -11,3 +11,8 @@ public class VersionedTestEntity : VersionedEntity
 {
     public string Name { get; set; } = string.Empty;
 }
+
+public class UniqueTestEntity : Entity
+{
+    public string Email { get; set; } = string.Empty;
+}

@@ -9,6 +9,8 @@ public static class ServiceCollectionExtensions
     ///     Registers <see cref="ISqlQuery" /> and <see cref="IAsyncSqlQuery" /> (scoped, backed by
     ///     <see cref="DapperSqlQuery" />). Requires a <c>BaseDbContext</c> to be registered
     ///     (e.g. via <c>AddDataConfigFromSettings&lt;TContext&gt;</c>).
+    ///     Query failures are logged in full when logging is registered (<c>AddLogging</c>);
+    ///     without it the executor still runs and error envelopes carry no provider text.
     /// </summary>
     /// <param name="services">The service collection.</param>
     public static IServiceCollection AddDapper(this IServiceCollection services)

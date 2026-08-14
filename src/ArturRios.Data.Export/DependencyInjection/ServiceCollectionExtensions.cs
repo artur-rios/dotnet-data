@@ -11,7 +11,11 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     extension(IServiceCollection services)
     {
-        /// <summary>Registers the exporter factory and the CSV/JSON/TXT/MessagePack exporters.</summary>
+        /// <summary>
+        ///     Registers the exporter factory and the CSV/JSON/TXT/MessagePack exporters.
+        ///     Write failures are logged in full when logging is registered (<c>AddLogging</c>);
+        ///     without it the exporters still run and error envelopes carry no exception text.
+        /// </summary>
         /// <param name="configure">Optional options configuration.</param>
         public IServiceCollection AddExport(Action<ExportOptions>? configure = null)
         {

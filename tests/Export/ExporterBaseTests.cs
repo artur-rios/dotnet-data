@@ -1,4 +1,6 @@
 using ArturRios.Data.Export.Exporters;
+using ArturRios.Data.Tests.TestSupport;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.Export;
 
@@ -24,6 +26,12 @@ public class ExporterBaseTests
     {
         protected override Task WriteCoreAsync(IEnumerable<string> data, Stream destination, CancellationToken ct)
             => throw new OperationCanceledException();
+    }
+
+    private sealed class LoggingThrowingExporter(ILogger logger) : ExporterBase<string>(logger)
+    {
+        protected override Task WriteCoreAsync(IEnumerable<string> data, Stream destination, CancellationToken ct)
+            => throw new IOException(@"Could not find a part of the path 'C:\srv\app\exports\out.csv'.");
     }
 
     [Fact]
@@ -57,6 +65,37 @@ public class ExporterBaseTests
         using var stream = new MemoryStream();
         var result = await new ThrowingExporter().WriteAsync(["a"], stream);
         Assert.False(result.Success);
+        Assert.Equal(["An export error occurred."], result.Errors);
+    }
+
+    [Fact]
+    public async Task WriteToFileAsync_WhenCoreThrows_DoesNotLeakPathOrOsError()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"export-{Guid.NewGuid():N}.txt");
+        try
+        {
+            var result = await new ThrowingExporter().WriteToFileAsync(["a"], path);
+
+            Assert.Equal(["An export error occurred."], result.Errors);
+            Assert.All(result.Errors, e => Assert.DoesNotContain(path, e));
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
+    [Fact]
+    public async Task WriteAsync_WithLogger_LogsExceptionDetail_ButEnvelopeStaysGeneric()
+    {
+        using var stream = new MemoryStream();
+        var logger = new ListLogger<ExporterBase<string>>();
+
+        var result = await new LoggingThrowingExporter(logger).WriteAsync(["a"], stream);
+
+        Assert.Equal(["An export error occurred."], result.Errors);
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Error, entry.Level);
+        Assert.Contains("LoggingThrowingExporter", entry.Message);
+        Assert.Contains(@"C:\srv\app\exports\out.csv", entry.Exception!.Message);
     }
 
     [Fact]

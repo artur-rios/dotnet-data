@@ -1,9 +1,11 @@
 using System.Data.Common;
 using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Output;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Dapper;
 
@@ -13,10 +15,17 @@ namespace ArturRios.Data.Dapper;
 ///     connection and one unit-of-work transaction. Failures are returned as <see cref="DataOutput{T}" />.
 /// </summary>
 /// <param name="context">The application's <see cref="BaseDbContext" />.</param>
-public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
+/// <param name="logger">
+///     Optional logger. Envelopes never carry provider text, so a query failure is otherwise
+///     undiagnosable: supply a logger and the full exception, plus the SQL that produced it, is
+///     written at <see cref="LogLevel.Error" />. Parameter values are never logged - they are the
+///     part most likely to hold personal data. Resolved from DI when logging is registered.
+/// </param>
+public class DapperSqlQuery(BaseDbContext context, ILogger<DapperSqlQuery>? logger = null)
+    : ISqlQuery, IAsyncSqlQuery
 {
-    /// <summary>Message prefix returned when a query fails.</summary>
-    protected const string QueryFailedMessage = "A data-access error occurred:";
+    /// <summary>Message returned when a query fails with no finer classification.</summary>
+    protected const string QueryFailedMessage = RelationalErrors.GenericMessage;
 
     /// <summary>The context's underlying database connection.</summary>
     protected DbConnection Connection => context.Database.GetDbConnection();
@@ -27,41 +36,43 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> QueryAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(async () => await Connection.QueryAsync<T>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.QueryAsync<T>(Command(sql, parameters, ct)));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> QueryFirstOrDefaultAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(async () => await Connection.QueryFirstOrDefaultAsync<T?>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.QueryFirstOrDefaultAsync<T?>(Command(sql, parameters, ct)));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> QuerySingleOrDefaultAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(async () => await Connection.QuerySingleOrDefaultAsync<T?>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.QuerySingleOrDefaultAsync<T?>(Command(sql, parameters, ct)));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> ExecuteScalarAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(async () => await Connection.ExecuteScalarAsync<T?>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.ExecuteScalarAsync<T?>(Command(sql, parameters, ct)));
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<T>> Query<T>(string sql, object? parameters = null) =>
-        Guarded(() => Connection.Query<T>(sql, parameters, Transaction));
+        Guarded(sql, () => Connection.Query<T>(sql, parameters, Transaction));
 
     /// <inheritdoc />
     public DataOutput<T?> QueryFirstOrDefault<T>(string sql, object? parameters = null) =>
-        Guarded(() => Connection.QueryFirstOrDefault<T?>(sql, parameters, Transaction));
+        Guarded(sql, () => Connection.QueryFirstOrDefault<T?>(sql, parameters, Transaction));
 
     /// <inheritdoc />
     public DataOutput<T?> QuerySingleOrDefault<T>(string sql, object? parameters = null) =>
-        Guarded(() => Connection.QuerySingleOrDefault<T?>(sql, parameters, Transaction));
+        Guarded(sql, () => Connection.QuerySingleOrDefault<T?>(sql, parameters, Transaction));
 
     /// <inheritdoc />
     public DataOutput<T?> ExecuteScalar<T>(string sql, object? parameters = null) =>
-        Guarded(() => Connection.ExecuteScalar<T?>(sql, parameters, Transaction));
+        Guarded(sql, () => Connection.ExecuteScalar<T?>(sql, parameters, Transaction));
 
     /// <summary>Runs a synchronous query, converting failures to envelope errors.</summary>
-    protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)
+    /// <param name="sql">The SQL being run, used as log context when a logger is configured.</param>
+    /// <param name="operation">The query to run.</param>
+    protected DataOutput<TResult> Guarded<TResult>(string sql, Func<TResult> operation)
     {
         try
         {
@@ -73,7 +84,7 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
         }
         catch (Exception ex)
         {
-            return DataOutput<TResult>.New.WithError($"{QueryFailedMessage} {ex.GetBaseException().Message}");
+            return Fail<TResult>(ex, sql);
         }
     }
 
@@ -82,7 +93,9 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
         new(sql, parameters, Transaction, cancellationToken: ct);
 
     /// <summary>Runs an asynchronous query, converting failures to envelope errors.</summary>
-    protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
+    /// <param name="sql">The SQL being run, used as log context when a logger is configured.</param>
+    /// <param name="operation">The query to run.</param>
+    protected async Task<DataOutput<TResult>> GuardedAsync<TResult>(string sql, Func<Task<TResult>> operation)
     {
         try
         {
@@ -94,7 +107,19 @@ public class DapperSqlQuery(BaseDbContext context) : ISqlQuery, IAsyncSqlQuery
         }
         catch (Exception ex)
         {
-            return DataOutput<TResult>.New.WithError($"{QueryFailedMessage} {ex.GetBaseException().Message}");
+            return Fail<TResult>(ex, sql);
         }
+    }
+
+    /// <summary>
+    ///     Logs the failure in full when a logger is configured, and returns the caller-safe
+    ///     envelope. Provider text names constraints, columns and SQL fragments, so it goes to
+    ///     the log and never to the caller.
+    /// </summary>
+    private DataOutput<TResult> Fail<TResult>(Exception ex, string sql)
+    {
+        logger?.LogError(ex, "Dapper query failed. SQL: {Sql}", sql);
+
+        return DataOutput<TResult>.New.WithError(RelationalErrors.Describe(ex));
     }
 }

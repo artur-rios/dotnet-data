@@ -1,4 +1,3 @@
-using System.Data.Common;
 using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Data.Relational.Core.Interfaces;
@@ -18,11 +17,13 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     where T : Entity
 {
     /// <summary>Message returned when an optimistic-concurrency conflict is detected.</summary>
-    protected const string ConcurrencyMessage =
-        "Concurrency conflict: the record was modified or removed by another process.";
+    protected const string ConcurrencyMessage = RelationalErrors.ConcurrencyMessage;
 
-    /// <summary>Message prefix returned when a persistence operation fails.</summary>
-    protected const string PersistenceMessage = "A data-access error occurred:";
+    /// <summary>Message returned when a persistence operation fails with no finer classification.</summary>
+    protected const string PersistenceMessage = RelationalErrors.GenericMessage;
+
+    /// <summary>Message returned when a write violates a unique constraint.</summary>
+    protected const string UniqueViolationMessage = RelationalErrors.UniqueViolationMessage;
 
     /// <summary>The tracked entity set for <typeparamref name="T" />.</summary>
     protected DbSet<T> Set => context.Set<T>();
@@ -163,14 +164,13 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         return matches.Select(e => e.Id).ToList();
     });
 
-    /// <summary>Maps an exception caught by a guard to an error envelope.</summary>
-    private static DataOutput<TResult> Fail<TResult>(Exception ex) => ex switch
-    {
-        DbUpdateConcurrencyException => DataOutput<TResult>.New.WithError(ConcurrencyMessage),
-        DbUpdateException => DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}"),
-        DbException => DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.Message}"),
-        _ => DataOutput<TResult>.New.WithError($"{PersistenceMessage} {ex.GetBaseException().Message}")
-    };
+    /// <summary>
+    ///     Maps an exception caught by a guard to an error envelope. Provider text - constraint
+    ///     and index names, columns, SQL fragments, conflicting values - is classified but never
+    ///     returned; EF Core logs the full exception for operators.
+    /// </summary>
+    private static DataOutput<TResult> Fail<TResult>(Exception ex) =>
+        DataOutput<TResult>.New.WithError(RelationalErrors.Describe(ex));
 
     /// <summary>Runs a synchronous data operation, converting failures to envelope errors.</summary>
     protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)

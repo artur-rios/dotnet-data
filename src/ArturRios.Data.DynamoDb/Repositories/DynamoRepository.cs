@@ -1,8 +1,11 @@
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.Runtime;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using System.Runtime.CompilerServices;
 using ArturRios.Data.DynamoDb.Interfaces;
 using ArturRios.Output;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.DynamoDb.Repositories;
 
@@ -14,13 +17,23 @@ namespace ArturRios.Data.DynamoDb.Repositories;
 /// </summary>
 /// <typeparam name="T">The item type.</typeparam>
 /// <param name="context">The DynamoDB object-persistence context.</param>
-public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoRepository<T> where T : class
+/// <param name="logger">
+///     Optional logger. Envelopes never carry service text, so a failure is otherwise
+///     undiagnosable: supply a logger and the full exception, plus the item type and the
+///     repository method that failed, is written at <see cref="LogLevel.Error" />. Item contents
+///     and key values are never logged. Resolved from DI when logging is registered.
+/// </param>
+public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoRepository<T>>? logger = null)
+    : IAsyncDynamoRepository<T> where T : class
 {
-    /// <summary>Message prefix returned when an operation fails.</summary>
-    protected const string OperationFailedMessage = "A data-access error occurred:";
+    /// <summary>Message returned when an operation fails with no finer classification.</summary>
+    protected const string OperationFailedMessage = "A data-access error occurred.";
 
     /// <summary>Message returned on an optimistic-concurrency conflict.</summary>
     protected const string ConcurrencyMessage = "Concurrency conflict: the item was modified by another process.";
+
+    /// <summary>Message returned when the failure is transient and the operation may be retried.</summary>
+    protected const string TransientMessage = "The data store is temporarily unavailable. Please retry.";
 
     /// <summary>
     ///     The DynamoDB batch-write API rejects types with a <c>[DynamoDBVersion]</c> property unless
@@ -103,7 +116,10 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         });
 
     /// <summary>Runs an operation returning data, converting failures to envelope errors.</summary>
-    protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
+    /// <param name="operation">The operation to run.</param>
+    /// <param name="operationName">The calling repository method, used as log context.</param>
+    protected async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation,
+        [CallerMemberName] string operationName = "")
     {
         try
         {
@@ -115,12 +131,15 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         }
         catch (Exception ex)
         {
-            return Fail<TResult>(ex);
+            return Fail<TResult>(ex, operationName);
         }
     }
 
     /// <summary>Runs an operation with no payload, converting failures to envelope errors.</summary>
-    protected static async Task<ProcessOutput> GuardedProcessAsync(Func<Task> operation)
+    /// <param name="operation">The operation to run.</param>
+    /// <param name="operationName">The calling repository method, used as log context.</param>
+    protected async Task<ProcessOutput> GuardedProcessAsync(Func<Task> operation,
+        [CallerMemberName] string operationName = "")
     {
         try
         {
@@ -133,16 +152,70 @@ public class DynamoRepository<T>(IDynamoDBContext context) : IAsyncDynamoReposit
         }
         catch (Exception ex)
         {
+            Log(ex, operationName);
+
             return ex is ConditionalCheckFailedException
                 ? ProcessOutput.New.WithError(ConcurrencyMessage)
-                : ProcessOutput.New.WithError($"{OperationFailedMessage} {ex.GetBaseException().Message}");
+                : ProcessOutput.New.WithError(Describe(ex));
         }
     }
 
-    /// <summary>Maps an exception to a data-output error envelope.</summary>
-    protected static DataOutput<TResult> Fail<TResult>(Exception ex) => ex switch
+    /// <summary>
+    ///     Logs the failure in full when a logger is configured, and maps it to a data-output error
+    ///     envelope. Service text names tables, indexes, keys and request ids, so it goes to the
+    ///     log and never to the caller.
+    /// </summary>
+    /// <param name="ex">The exception caught by a guard.</param>
+    /// <param name="operationName">The repository method that failed, used as log context.</param>
+    protected DataOutput<TResult> Fail<TResult>(Exception ex, string operationName = "")
     {
-        ConditionalCheckFailedException => DataOutput<TResult>.New.WithError(ConcurrencyMessage),
-        _ => DataOutput<TResult>.New.WithError($"{OperationFailedMessage} {ex.GetBaseException().Message}")
-    };
+        Log(ex, operationName);
+
+        return ex switch
+        {
+            ConditionalCheckFailedException => DataOutput<TResult>.New.WithError(ConcurrencyMessage),
+            _ => DataOutput<TResult>.New.WithError(Describe(ex))
+        };
+    }
+
+    private void Log(Exception ex, string operationName)
+    {
+        // A conditional-check failure is the expected outcome of optimistic locking, not an
+        // operational fault: logging it at Error would fill the log with routine contention.
+        var level = ex is ConditionalCheckFailedException ? LogLevel.Debug : LogLevel.Error;
+
+        logger?.Log(level, ex, "DynamoDB operation failed. Item: {Item}, operation: {Operation}",
+            typeof(T).Name, operationName);
+    }
+
+    /// <summary>Classifies a non-concurrency failure into a caller-safe message.</summary>
+    protected static string Describe(Exception ex)
+    {
+        for (var current = ex; current is not null; current = current.InnerException)
+        {
+            if (current is TimeoutException || IsRetryableServiceFault(current))
+            {
+                return TransientMessage;
+            }
+        }
+
+        return OperationFailedMessage;
+    }
+
+    // Throttling and server faults reach the caller under several exception types (and as a plain
+    // AmazonDynamoDBException with a throttling error code), so classify on what the SDK reports
+    // about the response rather than on the exception type alone.
+    private static bool IsRetryableServiceFault(Exception ex)
+    {
+        if (ex is ProvisionedThroughputExceededException or RequestLimitExceededException
+            or InternalServerErrorException)
+        {
+            return true;
+        }
+
+        return ex is AmazonServiceException service &&
+               (service.Retryable is not null ||
+                (int)service.StatusCode == 429 ||
+                (int)service.StatusCode >= 500);
+    }
 }

@@ -1,4 +1,5 @@
 using ArturRios.Data.Relational.Core.Configuration;
+using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Output;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -23,9 +24,14 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
         }
         catch (Exception ex)
         {
-            await tx.RollbackAsync(ct);
+            await RollbackQuietlyAsync(tx);
 
-            return ProcessOutput.New.WithError(ex.GetBaseException().Message);
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            return ProcessOutput.New.WithError(RelationalErrors.Describe(ex));
         }
     }
 
@@ -43,9 +49,14 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
         }
         catch (Exception ex)
         {
-            await tx.RollbackAsync(ct);
+            await RollbackQuietlyAsync(tx);
 
-            return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            return DataOutput<TResult>.New.WithError(RelationalErrors.Describe(ex));
         }
     }
 
@@ -64,11 +75,17 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
 
             return ProcessOutput.New;
         }
+        catch (OperationCanceledException)
+        {
+            RollbackQuietly(tx);
+
+            throw;
+        }
         catch (Exception ex)
         {
-            tx.Rollback();
+            RollbackQuietly(tx);
 
-            return ProcessOutput.New.WithError(ex.GetBaseException().Message);
+            return ProcessOutput.New.WithError(RelationalErrors.Describe(ex));
         }
     }
 
@@ -83,11 +100,44 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
 
             return DataOutput<TResult>.New.WithData(result);
         }
+        catch (OperationCanceledException)
+        {
+            RollbackQuietly(tx);
+
+            throw;
+        }
         catch (Exception ex)
         {
-            tx.Rollback();
+            RollbackQuietly(tx);
 
-            return DataOutput<TResult>.New.WithError(ex.GetBaseException().Message);
+            return DataOutput<TResult>.New.WithError(RelationalErrors.Describe(ex));
+        }
+    }
+
+    // Rollback must never mask the failure that triggered it: it runs untied to the caller's
+    // token (which may already be canceled, making Rollback throw before it rolls anything back)
+    // and swallows its own errors. Disposing the transaction rolls back whatever is left.
+    private static async Task RollbackQuietlyAsync(IDbContextTransaction transaction)
+    {
+        try
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+        }
+        catch
+        {
+            // Already rolled back, or the connection is gone. Dispose completes the cleanup.
+        }
+    }
+
+    private static void RollbackQuietly(IDbContextTransaction transaction)
+    {
+        try
+        {
+            transaction.Rollback();
+        }
+        catch
+        {
+            // Already rolled back, or the connection is gone. Dispose completes the cleanup.
         }
     }
 

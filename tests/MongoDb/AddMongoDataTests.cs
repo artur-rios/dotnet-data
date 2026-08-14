@@ -31,4 +31,20 @@ public class AddMongoDataTests
         Assert.NotNull(sp.GetRequiredService<IMongoUnitOfWork>());
         Assert.NotNull(sp.GetRequiredService<IAsyncMongoUnitOfWork>());
     }
+
+    [Fact]
+    public void AddMongoData_WithLoggingRegistered_ResolvesRepositories()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddMongoData(new MongoOptions
+        {
+            ConnectionString = "mongodb://localhost:27017", DatabaseName = "testdb"
+        });
+
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IDocumentRepository<TestDoc>>());
+    }
 }

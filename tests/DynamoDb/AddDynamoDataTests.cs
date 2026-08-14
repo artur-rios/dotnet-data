@@ -26,6 +26,19 @@ public class AddDynamoDataTests
     }
 
     [Fact]
+    public void AddDynamoData_WithLoggingRegistered_ResolvesRepository()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddDynamoData(new DynamoOptions { Region = "us-east-1", ServiceUrl = "http://localhost:8000" });
+
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IAsyncDynamoRepository<TestItem>>());
+    }
+
+    [Fact]
     public void AddDynamoData_WithRegionAndNoServiceUrl_ResolvesClient()
     {
         var services = new ServiceCollection();

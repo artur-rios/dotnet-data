@@ -1,3 +1,4 @@
+using System.Reflection;
 using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.Relational.Core.Exceptions;
 using ArturRios.Data.Relational.Core.Interfaces;
@@ -55,13 +56,23 @@ public static class ServiceCollectionExtensions
             return instance.Type;
         }
 
-        if (descriptor.ImplementationType is { } implementationType &&
-            Activator.CreateInstance(implementationType) is IDatabaseProvider created)
+        if (descriptor.ImplementationType is not { } implementationType)
         {
-            return created.Type;
+            return null;
         }
 
-        return null;
+        try
+        {
+            return Activator.CreateInstance(implementationType) is IDatabaseProvider created
+                ? created.Type
+                : null;
+        }
+        catch (Exception ex) when (ex is MissingMethodException or TargetInvocationException)
+        {
+            // A provider with constructor dependencies cannot be inspected here. Absence cannot be
+            // proven, so defer to ResolveProvider at first use rather than failing registration.
+            return null;
+        }
     }
 
     private static IDatabaseProvider ResolveProvider(

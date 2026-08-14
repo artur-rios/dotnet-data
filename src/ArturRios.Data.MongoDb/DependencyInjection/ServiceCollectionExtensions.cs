@@ -24,7 +24,11 @@ public static class ServiceCollectionExtensions
             return services.AddMongoData(options);
         }
 
-        /// <summary>Registers the MongoDB document store from an explicit options instance.</summary>
+        /// <summary>
+        ///     Registers the MongoDB document store from an explicit options instance.
+        ///     Failures are logged in full when logging is registered (<c>AddLogging</c>); without
+        ///     it the repositories still run and error envelopes carry no driver text.
+        /// </summary>
         /// <param name="options">The Mongo options.</param>
         public IServiceCollection AddMongoData(MongoOptions options)
         {

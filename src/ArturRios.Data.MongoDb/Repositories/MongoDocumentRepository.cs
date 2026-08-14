@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using ArturRios.Data.MongoDb.Exceptions;
 using ArturRios.Data.MongoDb.Interfaces;
 using ArturRios.Output;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -15,15 +17,26 @@ namespace ArturRios.Data.MongoDb.Repositories;
 /// </summary>
 /// <typeparam name="T">The document type.</typeparam>
 /// <param name="context">The Mongo context.</param>
-public class MongoDocumentRepository<T>(MongoContext context)
+/// <param name="logger">
+///     Optional logger. Envelopes never carry driver text, so a failure is otherwise
+///     undiagnosable: supply a logger and the full exception, plus the document type and the
+///     repository method that failed, is written at <see cref="LogLevel.Error" />. Document
+///     contents and key values are never logged. Resolved from DI when logging is registered.
+/// </param>
+public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocumentRepository<T>>? logger = null)
     : IDocumentRepository<T>, IAsyncDocumentRepository<T> where T : Document
 {
-    /// <summary>Message prefix returned when an operation fails.</summary>
-    protected const string OperationFailedMessage = "A data-access error occurred:";
+    /// <summary>Message returned when an operation fails with no finer classification.</summary>
+    protected const string OperationFailedMessage = MongoErrors.GenericMessage;
+
+    /// <summary>Message returned when the failure is transient and the operation may be retried.</summary>
+    protected const string TransientMessage = MongoErrors.TransientMessage;
 
     /// <summary>Message returned on an optimistic-concurrency conflict.</summary>
-    protected const string ConcurrencyMessage =
-        "Concurrency conflict: the document was modified or removed by another process.";
+    protected const string ConcurrencyMessage = MongoErrors.ConcurrencyMessage;
+
+    /// <summary>Message returned when a write violates a unique index.</summary>
+    protected const string UniqueViolationMessage = MongoErrors.UniqueViolationMessage;
 
     // Cached: the serialized BSON element name for VersionedDocument.Version on T
     // (respects any element-name convention the consumer registered).
@@ -243,7 +256,20 @@ public class MongoDocumentRepository<T>(MongoContext context)
             versioned.Version = expected + 1;
             var filter = Builders<T>.Filter.And(IdFilter(document.Id),
                 Builders<T>.Filter.Eq(VersionElementName, expected));
-            var result = ReplaceOne(filter, document);
+
+            ReplaceOneResult result;
+            try
+            {
+                result = ReplaceOne(filter, document);
+            }
+            catch
+            {
+                // The write never landed, so the in-memory bump must not survive: keeping it would
+                // make every retry filter on a version the server never stored.
+                versioned.Version = expected;
+                throw;
+            }
+
             if (result.MatchedCount == 0)
             {
                 versioned.Version = expected; // roll back the in-memory bump on a failed (stale) update
@@ -260,7 +286,10 @@ public class MongoDocumentRepository<T>(MongoContext context)
         Session is { } s ? Collection.ReplaceOne(s, filter, document) : Collection.ReplaceOne(filter, document);
 
     /// <summary>Runs a synchronous operation, converting failures to envelope errors.</summary>
-    protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)
+    /// <param name="operation">The operation to run.</param>
+    /// <param name="operationName">The calling repository method, used as log context.</param>
+    protected DataOutput<TResult> Guarded<TResult>(Func<TResult> operation,
+        [CallerMemberName] string operationName = "")
     {
         try
         {
@@ -272,7 +301,7 @@ public class MongoDocumentRepository<T>(MongoContext context)
         }
         catch (Exception ex)
         {
-            return Fail<TResult>(ex);
+            return Fail<TResult>(ex, operationName);
         }
     }
 
@@ -298,9 +327,21 @@ public class MongoDocumentRepository<T>(MongoContext context)
             versioned.Version = expected + 1;
             var filter = Builders<T>.Filter.And(IdFilter(document.Id),
                 Builders<T>.Filter.Eq(VersionElementName, expected));
-            var result = Session is { } s
-                ? await Collection.ReplaceOneAsync(s, filter, document, cancellationToken: ct)
-                : await Collection.ReplaceOneAsync(filter, document, cancellationToken: ct);
+            ReplaceOneResult result;
+            try
+            {
+                result = Session is { } s
+                    ? await Collection.ReplaceOneAsync(s, filter, document, cancellationToken: ct)
+                    : await Collection.ReplaceOneAsync(filter, document, cancellationToken: ct);
+            }
+            catch
+            {
+                // The write never landed, so the in-memory bump must not survive: keeping it would
+                // make every retry filter on a version the server never stored.
+                versioned.Version = expected;
+                throw;
+            }
+
             if (result.MatchedCount == 0)
             {
                 versioned.Version = expected; // roll back the in-memory bump on a failed (stale) update
@@ -322,7 +363,10 @@ public class MongoDocumentRepository<T>(MongoContext context)
     }
 
     /// <summary>Runs an asynchronous operation, converting failures to envelope errors.</summary>
-    protected static async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation)
+    /// <param name="operation">The operation to run.</param>
+    /// <param name="operationName">The calling repository method, used as log context.</param>
+    protected async Task<DataOutput<TResult>> GuardedAsync<TResult>(Func<Task<TResult>> operation,
+        [CallerMemberName] string operationName = "")
     {
         try
         {
@@ -334,14 +378,26 @@ public class MongoDocumentRepository<T>(MongoContext context)
         }
         catch (Exception ex)
         {
-            return Fail<TResult>(ex);
+            return Fail<TResult>(ex, operationName);
         }
     }
 
-    /// <summary>Maps an exception to an error envelope.</summary>
-    protected static DataOutput<TResult> Fail<TResult>(Exception ex) => ex switch
+    /// <summary>
+    ///     Logs the failure when a logger is configured, and maps it to an error envelope.
+    ///     Driver text names indexes, collections, key values and cluster endpoints, so it goes to
+    ///     the log and never to the caller.
+    /// </summary>
+    /// <param name="ex">The exception caught by a guard.</param>
+    /// <param name="operationName">The repository method that failed, used as log context.</param>
+    protected DataOutput<TResult> Fail<TResult>(Exception ex, string operationName = "")
     {
-        MongoConcurrencyException => DataOutput<TResult>.New.WithError(ConcurrencyMessage),
-        _ => DataOutput<TResult>.New.WithError($"{OperationFailedMessage} {ex.GetBaseException().Message}")
-    };
+        // A concurrency conflict is an expected outcome of optimistic locking, not an operational
+        // fault: logging it at Error would fill the log with routine contention.
+        var level = ex is MongoConcurrencyException ? LogLevel.Debug : LogLevel.Error;
+
+        logger?.Log(level, ex, "Mongo operation failed. Document: {Document}, operation: {Operation}",
+            typeof(T).Name, operationName);
+
+        return DataOutput<TResult>.New.WithError(MongoErrors.Describe(ex));
+    }
 }
