@@ -5,6 +5,7 @@ using ArturRios.Data.Tests.Export.TestSupport;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class CsvExporterTests
 {
     private static async Task<string> WriteAsync<T>(CsvExporter<T> exporter, IEnumerable<T> data) where T : class
@@ -16,7 +17,7 @@ public class CsvExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_WritesHeaderAndRows()
+    public async Task GivenRecords_WhenWritingCsv_ThenTheHeaderAndEveryRowAreWritten()
     {
         var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions()),
             [new Widget { Id = 1, Name = "a", Price = 2.5m }]);
@@ -27,7 +28,7 @@ public class CsvExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_QuotesFieldsWithSpecialChars()
+    public async Task GivenFieldsHoldingDelimitersOrQuotes_WhenWritingCsv_ThenTheyAreQuotedAndEscaped()
     {
         var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions()),
             [new Widget { Id = 1, Name = "Hello, \"World\"", Price = 0m }]);
@@ -36,14 +37,14 @@ public class CsvExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_EmptyCollection_WritesHeaderOnly()
+    public async Task GivenNoRecords_WhenWritingCsv_ThenOnlyTheHeaderIsWritten()
     {
         var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions()), []);
         Assert.Equal("Id,Name,Price", text.Trim());
     }
 
     [Fact]
-    public async Task WriteAsync_IncludeHeaderFalse_OmitsHeader()
+    public async Task GivenTheHeaderIsDisabled_WhenWritingCsv_ThenNoHeaderIsWritten()
     {
         var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions { IncludeHeader = false }),
             [new Widget { Id = 1, Name = "a", Price = 1m }]);
@@ -51,7 +52,7 @@ public class CsvExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_CustomDelimiter_IsUsed()
+    public async Task GivenACustomDelimiter_WhenWritingCsv_ThenItIsUsed()
     {
         var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions { Delimiter = ';' }),
             [new Widget { Id = 1, Name = "a", Price = 1m }]);
@@ -59,7 +60,7 @@ public class CsvExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_QuotesFieldsContainingNewlines()
+    public async Task GivenAFieldContainingANewline_WhenWritingCsv_ThenItIsQuoted()
     {
         var text = await WriteAsync(new CsvExporter<Widget>(new CsvOptions()),
             [new Widget { Id = 1, Name = "line1\nline2\rline3", Price = 0m }]);

@@ -5,6 +5,7 @@ using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Dapper;
 
+[Trait("Category", "Unit")]
 public class DapperInterfacesTests
 {
     [Theory]
@@ -12,7 +13,7 @@ public class DapperInterfacesTests
     [InlineData("QueryFirstOrDefault")]
     [InlineData("QuerySingleOrDefault")]
     [InlineData("ExecuteScalar")]
-    public void ISqlQuery_Methods_AreGeneric_ReturningDataOutput(string name)
+    public void GivenTheSynchronousQueryContract_WhenInspected_ThenEveryMethodIsGenericAndReturnsDataOutput(string name)
     {
         var m = typeof(ISqlQuery).GetMethod(name)!;
         Assert.NotNull(m);
@@ -25,7 +26,7 @@ public class DapperInterfacesTests
     [InlineData("QueryFirstOrDefaultAsync")]
     [InlineData("QuerySingleOrDefaultAsync")]
     [InlineData("ExecuteScalarAsync")]
-    public void IAsyncSqlQuery_Methods_ReturnTaskOfDataOutput_AndTakeCancellationToken(string name)
+    public void GivenTheAsynchronousQueryContract_WhenInspected_ThenEveryMethodReturnsTaskOfDataOutputAndTakesACancellationToken(string name)
     {
         var m = typeof(IAsyncSqlQuery).GetMethod(name)!;
         Assert.NotNull(m);

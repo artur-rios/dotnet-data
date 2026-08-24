@@ -3,10 +3,11 @@ using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Exceptions;
 
+[Trait("Category", "Unit")]
 public class DataAccessExceptionTests
 {
     [Fact]
-    public void CarriesMessages_AndIsCustomException()
+    public void GivenMessages_WhenConstructingTheException_ThenItCarriesThemAndIsACustomException()
     {
         var ex = new DataAccessException(["a", "b"]);
 

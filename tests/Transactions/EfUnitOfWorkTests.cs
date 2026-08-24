@@ -8,10 +8,11 @@ using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Transactions;
 
+[Trait("Category", "Functional")]
 public class EfUnitOfWorkTests
 {
     [Fact]
-    public void ExecuteInTransaction_CommitsOnSuccess()
+    public void GivenWorkThatSucceeds_WhenExecutedInATransaction_ThenItCommits()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -28,7 +29,7 @@ public class EfUnitOfWorkTests
     }
 
     [Fact]
-    public void ExecuteInTransaction_RollsBackOnException()
+    public void GivenWorkThatThrows_WhenExecutedInATransaction_ThenItRollsBack()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -46,7 +47,7 @@ public class EfUnitOfWorkTests
     }
 
     [Fact]
-    public void ExecuteInTransaction_OnUniqueViolation_ClassifiesWithoutLeakingConstraintText()
+    public void GivenAUniqueViolationInsideATransaction_WhenItIsClassified_ThenNoConstraintTextReachesTheCaller()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<UniqueTestEntity>(context);
@@ -65,7 +66,7 @@ public class EfUnitOfWorkTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_OnCancellation_PropagatesInsteadOfEnveloping()
+    public async Task GivenACancelledToken_WhenExecutingInATransactionAsynchronously_ThenCancellationPropagatesInsteadOfBeingEnveloped()
     {
         await using var context = SqliteTestContextFactory.Create();
         var uow = new EfUnitOfWork(context);
@@ -82,7 +83,7 @@ public class EfUnitOfWorkTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_WithResult_CommitsAndReturnsData()
+    public async Task GivenWorkThatReturnsAResult_WhenExecutedInATransactionAsynchronously_ThenItCommitsAndTheResultComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);

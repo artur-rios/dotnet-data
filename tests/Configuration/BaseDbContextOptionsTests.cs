@@ -3,10 +3,11 @@ using ArturRios.Data.Relational.Core.Configuration;
 
 namespace ArturRios.Data.Tests.Configuration;
 
+[Trait("Category", "Unit")]
 public class BaseDbContextOptionsTests
 {
     [Fact]
-    public void BaseDbContextOptions_HasConnectionString_OfTypeString()
+    public void GivenTheOptionsType_WhenInspected_ThenConnectionStringIsAString()
     {
         var prop = typeof(BaseDbContextOptions).GetProperty("ConnectionString");
 
@@ -15,7 +16,7 @@ public class BaseDbContextOptionsTests
     }
 
     [Fact]
-    public void BaseDbContextOptions_ConnectionString_DefaultsToEmptyString()
+    public void GivenNewOptions_WhenInspected_ThenConnectionStringDefaultsToEmpty()
     {
         var options = new BaseDbContextOptions();
 
@@ -23,7 +24,7 @@ public class BaseDbContextOptionsTests
     }
 
     [Fact]
-    public void BaseDbContextOptions_ConnectionString_IsInitOnly()
+    public void GivenTheOptionsType_WhenInspected_ThenConnectionStringIsInitOnly()
     {
         var prop = typeof(BaseDbContextOptions).GetProperty("ConnectionString");
         Assert.NotNull(prop);
@@ -38,7 +39,7 @@ public class BaseDbContextOptionsTests
     }
 
     [Fact]
-    public void BaseDbContextOptions_ConnectionString_CanBeSetViaObjectInitializer()
+    public void GivenAnObjectInitializer_WhenSettingConnectionString_ThenItIsApplied()
     {
         var options = new BaseDbContextOptions { ConnectionString = "Server=localhost;Database=test" };
 
@@ -46,7 +47,7 @@ public class BaseDbContextOptionsTests
     }
 
     [Fact]
-    public void Options_CarryDatabaseTypeAndConnectionString()
+    public void GivenAnObjectInitializer_WhenSettingBothValues_ThenBothAreCarried()
     {
         var options = new BaseDbContextOptions
         {

@@ -5,12 +5,13 @@ using ArturRios.Data.Tests.Export.TestSupport;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class TxtExporterTests
 {
     private static string Read(MemoryStream stream) => new UTF8Encoding(false).GetString(stream.ToArray());
 
     [Fact]
-    public async Task WriteAsync_DefaultsToToString()
+    public async Task GivenNoSelector_WhenWritingText_ThenEachRecordIsRenderedWithToString()
     {
         using var stream = new MemoryStream();
         var options = new TxtOptions { NewLine = "\n" };
@@ -22,7 +23,7 @@ public class TxtExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_WithSelector_UsesSelector()
+    public async Task GivenALineSelector_WhenWritingText_ThenItIsUsedForEveryLine()
     {
         using var stream = new MemoryStream();
         var options = new TxtOptions { NewLine = "\n" };
@@ -34,7 +35,7 @@ public class TxtExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_EmptyCollection_WritesNothing()
+    public async Task GivenNoRecords_WhenWritingText_ThenNothingIsWritten()
     {
         using var stream = new MemoryStream();
         await new TxtExporter<Widget>(new TxtOptions()).WriteAsync([], stream);
@@ -42,7 +43,7 @@ public class TxtExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_NullData_ReturnsError()
+    public async Task GivenNullData_WhenWritingText_ThenAnErrorEnvelopeComesBack()
     {
         using var stream = new MemoryStream();
         var result = await new TxtExporter<Widget>(new TxtOptions()).WriteAsync(null!, stream, w => w.Name);

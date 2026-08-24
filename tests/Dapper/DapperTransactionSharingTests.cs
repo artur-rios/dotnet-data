@@ -8,10 +8,11 @@ using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Dapper;
 
+[Trait("Category", "Functional")]
 public class DapperTransactionSharingTests
 {
     [Fact]
-    public async Task DapperRead_SeesUncommittedEfWrite_WithinUnitOfWorkTransaction()
+    public async Task GivenAnUncommittedEntityFrameworkWrite_WhenReadingWithDapperInTheSameTransaction_ThenTheWriteIsVisible()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -30,7 +31,7 @@ public class DapperTransactionSharingTests
     }
 
     [Fact]
-    public async Task Rollback_LeavesNothingVisibleToDapperAfterwards()
+    public async Task GivenARolledBackTransaction_WhenReadingWithDapperAfterwards_ThenNothingIsVisible()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);

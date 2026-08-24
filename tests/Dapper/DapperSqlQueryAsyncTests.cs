@@ -5,6 +5,7 @@ using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Dapper;
 
+[Trait("Category", "Functional")]
 public class DapperSqlQueryAsyncTests
 {
     private static void Seed(TestDbContext context, params string[] names)
@@ -18,7 +19,7 @@ public class DapperSqlQueryAsyncTests
     }
 
     [Fact]
-    public async Task QueryAsync_ReturnsAllRows()
+    public async Task GivenPopulatedTable_WhenQueryingAsynchronously_ThenAllRowsComeBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         Seed(context, "a", "b");
@@ -31,7 +32,7 @@ public class DapperSqlQueryAsyncTests
     }
 
     [Fact]
-    public async Task QueryFirstOrDefaultAsync_ReturnsNull_WhenMissing()
+    public async Task GivenNoMatchingRow_WhenQueryingFirstOrDefaultAsynchronously_ThenNullComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
@@ -44,7 +45,7 @@ public class DapperSqlQueryAsyncTests
     }
 
     [Fact]
-    public async Task QuerySingleOrDefaultAsync_MultipleRows_ReturnsErrorEnvelope()
+    public async Task GivenSeveralMatchingRows_WhenQueryingSingleOrDefaultAsynchronously_ThenAnErrorEnvelopeComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         Seed(context, "dup", "dup");
@@ -58,7 +59,7 @@ public class DapperSqlQueryAsyncTests
     }
 
     [Fact]
-    public async Task ExecuteScalarAsync_ReturnsScalar()
+    public async Task GivenAScalarQuery_WhenExecutingAsynchronously_ThenTheScalarComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         Seed(context, "a", "b");
@@ -71,7 +72,7 @@ public class DapperSqlQueryAsyncTests
     }
 
     [Fact]
-    public async Task QueryAsync_MalformedSql_ReturnsErrorEnvelope_DoesNotThrow()
+    public async Task GivenMalformedSql_WhenQueryingAsynchronously_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         await using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);

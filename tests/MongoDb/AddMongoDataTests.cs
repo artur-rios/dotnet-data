@@ -9,10 +9,11 @@ using MongoDB.Driver;
 
 namespace ArturRios.Data.Tests.MongoDb;
 
+[Trait("Category", "Functional")]
 public class AddMongoDataTests
 {
     [Fact]
-    public void AddMongoData_RegistersRepositoriesAndUnitOfWork_Resolvable()
+    public void GivenAServiceCollection_WhenAddingMongoData_ThenTheRepositoriesAndUnitOfWorkResolve()
     {
         var services = new ServiceCollection();
         services.AddMongoData(new MongoOptions
@@ -33,7 +34,7 @@ public class AddMongoDataTests
     }
 
     [Fact]
-    public void AddMongoData_WithLoggingRegistered_ResolvesRepositories()
+    public void GivenLoggingIsRegistered_WhenAddingMongoData_ThenTheRepositoriesResolve()
     {
         var services = new ServiceCollection();
         services.AddLogging();

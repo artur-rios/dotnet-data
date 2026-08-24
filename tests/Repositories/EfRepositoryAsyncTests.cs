@@ -5,10 +5,11 @@ using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Repositories;
 
+[Trait("Category", "Functional")]
 public class EfRepositoryAsyncTests
 {
     [Fact]
-    public async Task CreateAsync_PersistsAndReturnsId()
+    public async Task GivenANewEntity_WhenCreatedAsynchronously_ThenItPersistsAndItsIdIsReturned()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -20,7 +21,7 @@ public class EfRepositoryAsyncTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsSuccessWithNull_WhenMissing()
+    public async Task GivenNoMatchingEntity_WhenFetchingByIdAsynchronously_ThenASuccessfulNullComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -32,7 +33,7 @@ public class EfRepositoryAsyncTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ReturnsAll()
+    public async Task GivenSeveralEntities_WhenFetchingAllAsynchronously_ThenEveryOneComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -45,7 +46,7 @@ public class EfRepositoryAsyncTests
     }
 
     [Fact]
-    public async Task UpdateAsync_And_DeleteAsync_Work()
+    public async Task GivenAnEntity_WhenUpdatedAndDeletedAsynchronously_ThenBothTakeEffect()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -63,7 +64,7 @@ public class EfRepositoryAsyncTests
     }
 
     [Fact]
-    public async Task DeleteRangeAsync_RemovesByIds()
+    public async Task GivenSeveralDocuments_WhenDeletingARangeOfIdsAsynchronously_ThenOnlyThoseAreRemoved()
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);

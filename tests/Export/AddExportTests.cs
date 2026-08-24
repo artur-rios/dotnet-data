@@ -7,10 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class AddExportTests
 {
     [Fact]
-    public void AddExport_RegistersFactoryAndExporters()
+    public void GivenAServiceCollection_WhenAddingExport_ThenTheFactoryAndEveryExporterResolve()
     {
         var services = new ServiceCollection();
         services.AddExport();
@@ -24,7 +25,7 @@ public class AddExportTests
     }
 
     [Fact]
-    public void AddExport_AppliesConfiguredOptions()
+    public void GivenAConfigurationDelegate_WhenAddingExport_ThenTheConfiguredOptionsAreRegistered()
     {
         var services = new ServiceCollection();
         services.AddExport(o => o.Csv.Delimiter = ';');

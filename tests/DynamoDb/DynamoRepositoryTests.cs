@@ -15,6 +15,7 @@ public class UnmappedItem
 }
 
 [Collection(DynamoTestCollection.Name)]
+[Trait("Category", "Functional")]
 public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
 {
     public async Task InitializeAsync()
@@ -29,7 +30,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     private DynamoRepository<VersionedTestItem> NewVersionedRepo() => new(fixture.CreateContext());
 
     [Fact]
-    public async Task Save_And_Load_RoundTrips_AndNullWhenMissing()
+    public async Task GivenAnItem_WhenSavedAndLoaded_ThenItRoundTripsAndAMissingItemLoadsAsNull()
     {
         var repo = NewRepo();
         var item = new TestItem { Category = "books", Sku = "b1", Name = "A" };
@@ -45,7 +46,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Delete_RemovesItem_AndIsIdempotent()
+    public async Task GivenASavedItem_WhenDeletedTwice_ThenItIsRemovedAndTheSecondDeleteSucceeds()
     {
         var repo = NewRepo();
         var item = new TestItem { Category = "books", Sku = "d1", Name = "A" };
@@ -57,7 +58,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task VersionedSave_WithStaleVersion_ReturnsConcurrencyError()
+    public async Task GivenAStaleVersion_WhenSavingAVersionedItem_ThenAConcurrencyErrorIsReturned()
     {
         var repo = NewVersionedRepo();
         var item = new VersionedTestItem { Id = Guid.NewGuid().ToString(), Name = "A" };
@@ -77,7 +78,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Save_OnMissingTable_ReturnsErrorEnvelope_DoesNotThrow()
+    public async Task GivenATableThatDoesNotExist_WhenSaving_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         // A repository for a type whose table was never created.
         var repo = new DynamoRepository<UnmappedItem>(fixture.CreateContext());
@@ -87,7 +88,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Save_OnMissingTable_WithLogger_LogsServiceDetail_ButEnvelopeStaysGeneric()
+    public async Task GivenALoggerIsConfigured_WhenSavingToAMissingTable_ThenTheServiceDetailIsLoggedAndTheEnvelopeStaysGeneric()
     {
         var logger = new ListLogger<DynamoRepository<UnmappedItem>>();
         var repo = new DynamoRepository<UnmappedItem>(fixture.CreateContext(), logger);

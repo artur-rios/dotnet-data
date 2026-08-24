@@ -4,17 +4,18 @@ using ArturRios.Data.Relational.Core.Entities;
 
 namespace ArturRios.Data.Tests;
 
+[Trait("Category", "Unit")]
 public class EntityTests
 {
     [Fact]
-    public void Entity_IsAbstractClass()
+    public void GivenTheEntityType_WhenInspected_ThenItIsAbstract()
     {
         Assert.True(typeof(Entity).IsAbstract);
         Assert.False(typeof(Entity).IsInterface);
     }
 
     [Fact]
-    public void Entity_HasId_OfTypeLong()
+    public void GivenTheEntityType_WhenInspected_ThenItsIdIsALong()
     {
         var prop = typeof(Entity).GetProperty("Id");
 
@@ -23,7 +24,7 @@ public class EntityTests
     }
 
     [Fact]
-    public void Entity_Id_IsPublicReadWrite()
+    public void GivenTheEntityType_WhenInspected_ThenItsIdIsPubliclyReadableAndWritable()
     {
         var prop = typeof(Entity).GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
 
@@ -35,7 +36,7 @@ public class EntityTests
     }
 
     [Fact]
-    public void Entity_Id_HasColumnAttribute_WithOrderOne()
+    public void GivenTheEntityId_WhenInspected_ThenItCarriesAColumnAttributeOrderedFirst()
     {
         var prop = typeof(Entity).GetProperty("Id");
         Assert.NotNull(prop);

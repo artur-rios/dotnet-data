@@ -20,10 +20,10 @@ infrastructure failures — including optimistic-concurrency conflicts — surfa
 instead of unhandled exceptions.
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🧩 **Architecture & diagrams:** [Architecture](https://artur-rios.github.io/dotnet-data/architecture/)
-- 🗄️ **Guides:** [Relational](https://artur-rios.github.io/dotnet-data/relational/) ·
-  [MongoDB](https://artur-rios.github.io/dotnet-data/mongodb/) ·
-  [DynamoDB](https://artur-rios.github.io/dotnet-data/dynamodb/)
+- 🧩 **Architecture & diagrams:** [Architecture](https://artur-rios.github.io/dotnet-data/docs/architecture/)
+- 🗄️ **Guides:** [Relational](https://artur-rios.github.io/dotnet-data/docs/relational/) ·
+  [MongoDB](https://artur-rios.github.io/dotnet-data/docs/mongodb/) ·
+  [DynamoDB](https://artur-rios.github.io/dotnet-data/docs/dynamodb/)
 
 ## The package family
 
@@ -81,7 +81,7 @@ flowchart TB
 
 ¹ Deferred until `Pomelo.EntityFrameworkCore.MySql` publishes an EF Core 10 release (its latest still
 targets EF Core 9). Source is written and excluded from the build. See
-[Relational → MySQL](https://artur-rios.github.io/dotnet-data/relational/#mysql-status).
+[Relational → MySQL](https://artur-rios.github.io/dotnet-data/docs/relational/#mysql-status).
 
 ## Installation
 
@@ -200,7 +200,7 @@ public class ProductService(IAsyncRepository<Product> repo, IAsyncUnitOfWork uni
 
 The full relational guide (providers, sync + async interfaces, the `Query()` escape hatch, concurrency,
 transactions, and the Dapper read path) is at
-**[Relational](https://artur-rios.github.io/dotnet-data/relational/)**.
+**[Relational](https://artur-rios.github.io/dotnet-data/docs/relational/)**.
 
 ### Relational repository model
 
@@ -243,20 +243,35 @@ The NoSQL packages are **standalone** (no relational core) but keep the same env
 - **MongoDB** — a document repository (`IAsyncDocumentRepository<T>`) with `Document` / `VersionedDocument`
   identity, `Find(predicate)` server-side filtering, a `Query()` LINQ escape hatch, opt-in optimistic
   concurrency, and multi-document transactions (`IMongoUnitOfWork`, requires a replica set).
-  → **[MongoDB guide](https://artur-rios.github.io/dotnet-data/mongodb/)**
+  → **[MongoDB guide](https://artur-rios.github.io/dotnet-data/docs/mongodb/)**
 - **DynamoDB** — an async-only repository (`IAsyncDynamoRepository<T>`) over the AWS object-persistence
   model with POCO-attribute keys, `[DynamoDBVersion]` optimistic concurrency, Query/Scan/batch, and a
   `ServiceUrl` for DynamoDB Local / LocalStack.
-  → **[DynamoDB guide](https://artur-rios.github.io/dotnet-data/dynamodb/)**
+  → **[DynamoDB guide](https://artur-rios.github.io/dotnet-data/docs/dynamodb/)**
 
 ## Documentation
 
 | Page | What's there |
 |---|---|
-| [Architecture](https://artur-rios.github.io/dotnet-data/architecture/) | Package diagram, class diagrams, the envelope model, design principles |
-| [Relational](https://artur-rios.github.io/dotnet-data/relational/) | EF Core setup, providers, repositories, unit of work, concurrency, Dapper |
-| [MongoDB](https://artur-rios.github.io/dotnet-data/mongodb/) | Documents, repository, transactions, concurrency |
-| [DynamoDB](https://artur-rios.github.io/dotnet-data/dynamodb/) | Item POCOs, repository, query/scan/batch, concurrency |
+| [Architecture](https://artur-rios.github.io/dotnet-data/docs/architecture/) | Package diagram, class diagrams, the envelope model, design principles |
+| [Relational](https://artur-rios.github.io/dotnet-data/docs/relational/) | EF Core setup, providers, repositories, unit of work, concurrency, Dapper |
+| [MongoDB](https://artur-rios.github.io/dotnet-data/docs/mongodb/) | Documents, repository, transactions, concurrency |
+| [DynamoDB](https://artur-rios.github.io/dotnet-data/docs/dynamodb/) | Item POCOs, repository, query/scan/batch, concurrency |
+| [Export](https://artur-rios.github.io/dotnet-data/docs/export/) | Column mapping, the CSV/JSON/TXT/MessagePack exporters, the Excel add-on |
+
+## Testing
+
+The test suite is xUnit, and every test is named with the Given / When / Then pattern. Every test class
+carries a `Category` trait, so the two kinds can be run — and reported — separately:
+
+```bash
+dotnet test src/ArturRios.Data.sln --filter "Category=Unit"
+dotnet test src/ArturRios.Data.sln --filter "Category=Functional"
+```
+
+Unit tests exercise the code in isolation against test doubles.
+Functional tests run against real stores: SQLite for the relational and Dapper paths, an ephemeral MongoDB replica set, and DynamoDB Local.
+CI runs the two as separate jobs, and both must pass before a pull request can be merged.
 
 ## Versioning
 
@@ -270,6 +285,5 @@ publish, and Git for source control. Optional helper toolsets:
 [Dotnet Tools](https://github.com/artur-rios/dotnet-tools) ·
 [Python Dotnet Tools](https://github.com/artur-rios/python-dotnet-tools).
 
-## Legal
-
+## Legal Details
 Licensed under the [MIT License](https://en.wikipedia.org/wiki/MIT_License) — see [LICENSE](./LICENSE).

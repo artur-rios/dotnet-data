@@ -6,6 +6,7 @@ using ArturRios.Data.Tests.DynamoDb.TestSupport;
 namespace ArturRios.Data.Tests.DynamoDb;
 
 [Collection(DynamoTestCollection.Name)]
+[Trait("Category", "Functional")]
 public class DynamoBatchTests(DynamoLocalFixture fixture) : IAsyncLifetime
 {
     // Hash-only table for batch-get by hash key.
@@ -15,7 +16,7 @@ public class DynamoBatchTests(DynamoLocalFixture fixture) : IAsyncLifetime
     private DynamoRepository<VersionedTestItem> NewRepo() => new(fixture.CreateContext());
 
     [Fact]
-    public async Task SaveMany_LoadMany_DeleteMany()
+    public async Task GivenABatchOfItems_WhenSavingLoadingAndDeletingThemTogether_ThenEveryItemIsHandled()
     {
         var repo = NewRepo();
         var a = new VersionedTestItem { Id = "a", Name = "A" };

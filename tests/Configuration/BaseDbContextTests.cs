@@ -2,10 +2,11 @@ using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Configuration;
 
+[Trait("Category", "Functional")]
 public class BaseDbContextTests
 {
     [Fact]
-    public void SaveChanges_RegeneratesConcurrencyStamp_OnModifiedVersionedEntity()
+    public void GivenAModifiedVersionedEntity_WhenSavingChanges_ThenTheConcurrencyStampIsRegenerated()
     {
         using var context = SqliteTestContextFactory.Create();
         var entity = new VersionedTestEntity { Name = "one" };
@@ -20,7 +21,7 @@ public class BaseDbContextTests
     }
 
     [Fact]
-    public void SaveChanges_DoesNotChangeStamp_WhenUnmodified()
+    public void GivenAnUnmodifiedVersionedEntity_WhenSavingChanges_ThenTheConcurrencyStampIsUnchanged()
     {
         using var context = SqliteTestContextFactory.Create();
         var entity = new VersionedTestEntity { Name = "one" };

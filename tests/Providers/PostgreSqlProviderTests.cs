@@ -3,8 +3,9 @@ using ArturRios.Data.Relational.Core.Configuration;
 
 namespace ArturRios.Data.Tests.Providers;
 
+[Trait("Category", "Unit")]
 public class PostgreSqlProviderTests
 {
     [Fact]
-    public void Type_IsPostgreSql() => Assert.Equal(DatabaseType.PostgreSql, new PostgreSqlProvider().Type);
+    public void GivenThePostgreSqlProvider_WhenInspected_ThenItsTypeIsPostgreSql() => Assert.Equal(DatabaseType.PostgreSql, new PostgreSqlProvider().Type);
 }

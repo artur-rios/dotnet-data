@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -20,15 +20,15 @@
     <None Include="README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11"/>
     <!--
       Direct reference only to lift the transitive SQLitePCLRaw chain off 2.1.11, whose bundled
       SQLite has a high-severity vulnerability (GHSA-2m69-gcr7-jv3q, affects <= 2.1.11).
       Microsoft.EntityFrameworkCore.Sqlite still pins bundle_e_sqlite3 2.1.11, so upgrading EF Core
       alone does not clear it. Drop this line once EF Core's own pin moves past 2.1.11.
     -->
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArturRios.Data.Relational.Core\ArturRios.Data.Relational.Core.csproj"/>

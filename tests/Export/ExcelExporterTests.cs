@@ -9,10 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class ExcelExporterTests
 {
     [Fact]
-    public async Task WriteAsync_WritesHeaderAndRows()
+    public async Task GivenRecords_WhenWritingAWorkbook_ThenTheHeaderAndEveryRowAreWritten()
     {
         using var stream = new MemoryStream();
         var result = await new ExcelExporter<Widget>(new ExcelExportOptions())
@@ -29,7 +30,7 @@ public class ExcelExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_EmptyCollection_WritesHeaderOnly()
+    public async Task GivenNoRecords_WhenWritingAWorkbook_ThenOnlyTheHeaderIsWritten()
     {
         using var stream = new MemoryStream();
         var result = await new ExcelExporter<Widget>(new ExcelExportOptions()).WriteAsync([], stream);
@@ -43,7 +44,7 @@ public class ExcelExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_UsesConfiguredSheetName()
+    public async Task GivenAConfiguredSheetName_WhenWritingAWorkbook_ThenTheWorksheetCarriesIt()
     {
         using var stream = new MemoryStream();
         await new ExcelExporter<Widget>(new ExcelExportOptions { SheetName = "People" })
@@ -55,7 +56,7 @@ public class ExcelExporterTests
     }
 
     [Fact]
-    public void AddExcelExport_MakesFactoryResolveExcel()
+    public void GivenTheExcelAddOn_WhenResolvingTheExcelFormat_ThenTheExcelExporterComesBack()
     {
         var services = new ServiceCollection();
         services.AddExport();

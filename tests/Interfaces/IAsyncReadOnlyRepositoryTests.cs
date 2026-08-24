@@ -6,6 +6,7 @@ using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Interfaces;
 
+[Trait("Category", "Unit")]
 public class IAsyncReadOnlyRepositoryTests
 {
     private static readonly Type Type = typeof(IAsyncReadOnlyRepository<>);
@@ -13,7 +14,7 @@ public class IAsyncReadOnlyRepositoryTests
     [Theory]
     [InlineData("GetAllAsync")]
     [InlineData("GetByIdAsync")]
-    public void AsyncMethods_ReturnTaskOfDataOutput_AndTakeCancellationToken(string name)
+    public void GivenTheAsynchronousContract_WhenInspected_ThenEveryMethodReturnsTaskOfDataOutputAndTakesACancellationToken(string name)
     {
         var m = Type.GetMethod(name)!;
         Assert.Equal(typeof(Task<>), m.ReturnType.GetGenericTypeDefinition());

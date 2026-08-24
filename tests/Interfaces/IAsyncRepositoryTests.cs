@@ -6,12 +6,13 @@ using ArturRios.Data.Relational.Core.Interfaces;
 
 namespace ArturRios.Data.Tests.Interfaces;
 
+[Trait("Category", "Unit")]
 public class IAsyncRepositoryTests
 {
     private static readonly Type Type = typeof(IAsyncRepository<>);
 
     [Fact]
-    public void ExtendsAsyncReadOnlyRepository() =>
+    public void GivenTheAsynchronousRepositoryContract_WhenInspected_ThenItExtendsTheReadOnlyOne() =>
         Assert.Contains(typeof(IAsyncReadOnlyRepository<>),
             Type.GetInterfaces().Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
 
@@ -22,7 +23,7 @@ public class IAsyncRepositoryTests
     [InlineData("UpdateRangeAsync")]
     [InlineData("DeleteAsync")]
     [InlineData("DeleteRangeAsync")]
-    public void AsyncWriteMethods_ReturnTaskOfDataOutput_AndTakeCancellationToken(string name)
+    public void GivenTheAsynchronousWriteMethods_WhenInspected_ThenTheyReturnTaskOfDataOutputAndTakeACancellationToken(string name)
     {
         var m = Type.GetMethod(name)!;
         Assert.Equal(typeof(Task<>), m.ReturnType.GetGenericTypeDefinition());

@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using MessagePack;
 using MessagePack.Resolvers;
@@ -21,11 +21,42 @@ public class CsvOptions
 /// <summary>Options for the JSON exporter.</summary>
 public class JsonOptions
 {
+    private JsonSerializerOptions? _effective;
+    private bool _writeIndented;
+    private JsonSerializerOptions? _serializerOptions;
+
     /// <summary>Whether to indent the JSON. Ignored when <see cref="SerializerOptions" /> is set.</summary>
-    public bool WriteIndented { get; set; }
+    public bool WriteIndented
+    {
+        get => _writeIndented;
+        set
+        {
+            _writeIndented = value;
+            _effective = null;
+        }
+    }
 
     /// <summary>Explicit serializer options; when set, used as-is.</summary>
-    public JsonSerializerOptions? SerializerOptions { get; set; }
+    public JsonSerializerOptions? SerializerOptions
+    {
+        get => _serializerOptions;
+        set
+        {
+            _serializerOptions = value;
+            _effective = null;
+        }
+    }
+
+    /// <summary>
+    ///     The options actually used: caller-supplied, else one derived from <see cref="WriteIndented" />.
+    /// </summary>
+    /// <remarks>
+    ///     The derived instance is built once and reused. System.Text.Json caches its serialization metadata
+    ///     per <see cref="JsonSerializerOptions" /> instance, so handing it a fresh instance on every export -
+    ///     as this used to - rebuilt that cache every time and made each export pay full reflection cost.
+    /// </remarks>
+    public JsonSerializerOptions Effective =>
+        _effective ??= SerializerOptions ?? new JsonSerializerOptions { WriteIndented = WriteIndented };
 }
 
 /// <summary>Options for the TXT exporter.</summary>

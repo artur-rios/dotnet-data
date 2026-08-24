@@ -2,10 +2,11 @@ using ArturRios.Data.DynamoDb.Configuration;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 
+[Trait("Category", "Unit")]
 public class DynamoOptionsTests
 {
     [Fact]
-    public void Options_CarryRegionServiceUrlAndCredentials()
+    public void GivenAnObjectInitializer_WhenSettingTheDynamoOptions_ThenEveryValueIsCarried()
     {
         var o = new DynamoOptions
         {
@@ -19,7 +20,7 @@ public class DynamoOptionsTests
     }
 
     [Fact]
-    public void Options_ServiceUrlAndCredentials_DefaultToNull()
+    public void GivenNewDynamoOptions_WhenInspected_ThenTheServiceUrlAndCredentialsDefaultToNull()
     {
         var o = new DynamoOptions { Region = "us-east-1" };
         Assert.Null(o.ServiceUrl);

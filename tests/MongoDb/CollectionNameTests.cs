@@ -2,13 +2,14 @@ using ArturRios.Data.MongoDb;
 
 namespace ArturRios.Data.Tests.MongoDb;
 
+[Trait("Category", "Unit")]
 public class CollectionNameTests
 {
     [Fact]
-    public void For_UsesTypeName_WhenNoAttribute() => Assert.Equal("Plain", CollectionName.For<Plain>());
+    public void GivenNoCollectionAttribute_WhenResolvingTheCollectionName_ThenTheTypeNameIsUsed() => Assert.Equal("Plain", CollectionName.For<Plain>());
 
     [Fact]
-    public void For_UsesAttributeName_WhenPresent() => Assert.Equal("custom_things", CollectionName.For<Annotated>());
+    public void GivenACollectionAttribute_WhenResolvingTheCollectionName_ThenTheAttributeNameIsUsed() => Assert.Equal("custom_things", CollectionName.For<Annotated>());
 
     private sealed class Plain : Document
     {
