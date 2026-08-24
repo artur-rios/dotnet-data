@@ -1,4 +1,4 @@
----
+﻿---
 title: Relational
 weight: 20
 description: >-
@@ -14,14 +14,14 @@ SQLite, or MySQL.
 
 ```bash
 dotnet add package ArturRios.Data.Relational.Core
-dotnet add package ArturRios.Data.Sqlite          # or ArturRios.Data.PostgreSql
+dotnet add package ArturRios.Data.Sqlite          # or ArturRios.Data.PostgreSql / ArturRios.Data.MySql
 ```
 
 | Provider package | `DatabaseType` | Status |
 |---|---|---|
 | `ArturRios.Data.Sqlite` | `SqLite` | Available |
 | `ArturRios.Data.PostgreSql` | `PostgreSql` | Available |
-| `ArturRios.Data.MySql` | `MySql` | Deferred — see [MySQL status](#mysql-status) |
+| `ArturRios.Data.MySql` | `MySql` | Available — see [MySQL and MariaDB](#mysql-and-mariadb) |
 
 ## 1. Define entities
 
@@ -97,7 +97,7 @@ registration if no provider matches the configured `DatabaseType`.
 using ArturRios.Data.PostgreSql;                       // brings AddPostgreSqlProvider()
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
-builder.Services.AddPostgreSqlProvider();               // or AddSqliteProvider()
+builder.Services.AddPostgreSqlProvider();               // or AddSqliteProvider() / AddMySqlProvider()
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
@@ -221,11 +221,35 @@ The Dapper path is **read-only** — all writes go through the EF repositories. 
 `DbContext` connection** and enlists in the active `IUnitOfWork` transaction, so a Dapper read inside a
 unit of work sees the not-yet-committed EF writes.
 
-## MySQL status
+## MySQL and MariaDB
 
-`ArturRios.Data.MySql` is written but **deferred**: it depends on `Pomelo.EntityFrameworkCore.MySql`,
-whose latest release still targets EF Core 9, while this library is on EF Core 10. The project is kept
-in the repository (excluded from the build) and will ship once Pomelo publishes an EF Core 10 release.
-An alternative provider (Oracle's `MySql.EntityFrameworkCore`, which does support EF Core 10) is under
-consideration; it would trade Pomelo's `MySqlConnector` (MIT, true async) and MariaDB support for
-immediate availability.
+`ArturRios.Data.MySql` registers `MySqlProvider` for `DatabaseType.MySql`, and works against both MySQL
+and MariaDB. Register it like any other provider:
+
+```csharp
+using ArturRios.Data.MySql;                            // brings AddMySqlProvider()
+using ArturRios.Data.Relational.Core.DependencyInjection;
+
+builder.Services.AddMySqlProvider();
+builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
+```
+
+The provider calls `UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`, so the
+server version is probed from the connection string at configuration time — the connection must be
+reachable when the `DbContext` options are built.
+
+### A note on the underlying EF Core provider
+
+This package is built on [`Microting.EntityFrameworkCore.MySql`](https://github.com/microting/Pomelo.EntityFrameworkCore.MySql),
+an MIT-licensed, actively maintained fork of `Pomelo.EntityFrameworkCore.MySql`. Upstream Pomelo's
+latest release (9.0.0) still targets EF Core 9 and has no EF Core 10 build; the fork tracks EF Core 10
+patch releases and keeps Pomelo's API and its MIT `MySqlConnector` driver (true async, MariaDB support).
+
+Two practical consequences:
+
+- The dependency is pinned to an exact fork version. The fork constrains
+  `Microsoft.EntityFrameworkCore.Relational` to `[10.0.10, 10.0.999]`, so moving this library to a
+  future EF Core major requires a matching fork release first.
+- The provider type is not part of this package's public API — only `MySqlProvider` and
+  `AddMySqlProvider()` are. If upstream Pomelo ships an EF Core 10 release, swapping back is an
+  internal change here rather than a change to your code.

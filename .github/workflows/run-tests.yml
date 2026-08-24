@@ -89,3 +89,62 @@ jobs:
           name: functional-test-results
           path: artifacts/test-results/functional
           if-no-files-found: ignore
+
+  integration-tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: arturrios-data-ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -parturrios-data-ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src/ArturRios.Data.sln
+
+      - name: Build
+        run: dotnet build src/ArturRios.Data.sln --configuration Release --no-restore
+
+      # The MySQL integration tests skip themselves when this variable is unset. It is set here,
+      # so an unreachable server fails the CanConnect assertion rather than skipping - and the
+      # guard below catches any test that skipped anyway.
+      - name: Run integration tests
+        env:
+          ARTURRIOS_DATA_MYSQL_TEST_CONNECTION: Server=127.0.0.1;Port=3306;User ID=root;Password=arturrios-data-ci;
+        run: >-
+          dotnet test src/ArturRios.Data.sln --configuration Release --no-build
+          --filter "Category=Integration"
+          --logger "console;verbosity=normal"
+          --logger "trx;LogFileName=integration-tests.trx"
+          --results-directory artifacts/test-results/integration
+
+      - name: Fail if any integration test was skipped
+        run: |
+          set -euo pipefail
+          if grep -q 'outcome="NotExecuted"' artifacts/test-results/integration/integration-tests.trx; then
+            echo "Integration tests were skipped - the MySQL service container was not reachable." >&2
+            exit 1
+          fi
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: artifacts/test-results/integration
+          if-no-files-found: ignore

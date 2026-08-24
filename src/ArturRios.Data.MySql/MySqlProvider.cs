@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 namespace ArturRios.Data.MySql;
 
 /// <summary>
-/// <see cref="IDatabaseProvider"/> that configures EF Core to use MySQL via Pomelo.
+/// <see cref="IDatabaseProvider"/> that configures EF Core to use MySQL or MariaDB via
+/// Microting.EntityFrameworkCore.MySql, a maintained fork of Pomelo.EntityFrameworkCore.MySql.
 /// </summary>
 public class MySqlProvider : IDatabaseProvider
 {

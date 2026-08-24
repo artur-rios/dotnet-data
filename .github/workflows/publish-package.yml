@@ -81,12 +81,6 @@ jobs:
           PACKAGE: ${{ steps.resolve.outputs.package }}
         run: |
           set -euo pipefail
-          # ArturRios.Data.MySql is deferred: it depends on Pomelo.EntityFrameworkCore.MySql,
-          # which has no EF Core 10 release, so it is excluded from the build and cannot be packed.
-          if [ "$PACKAGE" = "ArturRios.Data.MySql" ]; then
-            echo "ArturRios.Data.MySql is deferred (no EF Core 10 MySQL provider yet) and cannot be published." >&2
-            exit 1
-          fi
           CSPROJ="src/${PACKAGE}/${PACKAGE}.csproj"
           if [ ! -f "$CSPROJ" ]; then
             echo "No project found for package '$PACKAGE' (expected $CSPROJ)." >&2

@@ -1,30 +1,29 @@
 # ArturRios.Data.MySql
 
+[![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.MySql.svg)](https://www.nuget.org/packages/ArturRios.Data.MySql)
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
-The **MySQL** provider for the **`ArturRios.Data`** toolkit, backed by
-[Pomelo](https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql).
+The **MySQL / MariaDB** provider for the **`ArturRios.Data`** toolkit, backed by
+[Microting.EntityFrameworkCore.MySql](https://github.com/microting/Pomelo.EntityFrameworkCore.MySql).
+It plugs MySQL into
+[`ArturRios.Data.Relational.Core`](https://www.nuget.org/packages/ArturRios.Data.Relational.Core)
+via a single `IDatabaseProvider` registration — your entities, repositories, and unit of work stay
+exactly the same as with any other engine.
 
-> **⏳ Status: deferred — not currently published or built.**
->
-> This provider is waiting on `Pomelo.EntityFrameworkCore.MySql` to ship an EF Core 10-compatible
-> release; its latest still targets EF Core 9. The source is written and kept in the repository, but
-> the project is excluded from the solution and from the release pipeline, so **there is no MySQL
-> package on NuGet yet**. Its `Pomelo` reference is deliberately pinned to a version range that does
-> not resolve, so an accidental restore fails loudly rather than silently pulling in EF Core 9.
->
-> Track this in the [Relational → MySQL](https://artur-rios.github.io/dotnet-data/relational/#mysql-status)
-> guide. In the meantime, use
-> [`ArturRios.Data.PostgreSql`](https://www.nuget.org/packages/ArturRios.Data.PostgreSql) or
-> [`ArturRios.Data.Sqlite`](https://www.nuget.org/packages/ArturRios.Data.Sqlite).
+This package is a thin provider. All the repository and transaction surface lives in
+`ArturRios.Data.Relational.Core`, which you install alongside it.
 
-## What it will look like
+## Installation
 
-Once released, this package will plug MySQL into
-[`ArturRios.Data.Relational.Core`](https://www.nuget.org/packages/ArturRios.Data.Relational.Core) via a
-single `IDatabaseProvider` registration — your entities, repositories, and unit of work stay exactly
-the same as with any other engine.
+```bash
+dotnet add package ArturRios.Data.Relational.Core
+dotnet add package ArturRios.Data.MySql
+```
+
+Requires **.NET 10.0** or later.
+
+## Quick start
 
 **1. Configure** (`appsettings.json`, default section `"ArturRios.Data.Core"`):
 
@@ -47,9 +46,34 @@ builder.Services.AddMySqlProvider();
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
+That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
+`IAsyncUnitOfWork`, and the rest of the core API — see the
+[Relational guide](https://artur-rios.github.io/dotnet-data/relational/).
+
+## What it does
+
 `AddMySqlProvider()` registers `MySqlProvider` as a singleton `IDatabaseProvider` with
-`Type => DatabaseType.MySql`, which calls `UseMySql(connectionString, ServerVersion.AutoDetect(...))`.
-Note that `AutoDetect` opens a connection to the server at startup to determine its version.
+`Type => DatabaseType.MySql`. When `AddDataConfigFromSettings<TContext>` builds your context and the
+configured `DatabaseType` is `MySql`, this provider is selected and calls
+`UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`. Note that `AutoDetect` opens
+a connection to the server to determine its version, so the server must be reachable when the context
+options are built.
+
+If the configured `DatabaseType` has no matching provider registered, registration fails fast with a
+`DataAccessException` naming the missing provider.
+
+## A note on the underlying EF Core provider
+
+This package depends on `Microting.EntityFrameworkCore.MySql`, an MIT-licensed, actively maintained
+fork of `Pomelo.EntityFrameworkCore.MySql`. Upstream Pomelo's latest release (9.0.0) still targets EF
+Core 9 and has no EF Core 10 build; the fork tracks EF Core 10 patch releases and keeps Pomelo's API
+and its MIT `MySqlConnector` driver (true async, MariaDB support).
+
+The dependency is pinned to an exact fork version, because the fork constrains
+`Microsoft.EntityFrameworkCore.Relational` to `[10.0.10, 10.0.999]`. The EF Core provider is not part
+of this package's public API — only `MySqlProvider` and `AddMySqlProvider()` are — so if upstream
+Pomelo ships an EF Core 10 release, swapping back is an internal change here rather than a change to
+your code.
 
 ## Documentation
 
