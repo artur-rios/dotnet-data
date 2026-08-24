@@ -6,12 +6,13 @@ using ArturRios.Data.Tests.MongoDb.TestSupport;
 namespace ArturRios.Data.Tests.MongoDb;
 
 [Collection(MongoTestCollection.Name)]
+[Trait("Category", "Functional")]
 public class MongoDocumentRepositoryAsyncTests(MongoReplicaSetFixture fixture)
 {
     private MongoDocumentRepository<TestDoc> NewRepo() => new(fixture.NewContext());
 
     [Fact]
-    public async Task CreateAsync_And_GetByIdAsync()
+    public async Task GivenADocument_WhenCreatedAndFetchedByIdAsynchronously_ThenItRoundTrips()
     {
         var repo = NewRepo();
         var doc = new TestDoc { Name = "a" };
@@ -28,7 +29,7 @@ public class MongoDocumentRepositoryAsyncTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task GetAllAsync_FindAsync_And_Ranges()
+    public async Task GivenSeveralDocuments_WhenReadingThemAsynchronouslyEveryWay_ThenEachReadAgrees()
     {
         var repo = NewRepo();
         await repo.CreateRangeAsync([new TestDoc { Name = "keep" }, new TestDoc { Name = "drop" }]);
@@ -38,7 +39,7 @@ public class MongoDocumentRepositoryAsyncTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task UpdateAsync_And_DeleteAsync()
+    public async Task GivenADocument_WhenUpdatedAndDeletedAsynchronously_ThenBothTakeEffect()
     {
         var repo = NewRepo();
         var doc = new TestDoc { Name = "a" };
@@ -52,7 +53,7 @@ public class MongoDocumentRepositoryAsyncTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task DeleteRangeAsync_RemovesByIds()
+    public async Task GivenSeveralDocuments_WhenDeletingARangeOfIdsAsynchronously_ThenOnlyThoseAreRemoved()
     {
         var repo = NewRepo();
         var a = new TestDoc { Name = "a" };

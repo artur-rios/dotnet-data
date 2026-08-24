@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class ExporterFactoryTests
 {
     private static IExporterFactory BuildFactory()
@@ -20,13 +21,13 @@ public class ExporterFactoryTests
     [InlineData(ExportFormat.Json, typeof(JsonExporter<Widget>))]
     [InlineData(ExportFormat.Txt, typeof(TxtExporter<Widget>))]
     [InlineData(ExportFormat.MessagePack, typeof(MessagePackExporter<Widget>))]
-    public void Resolve_ReturnsExpectedExporter(ExportFormat format, Type expected)
+    public void GivenAFormat_WhenResolvingAnExporter_ThenTheExporterForThatFormatComesBack(ExportFormat format, Type expected)
     {
         Assert.IsType(expected, BuildFactory().Resolve<Widget>(format));
     }
 
     [Fact]
-    public void Resolve_Excel_WithoutAddOn_Throws()
+    public void GivenTheExcelAddOnIsMissing_WhenResolvingTheExcelFormat_ThenItIsRefused()
     {
         var factory = BuildFactory();
         Assert.Throws<NotSupportedException>(() => factory.Resolve<Widget>(ExportFormat.Excel));

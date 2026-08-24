@@ -141,3 +141,15 @@ otherwise defaults to the contractless standard resolver.
   if exactness matters.
 - **Cancellation** propagates as `OperationCanceledException` rather than being folded into the
   envelope — consistent with the rest of the toolkit.
+
+## Fidelity notes
+
+- **Excel numbers are doubles.** The xlsx format stores every number as an IEEE-754 double, so a `long` or
+  `ulong` beyond 2^53, or a `decimal` carrying more precision than a double can hold, is written with the
+  precision a double allows. Export such a column as text when the exact value matters.
+- **CSV quoting is RFC 4180; the framing is not.** A field is quoted when it holds the delimiter, a double
+  quote or a line break, and an embedded quote is doubled — exactly as RFC 4180 prescribes. The delimiter
+  itself comes from `CsvOptions.Delimiter` and lines end with the platform's newline, so the output is
+  strictly RFC 4180 only when the delimiter is a comma and the platform's newline is CRLF.
+- **Column order.** Columns carrying `[ExportColumn(Order = n)]` come first, ascending. The rest follow in
+  declaration order; only two properties declared in different types fall back to sorting by name.

@@ -11,10 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.Tests.DependencyInjection;
 
+[Trait("Category", "Functional")]
 public class ServiceCollectionExtensionsTests
 {
     [Fact]
-    public void AddArturRiosData_RegistersRepositoriesAndUnitOfWork()
+    public void GivenAServiceCollection_WhenAddingTheDataConfiguration_ThenRepositoriesAndTheUnitOfWorkAreRegistered()
     {
         var connection = new SqliteConnection("Filename=:memory:");
         connection.Open();
@@ -36,7 +37,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddArturRiosData_Throws_WhenProviderMissing()
+    public void GivenNoDatabaseProvider_WhenAddingTheDataConfiguration_ThenRegistrationFails()
     {
         var services = new ServiceCollection(); // no IDatabaseProvider registered
 
@@ -45,7 +46,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddArturRiosData_DoesNotThrow_WhenProviderTypeHasConstructorDependencies()
+    public void GivenAProviderWithConstructorDependencies_WhenAddingTheDataConfiguration_ThenValidationDefersInsteadOfFailing()
     {
         var services = new ServiceCollection();
         // Type registration whose implementation cannot be instantiated by the eager validation
@@ -62,7 +63,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddArturRiosData_DoesNotThrow_WhenProviderRegisteredViaFactory()
+    public void GivenAFactoryRegisteredProvider_WhenAddingTheDataConfiguration_ThenValidationDefersInsteadOfFailing()
     {
         var connection = new SqliteConnection("Filename=:memory:");
         connection.Open();

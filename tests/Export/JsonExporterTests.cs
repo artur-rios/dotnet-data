@@ -6,10 +6,11 @@ using ArturRios.Data.Tests.Export.TestSupport;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class JsonExporterTests
 {
     [Fact]
-    public async Task WriteAsync_RoundTripsCollection()
+    public async Task GivenRecords_WhenWritingJson_ThenTheCollectionRoundTrips()
     {
         var input = new[] { new Widget { Id = 1, Name = "a", Price = 2.5m }, new Widget { Id = 2, Name = "b", Price = 3m } };
         using var stream = new MemoryStream();
@@ -23,7 +24,7 @@ public class JsonExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_EmptyCollection_WritesEmptyArray()
+    public async Task GivenNoRecords_WhenWritingJson_ThenAnEmptyArrayIsWritten()
     {
         using var stream = new MemoryStream();
         await new JsonExporter<Widget>(new JsonOptions()).WriteAsync([], stream);
@@ -31,7 +32,7 @@ public class JsonExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_WriteIndented_ProducesIndentedJson()
+    public async Task GivenIndentationIsEnabled_WhenWritingJson_ThenTheOutputIsIndented()
     {
         using var stream = new MemoryStream();
         await new JsonExporter<Widget>(new JsonOptions { WriteIndented = true })

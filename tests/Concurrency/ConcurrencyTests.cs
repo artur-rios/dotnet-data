@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArturRios.Data.Tests.Concurrency;
 
+[Trait("Category", "Functional")]
 public class ConcurrencyTests
 {
     [Fact]
-    public void Update_WithStaleStamp_ReturnsConcurrencyError()
+    public void GivenAStaleConcurrencyStamp_WhenUpdating_ThenAConcurrencyErrorIsReturned()
     {
         // Two contexts over the SAME in-memory database via a shared connection.
         using var writer = SqliteTestContextFactory.Create();

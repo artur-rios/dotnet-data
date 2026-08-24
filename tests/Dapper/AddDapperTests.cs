@@ -6,10 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.Dapper;
 
+[Trait("Category", "Functional")]
 public class AddDapperTests
 {
     [Fact]
-    public void AddDapper_RegistersQueryServices_Resolvable()
+    public void GivenAServiceCollection_WhenAddingDapper_ThenTheQueryServicesResolve()
     {
         var services = new ServiceCollection();
         // DapperSqlQuery depends on BaseDbContext; register a real one via the test factory.
@@ -24,7 +25,7 @@ public class AddDapperTests
     }
 
     [Fact]
-    public void AddDapper_WithLoggingRegistered_ResolvesAndLogsFailures()
+    public void GivenLoggingIsRegistered_WhenAddingDapper_ThenFailuresAreLogged()
     {
         var logger = new ListLogger<DapperSqlQuery>();
         var services = new ServiceCollection();

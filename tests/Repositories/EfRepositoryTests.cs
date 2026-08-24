@@ -5,10 +5,11 @@ using ArturRios.Data.Tests.TestSupport;
 
 namespace ArturRios.Data.Tests.Repositories;
 
+[Trait("Category", "Functional")]
 public class EfRepositoryTests
 {
     [Fact]
-    public void GetAll_OnUnmappedEntity_ReturnsErrorEnvelope_DoesNotThrow()
+    public void GivenAnUnmappedEntity_WhenFetchingAll_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<UnmappedEntity>(context);
@@ -20,7 +21,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void Create_PersistsAndReturnsId()
+    public void GivenANewEntity_WhenCreated_ThenItPersistsAndItsIdIsReturned()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -32,7 +33,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void GetById_ReturnsEntity_WhenExists()
+    public void GivenAnExistingEntity_WhenFetchingById_ThenItComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -45,7 +46,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void GetById_ReturnsSuccessWithNull_WhenMissing()
+    public void GivenNoMatchingEntity_WhenFetchingById_ThenASuccessfulNullComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -57,7 +58,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void GetAll_ReturnsAll()
+    public void GivenSeveralEntities_WhenFetchingAll_ThenEveryOneComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -70,7 +71,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void Update_ChangesEntity()
+    public void GivenAnExistingEntity_WhenUpdated_ThenTheChangePersists()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -85,7 +86,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void Delete_RemovesEntity()
+    public void GivenAnExistingEntity_WhenDeleted_ThenItIsRemoved()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -99,7 +100,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void DeleteRange_RemovesByIds()
+    public void GivenSeveralDocuments_WhenDeletingARangeOfIds_ThenOnlyThoseAreRemoved()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -114,7 +115,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void Query_ComposesLinq()
+    public void GivenTheQueryMethod_WhenComposingLinqOverIt_ThenTheCompositionIsHonoured()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity>(context);
@@ -126,7 +127,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void Create_DuplicateUniqueValue_ReturnsConflict_WithoutLeakingConstraintText()
+    public void GivenADuplicateUniqueValue_WhenCreating_ThenAConflictComesBackWithoutTheConstraintText()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<UniqueTestEntity>(context);
@@ -141,7 +142,7 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void GetAll_OnUnmappedEntity_DoesNotLeakProviderText()
+    public void GivenAnUnmappedEntity_WhenFetchingAll_ThenNoProviderTextReachesTheCaller()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<UnmappedEntity>(context);

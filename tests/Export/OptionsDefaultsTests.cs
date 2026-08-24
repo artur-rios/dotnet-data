@@ -3,10 +3,11 @@ using ArturRios.Data.Export.Configuration;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class OptionsDefaultsTests
 {
     [Fact]
-    public void ExportOptions_HaveExpectedDefaults()
+    public void GivenNewExportOptions_WhenInspected_ThenEverySectionCarriesItsDocumentedDefaults()
     {
         var options = new ExportOptions();
 
@@ -20,7 +21,7 @@ public class OptionsDefaultsTests
     }
 
     [Fact]
-    public void CsvEncoding_IsUtf8WithoutBom()
+    public void GivenNewCsvOptions_WhenInspected_ThenTheEncodingIsUtf8WithoutABom()
     {
         var preamble = new ExportOptions().Csv.Encoding.GetPreamble();
         Assert.Empty(preamble);

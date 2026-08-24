@@ -8,10 +8,11 @@ using ArturRios.Data.Tests.MongoDb.TestSupport;
 namespace ArturRios.Data.Tests.MongoDb;
 
 [Collection(MongoTestCollection.Name)]
+[Trait("Category", "Functional")]
 public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
 {
     [Fact]
-    public async Task Commit_PersistsAllWrites()
+    public async Task GivenSeveralWritesInATransaction_WhenCommitting_ThenAllOfThemPersist()
     {
         var context = fixture.NewContext(out var client);
         var repo = new MongoDocumentRepository<TestDoc>(context);
@@ -28,7 +29,7 @@ public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task Rollback_OnException_PersistsNothing()
+    public async Task GivenAnExceptionInsideATransaction_WhenItRollsBack_ThenNothingPersists()
     {
         var context = fixture.NewContext(out var client);
         var repo = new MongoDocumentRepository<TestDoc>(context);
@@ -45,7 +46,7 @@ public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task NestedTransaction_RestoresOuterAmbientSession()
+    public async Task GivenANestedTransaction_WhenItCompletes_ThenTheOuterAmbientSessionIsRestored()
     {
         var context = fixture.NewContext(out var client);
         var uow = new MongoUnitOfWork(client, context);
@@ -66,7 +67,7 @@ public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task Rollback_OnException_DoesNotLeakDriverText()
+    public async Task GivenAnExceptionInsideATransaction_WhenItRollsBack_ThenNoDriverTextReachesTheCaller()
     {
         var context = fixture.NewContext(out var client);
         var uow = new MongoUnitOfWork(client, context);
@@ -79,7 +80,7 @@ public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public async Task ReadInsideTransaction_SeesUncommittedWrite()
+    public async Task GivenAnUncommittedWrite_WhenReadingInsideTheSameTransaction_ThenTheWriteIsVisible()
     {
         var context = fixture.NewContext(out var client);
         var repo = new MongoDocumentRepository<TestDoc>(context);

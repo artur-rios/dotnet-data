@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class ExporterBaseTests
 {
     private sealed class OkExporter : ExporterBase<string>
@@ -35,7 +36,7 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteAsync_Success_ReturnsSuccessAndLeavesStreamOpen()
+    public async Task GivenAWriteThatSucceeds_WhenWritingToAStream_ThenItSucceedsAndTheStreamStaysOpen()
     {
         using var stream = new MemoryStream();
         var result = await new OkExporter().WriteAsync(["a", "b"], stream);
@@ -45,7 +46,7 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteAsync_NullData_ReturnsError()
+    public async Task GivenNullData_WhenWritingToAStream_ThenAnErrorEnvelopeComesBack()
     {
         using var stream = new MemoryStream();
         var result = await new OkExporter().WriteAsync(null!, stream);
@@ -53,14 +54,14 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteAsync_NullDestination_ReturnsError()
+    public async Task GivenANullDestination_WhenWriting_ThenAnErrorEnvelopeComesBack()
     {
         var result = await new OkExporter().WriteAsync(["a"], null!);
         Assert.False(result.Success);
     }
 
     [Fact]
-    public async Task WriteAsync_WhenCoreThrows_ReturnsError()
+    public async Task GivenTheFormatWriterThrows_WhenWritingToAStream_ThenAnErrorEnvelopeComesBack()
     {
         using var stream = new MemoryStream();
         var result = await new ThrowingExporter().WriteAsync(["a"], stream);
@@ -69,7 +70,7 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteToFileAsync_WhenCoreThrows_DoesNotLeakPathOrOsError()
+    public async Task GivenTheFormatWriterThrows_WhenWritingToAFile_ThenNeitherThePathNorTheOsErrorReachesTheCaller()
     {
         var path = Path.Combine(Path.GetTempPath(), $"export-{Guid.NewGuid():N}.txt");
         try
@@ -83,7 +84,7 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteAsync_WithLogger_LogsExceptionDetail_ButEnvelopeStaysGeneric()
+    public async Task GivenALoggerIsConfigured_WhenAWriteFails_ThenTheDetailIsLoggedAndTheEnvelopeStaysGeneric()
     {
         using var stream = new MemoryStream();
         var logger = new ListLogger<ExporterBase<string>>();
@@ -99,7 +100,7 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteAsync_WhenCanceled_Propagates()
+    public async Task GivenACancelledToken_WhenWriting_ThenCancellationPropagates()
     {
         using var stream = new MemoryStream();
         await Assert.ThrowsAsync<OperationCanceledException>(
@@ -107,7 +108,7 @@ public class ExporterBaseTests
     }
 
     [Fact]
-    public async Task WriteToFileAsync_WritesFile()
+    public async Task GivenRecords_WhenWritingToAFile_ThenTheFileIsCreatedWithTheContent()
     {
         var path = Path.Combine(Path.GetTempPath(), $"export-{Guid.NewGuid():N}.txt");
         try

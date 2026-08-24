@@ -3,16 +3,17 @@ using ArturRios.Data.Export.Abstractions;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class ValueRendererTests
 {
     [Fact]
-    public void Render_Null_ReturnsEmpty() => Assert.Equal(string.Empty, ValueRenderer.Render(null));
+    public void GivenNull_WhenRendering_ThenAnEmptyStringComesBack() => Assert.Equal(string.Empty, ValueRenderer.Render(null));
 
     [Fact]
-    public void Render_String_ReturnsItself() => Assert.Equal("hello", ValueRenderer.Render("hello"));
+    public void GivenAString_WhenRendering_ThenItComesBackUnchanged() => Assert.Equal("hello", ValueRenderer.Render("hello"));
 
     [Fact]
-    public void Render_Decimal_UsesInvariantCulture()
+    public void GivenADecimal_WhenRendering_ThenTheInvariantCultureIsUsed()
     {
         var previous = CultureInfo.CurrentCulture;
         CultureInfo.CurrentCulture = new CultureInfo("de-DE"); // comma decimal separator
@@ -21,7 +22,7 @@ public class ValueRendererTests
     }
 
     [Fact]
-    public void Render_DateTime_UsesInvariantCulture()
+    public void GivenADateTime_WhenRendering_ThenTheInvariantCultureIsUsed()
     {
         var value = new DateTime(2026, 7, 7, 13, 5, 0, DateTimeKind.Unspecified);
         Assert.Equal(value.ToString(CultureInfo.InvariantCulture), ValueRenderer.Render(value));

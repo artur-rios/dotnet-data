@@ -19,6 +19,7 @@ public class CamelVersionedDoc : VersionedDocument
 }
 
 [Collection(MongoTestCollection.Name)]
+[Trait("Category", "Functional")]
 public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
 {
     private static readonly object ConventionLock = new();
@@ -52,7 +53,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void Create_AssignsAndReturnsId()
+    public void GivenANewDocument_WhenCreated_ThenAnIdIsAssignedAndReturned()
     {
         var repo = NewRepo();
         var result = repo.Create(new TestDoc { Name = "a" });
@@ -61,7 +62,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void GetById_RoundTrips_AndNullWhenMissing()
+    public void GivenADocument_WhenFetchedById_ThenItRoundTripsAndAMissingIdYieldsNull()
     {
         var repo = NewRepo();
         var doc = new TestDoc { Name = "a" };
@@ -77,7 +78,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void GetAll_And_Find_And_Query()
+    public void GivenSeveralDocuments_WhenReadingThemEveryWay_ThenEachReadAgrees()
     {
         var repo = NewRepo();
         repo.CreateRange([new TestDoc { Name = "keep" }, new TestDoc { Name = "drop" }]);
@@ -88,7 +89,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void Update_And_Delete()
+    public void GivenADocument_WhenUpdatedAndDeleted_ThenBothTakeEffect()
     {
         var repo = NewRepo();
         var doc = new TestDoc { Name = "a" };
@@ -103,7 +104,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void DeleteRange_RemovesByIds()
+    public void GivenSeveralDocuments_WhenDeletingARangeOfIds_ThenOnlyThoseAreRemoved()
     {
         var repo = NewRepo();
         var a = new TestDoc { Name = "a" };
@@ -116,7 +117,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void Create_DuplicateId_ReturnsErrorEnvelope_DoesNotThrow()
+    public void GivenADuplicateId_WhenCreating_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         var repo = NewRepo();
         var first = new TestDoc { Id = "507f1f77bcf86cd799439099", Name = "a" };
@@ -133,7 +134,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void Create_DuplicateId_WithLogger_LogsDriverDetail_ButEnvelopeStaysGeneric()
+    public void GivenALoggerIsConfigured_WhenCreatingADuplicateId_ThenTheDriverDetailIsLoggedAndTheEnvelopeStaysGeneric()
     {
         var logger = new ListLogger<MongoDocumentRepository<TestDoc>>();
         var repo = new MongoDocumentRepository<TestDoc>(fixture.NewContext(), logger);
@@ -152,7 +153,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void VersionedUpdate_WithStaleVersion_ReturnsConcurrencyError()
+    public void GivenAStaleVersion_WhenUpdatingAVersionedDocument_ThenAConcurrencyErrorIsReturned()
     {
         var repo = NewVersionedRepo();
         var doc = new VersionedTestDoc { Name = "a" };
@@ -173,7 +174,7 @@ public class MongoDocumentRepositoryTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
-    public void VersionedUpdate_WithNonDefaultElementNameConvention_SucceedsAndStillDetectsStaleness()
+    public void GivenANonDefaultElementNameConvention_WhenUpdatingAVersionedDocument_ThenItSucceedsAndStillDetectsStaleness()
     {
         var repo = NewCamelVersionedRepo();
         var doc = new CamelVersionedDoc { Name = "a" };

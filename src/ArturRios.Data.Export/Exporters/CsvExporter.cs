@@ -1,10 +1,16 @@
-using ArturRios.Data.Export.Abstractions;
+﻿using ArturRios.Data.Export.Abstractions;
 using ArturRios.Data.Export.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Export.Exporters;
 
-/// <summary>Writes records as RFC 4180 CSV using the shared column map.</summary>
+/// <summary>Writes records as delimited text using the shared column map and RFC 4180 quoting.</summary>
+/// <remarks>
+///     Quoting follows RFC 4180: a field is quoted when it holds the delimiter, a double quote or a line
+///     break, and an embedded quote is doubled. The delimiter and the line terminator are not fixed to the
+///     RFC's comma and CRLF - the delimiter comes from the options and lines end with the platform's
+///     newline - so the output is RFC 4180 only when those happen to match.
+/// </remarks>
 /// <typeparam name="T">The record type.</typeparam>
 /// <param name="options">CSV options.</param>
 /// <param name="logger">Optional logger; see <see cref="ExporterBase{T}" />.</param>

@@ -8,10 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 
+[Trait("Category", "Functional")]
 public class AddDynamoDataTests
 {
     [Fact]
-    public void AddDynamoData_RegistersClientContextAndRepository_Resolvable()
+    public void GivenAServiceCollection_WhenAddingDynamoData_ThenTheClientContextAndRepositoryResolve()
     {
         var services = new ServiceCollection();
         services.AddDynamoData(new DynamoOptions { Region = "us-east-1", ServiceUrl = "http://localhost:8000" });
@@ -26,7 +27,7 @@ public class AddDynamoDataTests
     }
 
     [Fact]
-    public void AddDynamoData_WithLoggingRegistered_ResolvesRepository()
+    public void GivenLoggingIsRegistered_WhenAddingDynamoData_ThenTheRepositoryResolves()
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -39,7 +40,7 @@ public class AddDynamoDataTests
     }
 
     [Fact]
-    public void AddDynamoData_WithRegionAndNoServiceUrl_ResolvesClient()
+    public void GivenARegionAndNoServiceUrl_WhenAddingDynamoData_ThenTheClientResolves()
     {
         var services = new ServiceCollection();
         services.AddDynamoData(new DynamoOptions { Region = "us-east-1" });

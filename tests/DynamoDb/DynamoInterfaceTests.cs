@@ -8,12 +8,13 @@ using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.DynamoDb;
 
+[Trait("Category", "Unit")]
 public class DynamoInterfaceTests
 {
     private static readonly Type Type = typeof(IAsyncDynamoRepository<>);
 
     [Fact]
-    public void GenericParameter_IsConstrainedToClass()
+    public void GivenTheRepositoryContract_WhenInspected_ThenItsTypeParameterIsConstrainedToAClass()
     {
         var param = Type.GetGenericArguments()[0];
         Assert.True((param.GenericParameterAttributes &
@@ -27,7 +28,7 @@ public class DynamoInterfaceTests
     [InlineData("ScanAsync")]
     [InlineData("SaveManyAsync")]
     [InlineData("LoadManyAsync")]
-    public void AsyncMethods_ReturnTaskOfDataOutput_AndTakeCancellationToken(string name)
+    public void GivenTheAsynchronousContract_WhenInspected_ThenEveryMethodReturnsTaskOfDataOutputAndTakesACancellationToken(string name)
     {
         var m = Type.GetMethods().First(x => x.Name == name);
         Assert.Equal(typeof(Task<>), m.ReturnType.GetGenericTypeDefinition());
@@ -39,7 +40,7 @@ public class DynamoInterfaceTests
     [Theory]
     [InlineData("DeleteAsync")]
     [InlineData("DeleteManyAsync")]
-    public void DeleteMethods_ReturnTaskOfProcessOutput(string name)
+    public void GivenTheDeleteMethods_WhenInspected_ThenTheyReturnTaskOfProcessOutput(string name)
     {
         var m = Type.GetMethods().First(x => x.Name == name);
         Assert.Equal(typeof(Task<ProcessOutput>), m.ReturnType);

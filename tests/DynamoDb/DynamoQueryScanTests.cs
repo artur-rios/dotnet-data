@@ -8,6 +8,7 @@ using ArturRios.Data.Tests.DynamoDb.TestSupport;
 namespace ArturRios.Data.Tests.DynamoDb;
 
 [Collection(DynamoTestCollection.Name)]
+[Trait("Category", "Functional")]
 public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
 {
     public Task InitializeAsync() => fixture.CreateTableAsync("TestItems", "Category", "Sku");
@@ -16,7 +17,7 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
     private DynamoRepository<TestItem> NewRepo() => new(fixture.CreateContext());
 
     [Fact]
-    public async Task Query_ByPartitionKey_ReturnsItems()
+    public async Task GivenItemsUnderOnePartitionKey_WhenQueryingByIt_ThenThoseItemsComeBack()
     {
         var repo = NewRepo();
         await repo.SaveAsync(new TestItem { Category = "q", Sku = "a", Name = "A" });
@@ -29,7 +30,7 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Query_WithSortCondition_Filters()
+    public async Task GivenASortKeyCondition_WhenQuerying_ThenOnlyMatchingItemsComeBack()
     {
         var repo = NewRepo();
         await repo.SaveAsync(new TestItem { Category = "q2", Sku = "a", Name = "A" });
@@ -42,7 +43,7 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Scan_WithCondition_ReturnsMatches()
+    public async Task GivenAScanCondition_WhenScanning_ThenOnlyMatchingItemsComeBack()
     {
         var repo = NewRepo();
         await repo.SaveAsync(new TestItem { Category = "s", Sku = "a", Name = "keep" });

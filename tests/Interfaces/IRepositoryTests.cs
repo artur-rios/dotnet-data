@@ -5,12 +5,13 @@ using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Interfaces;
 
+[Trait("Category", "Unit")]
 public class IRepositoryTests
 {
     private static readonly Type Type = typeof(IRepository<>);
 
     [Fact]
-    public void ExtendsReadOnlyRepository() =>
+    public void GivenTheRepositoryContract_WhenInspected_ThenItExtendsTheReadOnlyOne() =>
         Assert.Contains(typeof(IReadOnlyRepository<>),
             Type.GetInterfaces().Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
 
@@ -21,7 +22,7 @@ public class IRepositoryTests
     [InlineData("UpdateRange")]
     [InlineData("Delete")]
     [InlineData("DeleteRange")]
-    public void WriteMethods_Exist_ReturningDataOutput(string name)
+    public void GivenTheWriteMethods_WhenInspected_ThenTheyExistAndReturnADataOutput(string name)
     {
         var m = Type.GetMethod(name)!;
         Assert.NotNull(m);

@@ -7,17 +7,18 @@ using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.MongoDb;
 
+[Trait("Category", "Unit")]
 public class MongoInterfacesTests
 {
     [Fact]
-    public void ReadOnly_IsConstrainedToDocument()
+    public void GivenTheReadOnlyDocumentContract_WhenInspected_ThenItIsConstrainedToDocument()
     {
         var param = typeof(IDocumentReadOnlyRepository<>).GetGenericArguments()[0];
         Assert.Contains(typeof(Document), param.GetGenericParameterConstraints());
     }
 
     [Fact]
-    public void Repository_ExtendsReadOnly() =>
+    public void GivenTheDocumentRepositoryContract_WhenInspected_ThenItExtendsTheReadOnlyOne() =>
         Assert.Contains(typeof(IDocumentReadOnlyRepository<>),
             typeof(IDocumentRepository<>).GetInterfaces()
                 .Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
@@ -27,7 +28,7 @@ public class MongoInterfacesTests
     [InlineData("Update")]
     [InlineData("Delete")]
     [InlineData("Find")]
-    public void SyncMethods_ReturnDataOutput(string name)
+    public void GivenTheSynchronousDocumentMethods_WhenInspected_ThenTheyReturnADataOutput(string name)
     {
         var m = typeof(IDocumentRepository<>).GetMethod(name) ?? typeof(IDocumentReadOnlyRepository<>).GetMethod(name);
         Assert.NotNull(m);
@@ -39,7 +40,7 @@ public class MongoInterfacesTests
     [InlineData("UpdateAsync")]
     [InlineData("DeleteAsync")]
     [InlineData("FindAsync")]
-    public void AsyncMethods_ReturnTaskOfDataOutput_WithCancellationToken(string name)
+    public void GivenTheAsynchronousDocumentMethods_WhenInspected_ThenTheyReturnTaskOfDataOutputAndTakeACancellationToken(string name)
     {
         var m = typeof(IAsyncDocumentRepository<>).GetMethod(name) ??
                 typeof(IAsyncDocumentReadOnlyRepository<>).GetMethod(name);

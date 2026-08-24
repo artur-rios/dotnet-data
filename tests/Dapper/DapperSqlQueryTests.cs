@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.Dapper;
 
+[Trait("Category", "Functional")]
 public class DapperSqlQueryTests
 {
     private static void Seed(TestDbContext context, params string[] names)
@@ -19,7 +20,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void Query_ReturnsAllRows()
+    public void GivenPopulatedTable_WhenQuerying_ThenAllRowsComeBack()
     {
         using var context = SqliteTestContextFactory.Create();
         Seed(context, "a", "b");
@@ -32,7 +33,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void Query_EmptyResult_IsSuccessWithEmptySequence()
+    public void GivenNoMatchingRows_WhenQuerying_ThenASuccessfulEmptySequenceComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
@@ -44,7 +45,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void QueryFirstOrDefault_ReturnsRow_OrNull()
+    public void GivenAQueryThatMayMatchNothing_WhenQueryingFirstOrDefault_ThenTheRowOrNullComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         Seed(context, "only");
@@ -62,7 +63,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void QuerySingleOrDefault_MultipleRows_ReturnsErrorEnvelope()
+    public void GivenSeveralMatchingRows_WhenQueryingSingleOrDefault_ThenAnErrorEnvelopeComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         Seed(context, "dup", "dup");
@@ -76,7 +77,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void ExecuteScalar_ReturnsScalar()
+    public void GivenAScalarQuery_WhenExecuting_ThenTheScalarComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
         Seed(context, "a", "b", "c");
@@ -89,7 +90,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void Query_MalformedSql_ReturnsErrorEnvelope_DoesNotThrow()
+    public void GivenMalformedSql_WhenQuerying_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
@@ -101,7 +102,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void ExecuteScalar_DuplicateUniqueValue_ReturnsConflict_WithoutLeakingConstraintText()
+    public void GivenADuplicateUniqueValue_WhenExecutingAScalar_ThenAConflictComesBackWithoutTheConstraintText()
     {
         using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
@@ -117,7 +118,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void ExecuteScalar_NotNullViolation_ReturnsIntegrityConflict_WithoutLeakingColumn()
+    public void GivenANotNullViolation_WhenExecutingAScalar_ThenAnIntegrityConflictComesBackWithoutTheColumnName()
     {
         using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
@@ -129,7 +130,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void Query_MalformedSql_DoesNotLeakProviderText()
+    public void GivenMalformedSql_WhenQuerying_ThenNoProviderTextReachesTheCaller()
     {
         using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
@@ -141,7 +142,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void Query_WithLogger_LogsProviderDetail_ButEnvelopeStaysGeneric()
+    public void GivenALoggerIsConfigured_WhenAQueryFails_ThenTheDetailIsLoggedAndTheEnvelopeStaysGeneric()
     {
         using var context = SqliteTestContextFactory.Create();
         var logger = new ListLogger<DapperSqlQuery>();
@@ -158,7 +159,7 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
-    public void Query_WithoutLogger_Succeeds()
+    public void GivenNoLogger_WhenQuerying_ThenItStillSucceeds()
     {
         using var context = SqliteTestContextFactory.Create();
         Seed(context, "a");

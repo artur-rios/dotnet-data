@@ -5,10 +5,11 @@ using MessagePack;
 
 namespace ArturRios.Data.Tests.Export;
 
+[Trait("Category", "Unit")]
 public class MessagePackExporterTests
 {
     [Fact]
-    public async Task WriteAsync_RoundTripsCollection()
+    public async Task GivenRecords_WhenWritingMessagePack_ThenTheCollectionRoundTrips()
     {
         var input = new[] { new Widget { Id = 1, Name = "a", Price = 2.5m }, new Widget { Id = 2, Name = "b", Price = 3m } };
         var options = new MessagePackOptions();
@@ -23,7 +24,7 @@ public class MessagePackExporterTests
     }
 
     [Fact]
-    public async Task WriteAsync_EmptyCollection_RoundTripsEmpty()
+    public async Task GivenNoRecords_WhenWritingMessagePack_ThenAnEmptyCollectionRoundTrips()
     {
         var options = new MessagePackOptions();
         using var stream = new MemoryStream();

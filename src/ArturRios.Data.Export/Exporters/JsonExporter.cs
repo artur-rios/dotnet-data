@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using ArturRios.Data.Export.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +14,6 @@ public class JsonExporter<T>(JsonOptions options, ILogger<JsonExporter<T>>? logg
     /// <inheritdoc />
     protected override Task WriteCoreAsync(IEnumerable<T> data, Stream destination, CancellationToken ct)
     {
-        var serializerOptions = options.SerializerOptions ?? new JsonSerializerOptions { WriteIndented = options.WriteIndented };
-        return JsonSerializer.SerializeAsync(destination, data, serializerOptions, ct);
+        return JsonSerializer.SerializeAsync(destination, data, options.Effective, ct);
     }
 }
