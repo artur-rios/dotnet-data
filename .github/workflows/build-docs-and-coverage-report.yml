@@ -9,6 +9,16 @@ on:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/build-docs-and-coverage-report.yml'
+  # Pull requests build the site and the coverage report as a check only - the deploy step
+  # below is gated to pushes on main, so a pull request can never publish to GitHub Pages.
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/build-docs-and-coverage-report.yml'
   workflow_dispatch:
     inputs:
       reason:
@@ -22,7 +32,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -111,6 +121,7 @@ jobs:
         run: hugo -s docs --environment production --minify --cleanDestinationDir --gc --baseURL "https://artur-rios.github.io/dotnet-data/"
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
