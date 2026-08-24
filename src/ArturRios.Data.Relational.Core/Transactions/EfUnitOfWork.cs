@@ -1,4 +1,4 @@
-using ArturRios.Data.Relational.Core.Configuration;
+﻿using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Output;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -15,16 +15,19 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
     /// <inheritdoc />
     public async Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)
     {
-        await using var tx = await context.Database.BeginTransactionAsync(ct);
+        var tx = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+        await using var txScope = tx.ConfigureAwait(false);
+
         try
         {
-            await work();
-            await tx.CommitAsync(ct);
+            await work().ConfigureAwait(false);
+            await tx.CommitAsync(ct).ConfigureAwait(false);
             return ProcessOutput.New;
         }
         catch (Exception ex)
         {
-            await RollbackQuietlyAsync(tx);
+            await RollbackQuietlyAsync(tx).ConfigureAwait(false);
 
             if (ex is OperationCanceledException)
             {
@@ -39,17 +42,20 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
     public async Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work,
         CancellationToken ct = default)
     {
-        await using var tx = await context.Database.BeginTransactionAsync(ct);
+        var tx = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+        await using var txScope = tx.ConfigureAwait(false);
+
         try
         {
-            var result = await work();
-            await tx.CommitAsync(ct);
+            var result = await work().ConfigureAwait(false);
+            await tx.CommitAsync(ct).ConfigureAwait(false);
 
             return DataOutput<TResult>.New.WithData(result);
         }
         catch (Exception ex)
         {
-            await RollbackQuietlyAsync(tx);
+            await RollbackQuietlyAsync(tx).ConfigureAwait(false);
 
             if (ex is OperationCanceledException)
             {
@@ -62,7 +68,7 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
 
     /// <inheritdoc />
     public async Task<IDbTransactionHandle> BeginTransactionAsync(CancellationToken ct = default) =>
-        new EfTransactionHandle(await context.Database.BeginTransactionAsync(ct));
+        new EfTransactionHandle(await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public ProcessOutput ExecuteInTransaction(Action work)
@@ -121,7 +127,7 @@ public class EfUnitOfWork(BaseDbContext context) : IUnitOfWork, IAsyncUnitOfWork
     {
         try
         {
-            await transaction.RollbackAsync(CancellationToken.None);
+            await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
         }
         catch
         {

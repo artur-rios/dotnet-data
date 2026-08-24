@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using ArturRios.Data.MongoDb.Exceptions;
 using ArturRios.Data.MongoDb.Interfaces;
@@ -52,23 +52,23 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () => await FindFluent(FilterDefinition<T>.Empty).ToListAsync(ct));
+        GuardedAsync<IEnumerable<T>>(async () => await FindFluent(FilterDefinition<T>.Empty).ToListAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> GetByIdAsync(string id, CancellationToken ct = default) =>
-        GuardedAsync<T?>(async () => await FindFluent(IdFilter(id)).FirstOrDefaultAsync(ct));
+        GuardedAsync<T?>(async () => await FindFluent(IdFilter(id)).FirstOrDefaultAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> FindAsync(Expression<Func<T, bool>> predicate,
         CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () => await FindFluent(Builders<T>.Filter.Where(predicate)).ToListAsync(ct));
+        GuardedAsync<IEnumerable<T>>(async () => await FindFluent(Builders<T>.Filter.Where(predicate)).ToListAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<string>> CreateAsync(T document, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
             EnsureId(document);
-            await InsertOneAsync(document, ct);
+            await InsertOneAsync(document, ct).ConfigureAwait(false);
             return document.Id;
         });
 
@@ -83,7 +83,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
                 EnsureId(d);
             }
 
-            await InsertManyAsync(list, ct);
+            await InsertManyAsync(list, ct).ConfigureAwait(false);
             return list.Select(d => d.Id).ToList();
         });
 
@@ -91,7 +91,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
     public Task<DataOutput<T>> UpdateAsync(T document, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
-            await ReplaceAsync(document, ct);
+            await ReplaceAsync(document, ct).ConfigureAwait(false);
             return document;
         });
 
@@ -103,7 +103,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
             var list = documents.ToList();
             foreach (var d in list)
             {
-                await ReplaceAsync(d, ct);
+                await ReplaceAsync(d, ct).ConfigureAwait(false);
             }
 
             return list;
@@ -113,7 +113,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
     public Task<DataOutput<string>> DeleteAsync(T document, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
-            await DeleteManyAsync(IdFilter(document.Id), ct);
+            await DeleteManyAsync(IdFilter(document.Id), ct).ConfigureAwait(false);
             return document.Id;
         });
 
@@ -123,7 +123,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
         GuardedAsync<IEnumerable<string>>(async () =>
         {
             var idList = ids.ToList();
-            await DeleteManyAsync(Builders<T>.Filter.In(d => d.Id, idList), ct);
+            await DeleteManyAsync(Builders<T>.Filter.In(d => d.Id, idList), ct).ConfigureAwait(false);
             return idList;
         });
 
@@ -331,8 +331,8 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
             try
             {
                 result = Session is { } s
-                    ? await Collection.ReplaceOneAsync(s, filter, document, cancellationToken: ct)
-                    : await Collection.ReplaceOneAsync(filter, document, cancellationToken: ct);
+                    ? await Collection.ReplaceOneAsync(s, filter, document, cancellationToken: ct).ConfigureAwait(false)
+                    : await Collection.ReplaceOneAsync(filter, document, cancellationToken: ct).ConfigureAwait(false);
             }
             catch
             {
@@ -354,11 +354,11 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
         var idFilter = IdFilter(document.Id);
         if (Session is { } session)
         {
-            await Collection.ReplaceOneAsync(session, idFilter, document, cancellationToken: ct);
+            await Collection.ReplaceOneAsync(session, idFilter, document, cancellationToken: ct).ConfigureAwait(false);
         }
         else
         {
-            await Collection.ReplaceOneAsync(idFilter, document, cancellationToken: ct);
+            await Collection.ReplaceOneAsync(idFilter, document, cancellationToken: ct).ConfigureAwait(false);
         }
     }
 
@@ -370,7 +370,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
     {
         try
         {
-            return DataOutput<TResult>.New.WithData(await operation());
+            return DataOutput<TResult>.New.WithData(await operation().ConfigureAwait(false));
         }
         catch (OperationCanceledException)
         {

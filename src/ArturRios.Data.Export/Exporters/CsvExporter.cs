@@ -21,22 +21,24 @@ public class CsvExporter<T>(CsvOptions options, ILogger<CsvExporter<T>>? logger 
     protected override async Task WriteCoreAsync(IEnumerable<T> data, Stream destination, CancellationToken ct)
     {
         var columns = ColumnMap.For<T>();
-        await using var writer = new StreamWriter(destination, options.Encoding, leaveOpen: true);
+        var writer = new StreamWriter(destination, options.Encoding, leaveOpen: true);
+
+        await using var writerScope = writer.ConfigureAwait(false);
 
         if (options.IncludeHeader)
         {
             await writer.WriteLineAsync(string.Join(options.Delimiter,
-                columns.Select(c => Escape(c.Header, options.Delimiter))));
+                columns.Select(c => Escape(c.Header, options.Delimiter)))).ConfigureAwait(false);
         }
 
         foreach (var item in data)
         {
             ct.ThrowIfCancellationRequested();
             await writer.WriteLineAsync(string.Join(options.Delimiter,
-                columns.Select(c => Escape(ValueRenderer.Render(c.Getter(item)), options.Delimiter))));
+                columns.Select(c => Escape(ValueRenderer.Render(c.Getter(item)), options.Delimiter)))).ConfigureAwait(false);
         }
 
-        await writer.FlushAsync(ct);
+        await writer.FlushAsync(ct).ConfigureAwait(false);
     }
 
     private static string Escape(string field, char delimiter)

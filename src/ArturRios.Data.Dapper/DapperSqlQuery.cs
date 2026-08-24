@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Output;
@@ -36,22 +36,22 @@ public class DapperSqlQuery(BaseDbContext context, ILogger<DapperSqlQuery>? logg
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> QueryAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(sql, async () => await Connection.QueryAsync<T>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.QueryAsync<T>(Command(sql, parameters, ct)).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> QueryFirstOrDefaultAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(sql, async () => await Connection.QueryFirstOrDefaultAsync<T?>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.QueryFirstOrDefaultAsync<T?>(Command(sql, parameters, ct)).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> QuerySingleOrDefaultAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(sql, async () => await Connection.QuerySingleOrDefaultAsync<T?>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.QuerySingleOrDefaultAsync<T?>(Command(sql, parameters, ct)).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> ExecuteScalarAsync<T>(string sql, object? parameters = null,
         CancellationToken ct = default) =>
-        GuardedAsync(sql, async () => await Connection.ExecuteScalarAsync<T?>(Command(sql, parameters, ct)));
+        GuardedAsync(sql, async () => await Connection.ExecuteScalarAsync<T?>(Command(sql, parameters, ct)).ConfigureAwait(false));
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<T>> Query<T>(string sql, object? parameters = null) =>
@@ -99,7 +99,7 @@ public class DapperSqlQuery(BaseDbContext context, ILogger<DapperSqlQuery>? logg
     {
         try
         {
-            return DataOutput<TResult>.New.WithData(await operation());
+            return DataOutput<TResult>.New.WithData(await operation().ConfigureAwait(false));
         }
         catch (OperationCanceledException)
         {

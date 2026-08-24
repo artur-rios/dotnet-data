@@ -1,4 +1,4 @@
-using Amazon.DynamoDBv2.DataModel;
+﻿using Amazon.DynamoDBv2.DataModel;
 using Amazon.Runtime;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
@@ -47,37 +47,37 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
     public Task<DataOutput<T>> SaveAsync(T item, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
-            await context.SaveAsync(item, ct);
+            await context.SaveAsync(item, ct).ConfigureAwait(false);
 
             return item;
         });
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> LoadAsync(object hashKey, CancellationToken ct = default) =>
-        GuardedAsync<T?>(async () => await context.LoadAsync<T>(hashKey, ct));
+        GuardedAsync<T?>(async () => await context.LoadAsync<T>(hashKey, ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> LoadAsync(object hashKey, object rangeKey, CancellationToken ct = default) =>
-        GuardedAsync<T?>(async () => await context.LoadAsync<T>(hashKey, rangeKey, ct));
+        GuardedAsync<T?>(async () => await context.LoadAsync<T>(hashKey, rangeKey, ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<ProcessOutput> DeleteAsync(T item, CancellationToken ct = default) =>
-        GuardedProcessAsync(async () => await context.DeleteAsync(item, ct));
+        GuardedProcessAsync(async () => await context.DeleteAsync(item, ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey).GetRemainingAsync(ct));
+        GuardedAsync<IEnumerable<T>>(async () => await context.QueryAsync<T>(hashKey).GetRemainingAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> QueryAsync(object hashKey, QueryOperator op,
         IEnumerable<object> sortKeyValues, CancellationToken ct = default) =>
         GuardedAsync<IEnumerable<T>>(async () =>
-            await context.QueryAsync<T>(hashKey, op, sortKeyValues).GetRemainingAsync(ct));
+            await context.QueryAsync<T>(hashKey, op, sortKeyValues).GetRemainingAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> ScanAsync(IEnumerable<ScanCondition> conditions,
         CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () => await context.ScanAsync<T>(conditions).GetRemainingAsync(ct));
+        GuardedAsync<IEnumerable<T>>(async () => await context.ScanAsync<T>(conditions).GetRemainingAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default) =>
@@ -86,7 +86,7 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
             var list = items.ToList();
             var batch = context.CreateBatchWrite<T>(BatchSkipVersionCheckConfig);
             batch.AddPutItems(list);
-            await batch.ExecuteAsync(ct);
+            await batch.ExecuteAsync(ct).ConfigureAwait(false);
             return list;
         });
 
@@ -96,7 +96,7 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
         {
             var batch = context.CreateBatchWrite<T>(BatchSkipVersionCheckConfig);
             batch.AddDeleteItems(items.ToList());
-            await batch.ExecuteAsync(ct);
+            await batch.ExecuteAsync(ct).ConfigureAwait(false);
         });
 
     /// <inheritdoc />
@@ -110,7 +110,7 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
                 batch.AddKey(key);
             }
 
-            await batch.ExecuteAsync(ct);
+            await batch.ExecuteAsync(ct).ConfigureAwait(false);
 
             return batch.Results;
         });
@@ -123,7 +123,7 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
     {
         try
         {
-            return DataOutput<TResult>.New.WithData(await operation());
+            return DataOutput<TResult>.New.WithData(await operation().ConfigureAwait(false));
         }
         catch (OperationCanceledException)
         {
@@ -143,7 +143,7 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
     {
         try
         {
-            await operation();
+            await operation().ConfigureAwait(false);
             return ProcessOutput.New;
         }
         catch (OperationCanceledException)

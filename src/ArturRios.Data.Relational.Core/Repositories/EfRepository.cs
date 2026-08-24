@@ -1,4 +1,4 @@
-using ArturRios.Data.Relational.Core.Configuration;
+﻿using ArturRios.Data.Relational.Core.Configuration;
 using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Output;
@@ -30,18 +30,18 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () => await Set.ToListAsync(ct));
+        GuardedAsync<IEnumerable<T>>(async () => await Set.ToListAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> GetByIdAsync(long id, CancellationToken ct = default) =>
-        GuardedAsync(async () => await Set.FirstOrDefaultAsync(e => e.Id == id, ct));
+        GuardedAsync(async () => await Set.FirstOrDefaultAsync(e => e.Id == id, ct).ConfigureAwait(false));
 
     /// <inheritdoc />
     public Task<DataOutput<long>> CreateAsync(T entity, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
-            await Set.AddAsync(entity, ct);
-            await context.SaveChangesAsync(ct);
+            await Set.AddAsync(entity, ct).ConfigureAwait(false);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return entity.Id;
         });
@@ -52,8 +52,8 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         GuardedAsync<IEnumerable<long>>(async () =>
         {
             var list = entities.ToList();
-            await Set.AddRangeAsync(list, ct);
-            await context.SaveChangesAsync(ct);
+            await Set.AddRangeAsync(list, ct).ConfigureAwait(false);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return list.Select(e => e.Id).ToList();
         });
@@ -63,7 +63,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         GuardedAsync(async () =>
         {
             Set.Update(entity);
-            await context.SaveChangesAsync(ct);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return entity;
         });
@@ -74,7 +74,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         {
             var list = entities.ToList();
             Set.UpdateRange(list);
-            await context.SaveChangesAsync(ct);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return list;
         });
@@ -84,7 +84,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         GuardedAsync(async () =>
         {
             Set.Remove(entity);
-            await context.SaveChangesAsync(ct);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return entity.Id;
         });
@@ -94,9 +94,9 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         GuardedAsync<IEnumerable<long>>(async () =>
         {
             var idList = ids.ToList();
-            var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct);
+            var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct).ConfigureAwait(false);
             Set.RemoveRange(matches);
-            await context.SaveChangesAsync(ct);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return matches.Select(e => e.Id).ToList();
         });
@@ -194,7 +194,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     {
         try
         {
-            return DataOutput<TResult>.New.WithData(await operation());
+            return DataOutput<TResult>.New.WithData(await operation().ConfigureAwait(false));
         }
         catch (OperationCanceledException)
         {

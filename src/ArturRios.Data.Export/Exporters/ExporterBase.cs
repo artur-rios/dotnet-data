@@ -1,4 +1,4 @@
-using ArturRios.Data.Export.Interfaces;
+﻿using ArturRios.Data.Export.Interfaces;
 using ArturRios.Output;
 using Microsoft.Extensions.Logging;
 
@@ -46,7 +46,7 @@ public abstract class ExporterBase<T>(ILogger? logger = null) : IExporter<T> whe
 
         try
         {
-            await write(destination);
+            await write(destination).ConfigureAwait(false);
             return ProcessOutput.New;
         }
         catch (OperationCanceledException) { throw; }
@@ -61,8 +61,11 @@ public abstract class ExporterBase<T>(ILogger? logger = null) : IExporter<T> whe
 
         try
         {
-            await using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-            await write(stream);
+            var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+
+            await using var streamScope = stream.ConfigureAwait(false);
+
+            await write(stream).ConfigureAwait(false);
             return ProcessOutput.New;
         }
         catch (OperationCanceledException) { throw; }

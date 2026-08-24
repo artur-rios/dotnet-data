@@ -1,4 +1,4 @@
-using ArturRios.Data.MongoDb.Repositories;
+﻿using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Output;
 using MongoDB.Driver;
 
@@ -15,19 +15,19 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     /// <inheritdoc />
     public async Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)
     {
-        using var session = await client.StartSessionAsync(cancellationToken: ct);
+        using var session = await client.StartSessionAsync(cancellationToken: ct).ConfigureAwait(false);
         var previousSession = context.Session;
         context.Session = session;
         session.StartTransaction();
         try
         {
-            await work();
-            await session.CommitTransactionAsync(ct);
+            await work().ConfigureAwait(false);
+            await session.CommitTransactionAsync(ct).ConfigureAwait(false);
             return ProcessOutput.New;
         }
         catch (Exception ex)
         {
-            await AbortQuietlyAsync(session);
+            await AbortQuietlyAsync(session).ConfigureAwait(false);
 
             if (ex is OperationCanceledException)
             {
@@ -46,19 +46,19 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     public async Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work,
         CancellationToken ct = default)
     {
-        using var session = await client.StartSessionAsync(cancellationToken: ct);
+        using var session = await client.StartSessionAsync(cancellationToken: ct).ConfigureAwait(false);
         var previousSession = context.Session;
         context.Session = session;
         session.StartTransaction();
         try
         {
-            var result = await work();
-            await session.CommitTransactionAsync(ct);
+            var result = await work().ConfigureAwait(false);
+            await session.CommitTransactionAsync(ct).ConfigureAwait(false);
             return DataOutput<TResult>.New.WithData(result);
         }
         catch (Exception ex)
         {
-            await AbortQuietlyAsync(session);
+            await AbortQuietlyAsync(session).ConfigureAwait(false);
 
             if (ex is OperationCanceledException)
             {
@@ -142,7 +142,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     {
         try
         {
-            await session.AbortTransactionAsync(CancellationToken.None);
+            await session.AbortTransactionAsync(CancellationToken.None).ConfigureAwait(false);
         }
         catch
         {
