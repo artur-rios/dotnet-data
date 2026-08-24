@@ -9,6 +9,16 @@ on:
       - 'src/**'
       - 'tests/**'
       - '.github/workflows/build-docs-and-coverage-report.yml'
+  # Pull requests build the site and the coverage report as a check only - the deploy step
+  # below is gated to pushes on main, so a pull request can never publish to GitHub Pages.
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/build-docs-and-coverage-report.yml'
   workflow_dispatch:
     inputs:
       reason:
@@ -22,7 +32,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -31,6 +41,20 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    services:
+      # The MySQL integration tests skip themselves without a reachable server, which would
+      # leave ArturRios.Data.MySql under-reported in the coverage numbers.
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: arturrios-data-ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -parturrios-data-ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -43,11 +67,23 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run tests with coverage
+        env:
+          ARTURRIOS_DATA_MYSQL_TEST_CONNECTION: Server=127.0.0.1;Port=3306;User ID=root;Password=arturrios-data-ci;
         run: |
           dotnet test src/ArturRios.Data.sln \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
+            --logger "trx;LogFileName=coverage-tests.trx" \
             --results-directory coverage
+
+      # Skipped tests would silently under-report coverage: dotnet test exits 0 when every
+      # test in a category skips.
+      - name: Fail if any test was skipped
+        run: |
+          if grep -q 'outcome="NotExecuted"' coverage/coverage-tests.trx; then
+            echo "Tests were skipped - is the MySQL service container reachable?" >&2
+            exit 1
+          fi
 
       - name: Install ReportGenerator (PRO)
         run: |
@@ -85,6 +121,7 @@ jobs:
         run: hugo -s docs --environment production --minify --cleanDestinationDir --gc --baseURL "https://artur-rios.github.io/dotnet-data/"
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
