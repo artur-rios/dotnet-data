@@ -274,6 +274,24 @@ plan from the record's public properties, honouring `[ExportColumn]` and `[Expor
 See the [Relational](../relational/), [MongoDB](../mongodb/), [DynamoDB](../dynamodb/), and
 [Export](../export/) guides for full usage.
 
+## Asynchronous conventions
+
+Every `await` inside these packages calls `.ConfigureAwait(false)`. A library that captures the caller's
+synchronisation context deadlocks anyone who blocks on the returned task, and forces a context hop on every
+resumption for no benefit — a library has no UI thread to get back to.
+
+Where a value is bound by `await using`, the value is bound first and the scope declared separately:
+
+```csharp
+var tx = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+await using var txScope = tx.ConfigureAwait(false);
+```
+
+Writing `await using var tx = (…).ConfigureAwait(false)` would make `tx` a `ConfiguredAsyncDisposable`,
+which is not the transaction the surrounding code needs. Splitting it keeps the variable's own type and
+still configures the disposal await.
+
 ## Testing
 
 The test suite is xUnit, and every test is named with the Given / When / Then pattern. Every test class

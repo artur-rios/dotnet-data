@@ -1,4 +1,4 @@
-using ArturRios.Data.Export.Configuration;
+﻿using ArturRios.Data.Export.Configuration;
 using ArturRios.Output;
 using Microsoft.Extensions.Logging;
 
@@ -28,15 +28,17 @@ public class TxtExporter<T>(TxtOptions options, ILogger<TxtExporter<T>>? logger 
     private async Task WriteLinesAsync(IEnumerable<T> data, Stream destination, Func<T, string> lineSelector,
         CancellationToken ct)
     {
-        await using var writer = new StreamWriter(destination, options.Encoding, leaveOpen: true);
+        var writer = new StreamWriter(destination, options.Encoding, leaveOpen: true);
+
+        await using var writerScope = writer.ConfigureAwait(false);
 
         foreach (var item in data)
         {
             ct.ThrowIfCancellationRequested();
-            await writer.WriteAsync(lineSelector(item));
-            await writer.WriteAsync(options.NewLine);
+            await writer.WriteAsync(lineSelector(item)).ConfigureAwait(false);
+            await writer.WriteAsync(options.NewLine).ConfigureAwait(false);
         }
 
-        await writer.FlushAsync(ct);
+        await writer.FlushAsync(ct).ConfigureAwait(false);
     }
 }
