@@ -1,4 +1,4 @@
----
+﻿---
 title: Architecture
 weight: 10
 description: >-
@@ -19,7 +19,7 @@ flowchart TB
         Core["ArturRios.Data.Relational.Core<br/><i>interfaces, EfRepository, EfUnitOfWork,<br/>BaseDbContext, IDatabaseProvider seam</i>"]
         Sqlite["ArturRios.Data.Sqlite<br/><i>AddSqliteProvider()</i>"]
         Postgres["ArturRios.Data.PostgreSql<br/><i>AddPostgreSqlProvider()</i>"]
-        MySql["ArturRios.Data.MySql<br/><i>(deferred)</i>"]
+        MySql["ArturRios.Data.MySql"]
         Dapper["ArturRios.Data.Dapper<br/><i>read-only raw SQL</i>"]
     end
 

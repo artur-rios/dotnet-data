@@ -1,4 +1,4 @@
-# Dotnet Data
+﻿# Dotnet Data
 
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
@@ -40,7 +40,7 @@ flowchart TB
         Core["ArturRios.Data.Relational.Core<br/><i>repository &amp; unit-of-work abstractions,<br/>EfRepository, BaseDbContext, provider seam</i>"]
         Sqlite["ArturRios.Data.Sqlite"]
         Postgres["ArturRios.Data.PostgreSql"]
-        MySql["ArturRios.Data.MySql<br/><i>(deferred)</i>"]
+        MySql["ArturRios.Data.MySql"]
         Dapper["ArturRios.Data.Dapper<br/><i>read-only raw SQL</i>"]
     end
 
@@ -72,16 +72,12 @@ flowchart TB
 | `ArturRios.Data.Relational.Core` | EF Core abstractions (shared) | `ArturRios.Output`, EF Core | ✅ |
 | `ArturRios.Data.Sqlite` | SQLite | Relational.Core | ✅ |
 | `ArturRios.Data.PostgreSql` | PostgreSQL (Npgsql) | Relational.Core | ✅ |
-| `ArturRios.Data.MySql` | MySQL (Pomelo) | Relational.Core | ⏳ deferred¹ |
+| `ArturRios.Data.MySql` | MySQL / MariaDB | Relational.Core | ✅ |
 | `ArturRios.Data.Dapper` | Raw-SQL reads over the EF connection | Relational.Core, Dapper | ✅ |
 | `ArturRios.Data.MongoDb` | MongoDB document store | `ArturRios.Output`, MongoDB.Driver | ✅ |
 | `ArturRios.Data.DynamoDb` | AWS DynamoDB | `ArturRios.Output`, AWSSDK.DynamoDBv2 | ✅ |
 | `ArturRios.Data.Export` | CSV / JSON / TXT / MessagePack writers | `ArturRios.Output`, MessagePack | ✅ |
 | `ArturRios.Data.Export.Excel` | Excel .xlsx export add-on | Export, ClosedXML | ✅ |
-
-¹ Deferred until `Pomelo.EntityFrameworkCore.MySql` publishes an EF Core 10 release (its latest still
-targets EF Core 9). Source is written and excluded from the build. See
-[Relational → MySQL](https://artur-rios.github.io/dotnet-data/docs/relational/#mysql-status).
 
 ## Installation
 
@@ -91,7 +87,7 @@ Install the package(s) for your backend with the [.NET CLI](https://learn.micros
 ```bash
 # Relational (EF Core) — the core + a provider matching your engine:
 dotnet add package ArturRios.Data.Relational.Core
-dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql
+dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql / .MySql
 
 # Optional raw-SQL read path (relational):
 dotnet add package ArturRios.Data.Dapper
@@ -262,16 +258,26 @@ The NoSQL packages are **standalone** (no relational core) but keep the same env
 ## Testing
 
 The test suite is xUnit, and every test is named with the Given / When / Then pattern. Every test class
-carries a `Category` trait, so the two kinds can be run — and reported — separately:
+carries a `Category` trait, so the three kinds can be run — and reported — separately:
 
 ```bash
 dotnet test src/ArturRios.Data.sln --filter "Category=Unit"
 dotnet test src/ArturRios.Data.sln --filter "Category=Functional"
+dotnet test src/ArturRios.Data.sln --filter "Category=Integration"
 ```
 
 Unit tests exercise the code in isolation against test doubles.
-Functional tests run against real stores: SQLite for the relational and Dapper paths, an ephemeral MongoDB replica set, and DynamoDB Local.
-CI runs the two as separate jobs, and both must pass before a pull request can be merged.
+Functional tests run against real stores that the suite provisions itself: SQLite for the relational and Dapper paths, an ephemeral MongoDB replica set, and DynamoDB Local.
+Integration tests need a server the suite cannot provision — today, MySQL. They read a connection string from `ARTURRIOS_DATA_MYSQL_TEST_CONNECTION` and **skip** when it is unset:
+
+```bash
+ARTURRIOS_DATA_MYSQL_TEST_CONNECTION="Server=localhost;Port=3306;User ID=root;Password=secret;"
+```
+
+The user in that connection string must be able to create and drop databases: each run creates a
+throwaway `arturrios_data_test_<guid>` database and drops it afterwards, so no existing schema is
+touched. CI runs the three as separate jobs — the integration job supplies MySQL as a service
+container — and all three must pass before a pull request can be merged.
 
 ## Versioning
 

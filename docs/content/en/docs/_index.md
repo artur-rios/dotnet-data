@@ -1,4 +1,4 @@
----
+﻿---
 title: Documentation
 linkTitle: Documentation
 weight: 20
@@ -30,7 +30,7 @@ flowchart TB
         Core["ArturRios.Data.Relational.Core"]
         Sqlite["ArturRios.Data.Sqlite"]
         Postgres["ArturRios.Data.PostgreSql"]
-        MySql["ArturRios.Data.MySql (deferred)"]
+        MySql["ArturRios.Data.MySql"]
         Dapper["ArturRios.Data.Dapper"]
     end
 
@@ -62,7 +62,7 @@ flowchart TB
 | `ArturRios.Data.Relational.Core` | EF Core abstractions (shared) | Available |
 | `ArturRios.Data.Sqlite` | SQLite | Available |
 | `ArturRios.Data.PostgreSql` | PostgreSQL | Available |
-| `ArturRios.Data.MySql` | MySQL | Deferred (waiting on a Pomelo EF Core 10 release) |
+| `ArturRios.Data.MySql` | MySQL / MariaDB | Available |
 | `ArturRios.Data.Dapper` | Raw-SQL reads over the EF connection | Available |
 | `ArturRios.Data.MongoDb` | MongoDB document store | Available |
 | `ArturRios.Data.DynamoDb` | AWS DynamoDB | Available |
@@ -76,7 +76,7 @@ Requires **.NET 10.0** or later. Install the package(s) for your backend:
 ```bash
 # Relational (EF Core) — the core + a provider matching your engine:
 dotnet add package ArturRios.Data.Relational.Core
-dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql
+dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql / .MySql
 
 # Optional raw-SQL read path (relational):
 dotnet add package ArturRios.Data.Dapper

@@ -44,8 +44,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "src"
 
 # Packages that exist in the tree but cannot be published (excluded from the
-# build). Keep in sync with the guard in publish-package.yml.
-DEFERRED = {"ArturRios.Data.MySql"}
+# build). Empty today - ArturRios.Data.MySql shipped once the MySQL provider
+# moved to Microting.EntityFrameworkCore.MySql.
+DEFERRED: set[str] = set()
 
 PACKAGE_ID_RE = re.compile(r"<PackageId>\s*(.*?)\s*</PackageId>")
 VERSION_RE = re.compile(r"<Version>\s*(.*?)\s*</Version>")
