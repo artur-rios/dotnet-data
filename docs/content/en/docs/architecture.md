@@ -46,7 +46,7 @@ flowchart TB
     ExportCore --> Output
 
     EF["Microsoft.EntityFrameworkCore"]:::ext
-    EfProviders["Npgsql / Pomelo / Sqlite EF provider"]:::ext
+    EfProviders["Npgsql / Microting (Pomelo fork) / Sqlite EF provider"]:::ext
     DapperLib["Dapper"]:::ext
     MongoLib["MongoDB.Driver"]:::ext
     Aws["AWSSDK.DynamoDBv2"]:::ext

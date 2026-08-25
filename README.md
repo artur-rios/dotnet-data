@@ -5,6 +5,7 @@
 [![Relational.Core](https://img.shields.io/nuget/v/ArturRios.Data.Relational.Core.svg?label=Relational.Core)](https://www.nuget.org/packages/ArturRios.Data.Relational.Core)
 [![Sqlite](https://img.shields.io/nuget/v/ArturRios.Data.Sqlite.svg?label=Sqlite)](https://www.nuget.org/packages/ArturRios.Data.Sqlite)
 [![PostgreSql](https://img.shields.io/nuget/v/ArturRios.Data.PostgreSql.svg?label=PostgreSql)](https://www.nuget.org/packages/ArturRios.Data.PostgreSql)
+[![MySql](https://img.shields.io/nuget/v/ArturRios.Data.MySql.svg?label=MySql)](https://www.nuget.org/packages/ArturRios.Data.MySql)
 [![Dapper](https://img.shields.io/nuget/v/ArturRios.Data.Dapper.svg?label=Dapper)](https://www.nuget.org/packages/ArturRios.Data.Dapper)
 [![MongoDb](https://img.shields.io/nuget/v/ArturRios.Data.MongoDb.svg?label=MongoDb)](https://www.nuget.org/packages/ArturRios.Data.MongoDb)
 [![DynamoDb](https://img.shields.io/nuget/v/ArturRios.Data.DynamoDb.svg?label=DynamoDb)](https://www.nuget.org/packages/ArturRios.Data.DynamoDb)
