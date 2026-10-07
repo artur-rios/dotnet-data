@@ -130,7 +130,7 @@ classDiagram
 ```csharp
 using ArturRios.Data.Relational.Core;
 
-public class Product : Entity          // or : VersionedEntity for optimistic concurrency
+public class Product : Entity<long>    // or : VersionedEntity<long> for optimistic concurrency
 {
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
@@ -177,15 +177,15 @@ using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Output;
 
-public class ProductService(IAsyncRepository<Product> repo, IAsyncUnitOfWork unitOfWork)
+public class ProductService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWork unitOfWork)
 {
-    public async Task<int> CreateAsync(Product p)
+    public async Task<long> CreateAsync(Product p)
     {
-        DataOutput<int> result = await repo.CreateAsync(p);
+        DataOutput<long> result = await repo.CreateAsync(p);
         return result.Success ? result.Data : throw new InvalidOperationException(string.Join(", ", result.Errors));
     }
 
-    public Task<DataOutput<int>> CreateTwoAtomicallyAsync(Product a, Product b) =>
+    public Task<DataOutput<long>> CreateTwoAtomicallyAsync(Product a, Product b) =>
         unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var first = await repo.CreateAsync(a);
@@ -203,14 +203,14 @@ transactions, and the Dapper read path) is at
 
 ```mermaid
 classDiagram
-    class Entity { +long Id }
-    class VersionedEntity { +Guid ConcurrencyStamp }
+    class Entity~TKey~ { +TKey Id }
+    class VersionedEntity~TKey~ { +Guid ConcurrencyStamp }
     Entity <|-- VersionedEntity
 
     class IReadOnlyRepository~T~ {
         +Query() IQueryable~T~
         +GetAll() DataOutput
-        +GetById(long) DataOutput
+        +GetById(TKey) DataOutput
     }
     class IRepository~T~ {
         +Create(T) DataOutput

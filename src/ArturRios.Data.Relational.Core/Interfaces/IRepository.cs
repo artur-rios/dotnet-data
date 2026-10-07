@@ -4,16 +4,18 @@ using ArturRios.Output;
 namespace ArturRios.Data.Relational.Core.Interfaces;
 
 /// <summary>
-///     Full read/write repository contract for entities of type <typeparamref name="T" />.
+///     Full read/write repository contract for entities of type <typeparamref name="T" /> keyed by <typeparamref name="TKey" />.
 /// </summary>
-/// <typeparam name="T">The entity type, must derive from <see cref="Entity" />.</typeparam>
-public interface IRepository<T> : IReadOnlyRepository<T> where T : Entity
+/// <typeparam name="T">The entity type, must derive from <see cref="Entity{TKey}" />.</typeparam>
+/// <typeparam name="TKey">The entity's primary key type.</typeparam>
+public interface IRepository<T, TKey> : IReadOnlyRepository<T, TKey>
+    where T : Entity<TKey> where TKey : IEquatable<TKey>
 {
     /// <summary>Persists a new entity and returns its generated identifier.</summary>
-    DataOutput<long> Create(T entity);
+    DataOutput<TKey> Create(T entity);
 
     /// <summary>Persists multiple new entities and returns their generated identifiers.</summary>
-    DataOutput<IEnumerable<long>> CreateRange(IEnumerable<T> entities);
+    DataOutput<IEnumerable<TKey>> CreateRange(IEnumerable<T> entities);
 
     /// <summary>Applies changes to an existing entity.</summary>
     DataOutput<T> Update(T entity);
@@ -22,8 +24,8 @@ public interface IRepository<T> : IReadOnlyRepository<T> where T : Entity
     DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities);
 
     /// <summary>Removes an entity and returns its identifier.</summary>
-    DataOutput<long> Delete(T entity);
+    DataOutput<TKey> Delete(T entity);
 
     /// <summary>Removes entities by identifier and returns the deleted identifiers.</summary>
-    DataOutput<IEnumerable<long>> DeleteRange(IEnumerable<long> ids);
+    DataOutput<IEnumerable<TKey>> DeleteRange(IEnumerable<TKey> ids);
 }

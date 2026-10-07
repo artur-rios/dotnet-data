@@ -8,11 +8,11 @@ namespace ArturRios.Data.Tests.Interfaces;
 [Trait("Category", "Unit")]
 public class IRepositoryTests
 {
-    private static readonly Type Type = typeof(IRepository<>);
+    private static readonly Type Type = typeof(IRepository<,>);
 
     [Fact]
     public void GivenTheRepositoryContract_WhenInspected_ThenItExtendsTheReadOnlyOne() =>
-        Assert.Contains(typeof(IReadOnlyRepository<>),
+        Assert.Contains(typeof(IReadOnlyRepository<,>),
             Type.GetInterfaces().Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
 
     [Theory]

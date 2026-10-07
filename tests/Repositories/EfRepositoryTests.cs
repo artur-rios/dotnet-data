@@ -12,7 +12,7 @@ public class EfRepositoryTests
     public void GivenAnUnmappedEntity_WhenFetchingAll_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<UnmappedEntity>(context);
+        var repo = new EfRepository<UnmappedEntity, long>(context);
 
         var result = repo.GetAll();
 
@@ -24,7 +24,7 @@ public class EfRepositoryTests
     public void GivenANewEntity_WhenCreated_ThenItPersistsAndItsIdIsReturned()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
 
         var result = repo.Create(new TestEntity { Name = "a" });
 
@@ -36,7 +36,7 @@ public class EfRepositoryTests
     public void GivenAnExistingEntity_WhenFetchingById_ThenItComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var id = repo.Create(new TestEntity { Name = "a" }).Data;
 
         var result = repo.GetById(id);
@@ -49,7 +49,7 @@ public class EfRepositoryTests
     public void GivenNoMatchingEntity_WhenFetchingById_ThenASuccessfulNullComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
 
         var result = repo.GetById(999);
 
@@ -61,7 +61,7 @@ public class EfRepositoryTests
     public void GivenSeveralEntities_WhenFetchingAll_ThenEveryOneComesBack()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         repo.CreateRange([new TestEntity { Name = "a" }, new TestEntity { Name = "b" }]);
 
         var result = repo.GetAll();
@@ -74,7 +74,7 @@ public class EfRepositoryTests
     public void GivenAnExistingEntity_WhenUpdated_ThenTheChangePersists()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var entity = new TestEntity { Name = "a" };
         repo.Create(entity);
 
@@ -89,7 +89,7 @@ public class EfRepositoryTests
     public void GivenAnExistingEntity_WhenDeleted_ThenItIsRemoved()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var entity = new TestEntity { Name = "a" };
         repo.Create(entity);
 
@@ -103,7 +103,7 @@ public class EfRepositoryTests
     public void GivenSeveralDocuments_WhenDeletingARangeOfIds_ThenOnlyThoseAreRemoved()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var a = new TestEntity { Name = "a" };
         var b = new TestEntity { Name = "b" };
         repo.CreateRange([a, b]);
@@ -118,7 +118,7 @@ public class EfRepositoryTests
     public void GivenTheQueryMethod_WhenComposingLinqOverIt_ThenTheCompositionIsHonoured()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         repo.CreateRange([new TestEntity { Name = "keep" }, new TestEntity { Name = "drop" }]);
 
         var kept = repo.Query().Where(e => e.Name == "keep").ToList();
@@ -130,7 +130,7 @@ public class EfRepositoryTests
     public void GivenADuplicateUniqueValue_WhenCreating_ThenAConflictComesBackWithoutTheConstraintText()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<UniqueTestEntity>(context);
+        var repo = new EfRepository<UniqueTestEntity, long>(context);
         Assert.True(repo.Create(new UniqueTestEntity { Email = "a@b.com" }).Success);
 
         var result = repo.Create(new UniqueTestEntity { Email = "a@b.com" });
@@ -145,7 +145,7 @@ public class EfRepositoryTests
     public void GivenAnUnmappedEntity_WhenFetchingAll_ThenNoProviderTextReachesTheCaller()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<UnmappedEntity>(context);
+        var repo = new EfRepository<UnmappedEntity, long>(context);
 
         var result = repo.GetAll();
 
@@ -154,5 +154,5 @@ public class EfRepositoryTests
         Assert.All(result.Errors, e => Assert.DoesNotContain("SQLite", e));
     }
 
-    private sealed class UnmappedEntity : Entity;
+    private sealed class UnmappedEntity : Entity<long>;
 }

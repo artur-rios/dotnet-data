@@ -12,7 +12,7 @@ public class ConcurrencyTests
     {
         // Two contexts over the SAME in-memory database via a shared connection.
         using var writer = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<VersionedTestEntity>(writer);
+        var repo = new EfRepository<VersionedTestEntity, long>(writer);
 
         var entity = new VersionedTestEntity { Name = "original" };
         repo.Create(entity);

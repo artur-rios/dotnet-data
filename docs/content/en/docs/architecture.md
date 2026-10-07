@@ -100,20 +100,20 @@ classDiagram
 ## Relational model
 
 The relational core exposes four repository interfaces (a read-only tier and a full read/write tier,
-each in a sync and an async flavour), all constrained to `T : Entity`. `EfRepository<T>` implements all
+each in a sync and an async flavour), all generic over the entity and its key type (`T : Entity<TKey>`). `EfRepository<T, TKey>` implements all
 four; `EfUnitOfWork` implements both unit-of-work interfaces. Consumers derive their entities from
-`Entity` (or `VersionedEntity` for optimistic concurrency) and their `DbContext` from `BaseDbContext`.
+`Entity<TKey>` (or `VersionedEntity<TKey>` for optimistic concurrency) and their `DbContext` from `BaseDbContext`.
 
 ```mermaid
 classDiagram
-    class Entity { +long Id }
-    class VersionedEntity { +Guid ConcurrencyStamp }
+    class Entity~TKey~ { +TKey Id }
+    class VersionedEntity~TKey~ { +Guid ConcurrencyStamp }
     Entity <|-- VersionedEntity
 
     class IReadOnlyRepository~T~ {
         +Query() IQueryable~T~
         +GetAll() DataOutput
-        +GetById(long) DataOutput
+        +GetById(TKey) DataOutput
     }
     class IRepository~T~ {
         +Create(T) DataOutput
@@ -263,7 +263,7 @@ plan from the record's public properties, honouring `[ExportColumn]` and `[Expor
   exceptions and returns them as `DataOutput`/`ProcessOutput` errors. Optimistic-concurrency conflicts
   become a friendly "concurrency conflict" error. The one intentional exception is
   `OperationCanceledException`, which propagates so cooperative cancellation stays idiomatic.
-- **Opt-in optimistic concurrency.** Derive from `VersionedEntity` / `VersionedDocument`, or add
+- **Opt-in optimistic concurrency.** Derive from `VersionedEntity<TKey>` / `VersionedDocument`, or add
   `[DynamoDBVersion]`, to get conditional writes; without it, writes are last-writer-wins.
 - **Transactions where the engine supports them.** Relational and MongoDB expose a delegate-based unit
   of work; the Dapper read path enlists in the relational transaction. (DynamoDB transactions are a

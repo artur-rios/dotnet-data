@@ -129,10 +129,10 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<BaseDbContext>(sp => sp.GetRequiredService<TContext>());
 
-            services.AddScoped(typeof(IReadOnlyRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IAsyncReadOnlyRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IReadOnlyRepository<,>), typeof(EfRepository<,>));
+            services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
+            services.AddScoped(typeof(IAsyncReadOnlyRepository<,>), typeof(EfRepository<,>));
+            services.AddScoped(typeof(IAsyncRepository<,>), typeof(EfRepository<,>));
 
             services.AddScoped<IUnitOfWork, EfUnitOfWork>();
             services.AddScoped<IAsyncUnitOfWork, EfUnitOfWork>();

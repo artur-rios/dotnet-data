@@ -9,7 +9,7 @@ namespace ArturRios.Data.Tests.Interfaces;
 [Trait("Category", "Unit")]
 public class IAsyncReadOnlyRepositoryTests
 {
-    private static readonly Type Type = typeof(IAsyncReadOnlyRepository<>);
+    private static readonly Type Type = typeof(IAsyncReadOnlyRepository<,>);
 
     [Theory]
     [InlineData("GetAllAsync")]
