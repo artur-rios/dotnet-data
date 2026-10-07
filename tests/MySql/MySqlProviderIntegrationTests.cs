@@ -29,7 +29,7 @@ public class MySqlProviderIntegrationTests(MySqlDatabaseFixture fixture)
     {
         fixture.Reset();
         using var context = fixture.CreateContext();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
 
         var created = repo.Create(new TestEntity { Name = "round-trip" });
         var fetched = repo.GetById(created.Data);
@@ -49,11 +49,11 @@ public class MySqlProviderIntegrationTests(MySqlDatabaseFixture fixture)
 
         using (var writer = fixture.CreateContext())
         {
-            id = new EfRepository<TestEntity>(writer).Create(new TestEntity { Name = "durable" }).Data;
+            id = new EfRepository<TestEntity, long>(writer).Create(new TestEntity { Name = "durable" }).Data;
         }
 
         using var reader = fixture.CreateContext();
-        var result = new EfRepository<TestEntity>(reader).GetById(id);
+        var result = new EfRepository<TestEntity, long>(reader).GetById(id);
 
         Assert.True(result.Success);
         Assert.Equal("durable", result.Data!.Name);
@@ -64,7 +64,7 @@ public class MySqlProviderIntegrationTests(MySqlDatabaseFixture fixture)
     {
         fixture.Reset();
         using var context = fixture.CreateContext();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
 
         var result = new EfUnitOfWork(context).ExecuteInTransaction(() =>
         {
@@ -81,7 +81,7 @@ public class MySqlProviderIntegrationTests(MySqlDatabaseFixture fixture)
     {
         fixture.Reset();
         using var context = fixture.CreateContext();
-        var repo = new EfRepository<UniqueTestEntity>(context);
+        var repo = new EfRepository<UniqueTestEntity, long>(context);
 
         repo.Create(new UniqueTestEntity { Email = "duplicate@example.com" });
         var result = repo.Create(new UniqueTestEntity { Email = "duplicate@example.com" });
@@ -100,20 +100,20 @@ public class MySqlProviderIntegrationTests(MySqlDatabaseFixture fixture)
 
         using (var seed = fixture.CreateContext())
         {
-            id = new EfRepository<VersionedTestEntity>(seed).Create(new VersionedTestEntity { Name = "v1" }).Data;
+            id = new EfRepository<VersionedTestEntity, long>(seed).Create(new VersionedTestEntity { Name = "v1" }).Data;
         }
 
         using var first = fixture.CreateContext();
         using var second = fixture.CreateContext();
 
         var stale = first.Set<VersionedTestEntity>().Single(e => e.Id == id);
-        var winner = new EfRepository<VersionedTestEntity>(second).GetById(id).Data!;
+        var winner = new EfRepository<VersionedTestEntity, long>(second).GetById(id).Data!;
 
         winner.Name = "winner";
-        new EfRepository<VersionedTestEntity>(second).Update(winner);
+        new EfRepository<VersionedTestEntity, long>(second).Update(winner);
 
         stale.Name = "loser";
-        var result = new EfRepository<VersionedTestEntity>(first).Update(stale);
+        var result = new EfRepository<VersionedTestEntity, long>(first).Update(stale);
 
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);

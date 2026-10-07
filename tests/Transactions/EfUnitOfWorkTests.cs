@@ -15,7 +15,7 @@ public class EfUnitOfWorkTests
     public void GivenWorkThatSucceeds_WhenExecutedInATransaction_ThenItCommits()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var uow = new EfUnitOfWork(context);
 
         var result = uow.ExecuteInTransaction(() =>
@@ -32,7 +32,7 @@ public class EfUnitOfWorkTests
     public void GivenWorkThatThrows_WhenExecutedInATransaction_ThenItRollsBack()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var uow = new EfUnitOfWork(context);
 
         var result = uow.ExecuteInTransaction(() =>
@@ -50,7 +50,7 @@ public class EfUnitOfWorkTests
     public void GivenAUniqueViolationInsideATransaction_WhenItIsClassified_ThenNoConstraintTextReachesTheCaller()
     {
         using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<UniqueTestEntity>(context);
+        var repo = new EfRepository<UniqueTestEntity, long>(context);
         var uow = new EfUnitOfWork(context);
         repo.Create(new UniqueTestEntity { Email = "a@b.com" });
 
@@ -86,7 +86,7 @@ public class EfUnitOfWorkTests
     public async Task GivenWorkThatReturnsAResult_WhenExecutedInATransactionAsynchronously_ThenItCommitsAndTheResultComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var uow = new EfUnitOfWork(context);
 
         var result = await uow.ExecuteInTransactionAsync(async () =>

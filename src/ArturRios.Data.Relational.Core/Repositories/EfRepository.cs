@@ -12,9 +12,10 @@ namespace ArturRios.Data.Relational.Core.Repositories;
 ///     saves flush without committing. Infrastructure failures are returned as <see cref="DataOutput{T}" /> errors.
 /// </summary>
 /// <typeparam name="T">The entity type.</typeparam>
+/// <typeparam name="TKey">The entity's primary key type.</typeparam>
 /// <param name="context">The application's <see cref="BaseDbContext" />.</param>
-public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepository<T>
-    where T : Entity
+public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>, IAsyncRepository<T, TKey>
+    where T : Entity<TKey> where TKey : IEquatable<TKey>
 {
     /// <summary>Message returned when an optimistic-concurrency conflict is detected.</summary>
     protected const string ConcurrencyMessage = RelationalErrors.ConcurrencyMessage;
@@ -33,11 +34,11 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         GuardedAsync<IEnumerable<T>>(async () => await Set.ToListAsync(ct).ConfigureAwait(false));
 
     /// <inheritdoc />
-    public Task<DataOutput<T?>> GetByIdAsync(long id, CancellationToken ct = default) =>
-        GuardedAsync(async () => await Set.FirstOrDefaultAsync(e => e.Id == id, ct).ConfigureAwait(false));
+    public Task<DataOutput<T?>> GetByIdAsync(TKey id, CancellationToken ct = default) =>
+        GuardedAsync(async () => await Set.FirstOrDefaultAsync(e => e.Id.Equals(id), ct).ConfigureAwait(false));
 
     /// <inheritdoc />
-    public Task<DataOutput<long>> CreateAsync(T entity, CancellationToken ct = default) =>
+    public Task<DataOutput<TKey>> CreateAsync(T entity, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
             await Set.AddAsync(entity, ct).ConfigureAwait(false);
@@ -47,9 +48,9 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<long>>>
+    public Task<DataOutput<IEnumerable<TKey>>>
         CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<long>>(async () =>
+        GuardedAsync<IEnumerable<TKey>>(async () =>
         {
             var list = entities.ToList();
             await Set.AddRangeAsync(list, ct).ConfigureAwait(false);
@@ -80,7 +81,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<long>> DeleteAsync(T entity, CancellationToken ct = default) =>
+    public Task<DataOutput<TKey>> DeleteAsync(T entity, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
             Set.Remove(entity);
@@ -90,8 +91,8 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         });
 
     /// <inheritdoc />
-    public Task<DataOutput<IEnumerable<long>>> DeleteRangeAsync(IEnumerable<long> ids, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<long>>(async () =>
+    public Task<DataOutput<IEnumerable<TKey>>> DeleteRangeAsync(IEnumerable<TKey> ids, CancellationToken ct = default) =>
+        GuardedAsync<IEnumerable<TKey>>(async () =>
         {
             var idList = ids.ToList();
             var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct).ConfigureAwait(false);
@@ -109,11 +110,11 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
         Guarded(IEnumerable<T> () => Set.ToList());
 
     /// <inheritdoc />
-    public DataOutput<T?> GetById(long id) =>
-        Guarded(() => Set.FirstOrDefault(e => e.Id == id));
+    public DataOutput<T?> GetById(TKey id) =>
+        Guarded(() => Set.FirstOrDefault(e => e.Id.Equals(id)));
 
     /// <inheritdoc />
-    public DataOutput<long> Create(T entity) => Guarded(() =>
+    public DataOutput<TKey> Create(T entity) => Guarded(() =>
     {
         Set.Add(entity);
         context.SaveChanges();
@@ -121,7 +122,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<long>> CreateRange(IEnumerable<T> entities) => Guarded(IEnumerable<long> () =>
+    public DataOutput<IEnumerable<TKey>> CreateRange(IEnumerable<T> entities) => Guarded(IEnumerable<TKey> () =>
     {
         var list = entities.ToList();
         Set.AddRange(list);
@@ -147,7 +148,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<long> Delete(T entity) => Guarded(() =>
+    public DataOutput<TKey> Delete(T entity) => Guarded(() =>
     {
         Set.Remove(entity);
         context.SaveChanges();
@@ -155,7 +156,7 @@ public class EfRepository<T>(BaseDbContext context) : IRepository<T>, IAsyncRepo
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<long>> DeleteRange(IEnumerable<long> ids) => Guarded(IEnumerable<long> () =>
+    public DataOutput<IEnumerable<TKey>> DeleteRange(IEnumerable<TKey> ids) => Guarded(IEnumerable<TKey> () =>
     {
         var idList = ids.ToList();
         var matches = Set.Where(e => idList.Contains(e.Id)).ToList();

@@ -4,10 +4,11 @@ using ArturRios.Output;
 namespace ArturRios.Data.Relational.Core.Interfaces;
 
 /// <summary>
-///     Read-only repository contract for entities of type <typeparamref name="T" />.
+///     Read-only repository contract for entities of type <typeparamref name="T" /> keyed by <typeparamref name="TKey" />.
 /// </summary>
-/// <typeparam name="T">The entity type, must derive from <see cref="Entity" />.</typeparam>
-public interface IReadOnlyRepository<T> where T : Entity
+/// <typeparam name="T">The entity type, must derive from <see cref="Entity{TKey}" />.</typeparam>
+/// <typeparam name="TKey">The entity's primary key type.</typeparam>
+public interface IReadOnlyRepository<T, TKey> where T : Entity<TKey> where TKey : IEquatable<TKey>
 {
     /// <summary>
     ///     Returns a deferred, composable query over the entity set. Performs no I/O until materialized.
@@ -23,5 +24,5 @@ public interface IReadOnlyRepository<T> where T : Entity
     ///     Returns the entity with the given identifier, or a successful result with
     ///     <c>null</c> data when none matches.
     /// </summary>
-    DataOutput<T?> GetById(long id);
+    DataOutput<T?> GetById(TKey id);
 }

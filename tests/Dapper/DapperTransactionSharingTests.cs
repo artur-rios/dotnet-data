@@ -15,7 +15,7 @@ public class DapperTransactionSharingTests
     public async Task GivenAnUncommittedEntityFrameworkWrite_WhenReadingWithDapperInTheSameTransaction_ThenTheWriteIsVisible()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var uow = new EfUnitOfWork(context);
         var dapper = new DapperSqlQuery(context);
 
@@ -34,7 +34,7 @@ public class DapperTransactionSharingTests
     public async Task GivenARolledBackTransaction_WhenReadingWithDapperAfterwards_ThenNothingIsVisible()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var uow = new EfUnitOfWork(context);
         var dapper = new DapperSqlQuery(context);
 

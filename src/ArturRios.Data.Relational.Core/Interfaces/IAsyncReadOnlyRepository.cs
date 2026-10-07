@@ -4,10 +4,12 @@ using ArturRios.Output;
 namespace ArturRios.Data.Relational.Core.Interfaces;
 
 /// <summary>
-///     Asynchronous read-only repository contract for entities of type <typeparamref name="T" />.
+///     Asynchronous read-only repository contract for entities of type <typeparamref name="T" />
+///     keyed by <typeparamref name="TKey" />.
 /// </summary>
-/// <typeparam name="T">The entity type, must derive from <see cref="Entity" />.</typeparam>
-public interface IAsyncReadOnlyRepository<T> where T : Entity
+/// <typeparam name="T">The entity type, must derive from <see cref="Entity{TKey}" />.</typeparam>
+/// <typeparam name="TKey">The entity's primary key type.</typeparam>
+public interface IAsyncReadOnlyRepository<T, TKey> where T : Entity<TKey> where TKey : IEquatable<TKey>
 {
     /// <summary>
     ///     Returns a deferred, composable query over the entity set. Performs no I/O until materialized.
@@ -21,5 +23,5 @@ public interface IAsyncReadOnlyRepository<T> where T : Entity
     ///     Returns the entity with the given identifier, or a successful result with
     ///     <c>null</c> data when none matches.
     /// </summary>
-    Task<DataOutput<T?>> GetByIdAsync(long id, CancellationToken ct = default);
+    Task<DataOutput<T?>> GetByIdAsync(TKey id, CancellationToken ct = default);
 }

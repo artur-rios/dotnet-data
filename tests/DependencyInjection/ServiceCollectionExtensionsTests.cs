@@ -30,8 +30,12 @@ public class ServiceCollectionExtensionsTests
         using var provider = services.BuildServiceProvider();
         provider.GetRequiredService<TestDbContext>().Database.EnsureCreated();
 
-        Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity>>());
-        Assert.NotNull(provider.GetRequiredService<IAsyncRepository<TestEntity>>());
+        Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity, long>>());
+        Assert.NotNull(provider.GetRequiredService<IAsyncRepository<TestEntity, long>>());
+        Assert.NotNull(provider.GetRequiredService<IReadOnlyRepository<GuidKeyedTestEntity, Guid>>());
+        Assert.NotNull(provider.GetRequiredService<IRepository<GuidKeyedTestEntity, Guid>>());
+        Assert.NotNull(provider.GetRequiredService<IAsyncReadOnlyRepository<StringKeyedTestEntity, string>>());
+        Assert.NotNull(provider.GetRequiredService<IAsyncRepository<StringKeyedTestEntity, string>>());
         Assert.NotNull(provider.GetRequiredService<IUnitOfWork>());
         Assert.NotNull(provider.GetRequiredService<IAsyncUnitOfWork>());
     }
@@ -84,7 +88,7 @@ public class ServiceCollectionExtensionsTests
         using var provider = services.BuildServiceProvider();
         provider.GetRequiredService<TestDbContext>().Database.EnsureCreated();
 
-        Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity>>());
+        Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity, long>>());
     }
 
     [Fact]
@@ -106,8 +110,8 @@ public class ServiceCollectionExtensionsTests
             using var provider = services.BuildServiceProvider();
             provider.GetRequiredService<TestDbContext>().Database.EnsureCreated();
 
-            Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity>>());
-            Assert.NotNull(provider.GetRequiredService<IAsyncRepository<TestEntity>>());
+            Assert.NotNull(provider.GetRequiredService<IRepository<TestEntity, long>>());
+            Assert.NotNull(provider.GetRequiredService<IAsyncRepository<TestEntity, long>>());
             Assert.NotNull(provider.GetRequiredService<IUnitOfWork>());
             Assert.NotNull(provider.GetRequiredService<IAsyncUnitOfWork>());
         }

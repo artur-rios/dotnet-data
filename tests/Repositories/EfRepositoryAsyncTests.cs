@@ -12,7 +12,7 @@ public class EfRepositoryAsyncTests
     public async Task GivenANewEntity_WhenCreatedAsynchronously_ThenItPersistsAndItsIdIsReturned()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
 
         var result = await repo.CreateAsync(new TestEntity { Name = "a" });
 
@@ -24,7 +24,7 @@ public class EfRepositoryAsyncTests
     public async Task GivenNoMatchingEntity_WhenFetchingByIdAsynchronously_ThenASuccessfulNullComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
 
         var result = await repo.GetByIdAsync(123);
 
@@ -36,7 +36,7 @@ public class EfRepositoryAsyncTests
     public async Task GivenSeveralEntities_WhenFetchingAllAsynchronously_ThenEveryOneComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         await repo.CreateRangeAsync([new TestEntity { Name = "a" }, new TestEntity { Name = "b" }]);
 
         var result = await repo.GetAllAsync();
@@ -49,7 +49,7 @@ public class EfRepositoryAsyncTests
     public async Task GivenAnEntity_WhenUpdatedAndDeletedAsynchronously_ThenBothTakeEffect()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var entity = new TestEntity { Name = "a" };
         await repo.CreateAsync(entity);
 
@@ -67,7 +67,7 @@ public class EfRepositoryAsyncTests
     public async Task GivenSeveralDocuments_WhenDeletingARangeOfIdsAsynchronously_ThenOnlyThoseAreRemoved()
     {
         await using var context = SqliteTestContextFactory.Create();
-        var repo = new EfRepository<TestEntity>(context);
+        var repo = new EfRepository<TestEntity, long>(context);
         var a = new TestEntity { Name = "a" };
         var b = new TestEntity { Name = "b" };
         await repo.CreateRangeAsync([a, b]);
