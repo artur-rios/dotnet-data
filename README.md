@@ -280,6 +280,35 @@ throwaway `arturrios_data_test_<guid>` database and drops it afterwards, so no e
 touched. CI runs the three as separate jobs — the integration job supplies MySQL as a service
 container — and all three must pass before a pull request can be merged.
 
+## Branching and releases
+
+`develop` is the integration branch and the base for all new work; `main` only holds released
+code.
+
+1. Branch off `develop` — `feature/<name>` for features, `fix/<name>` for fixes (`chore/`,
+   `refactor/`, `docs/`, `ci/`, `test/`, `perf/` and `build/` are accepted too) — and open a pull
+   request back into `develop`.
+2. To release, cut `release/<name>` from `develop`, bump each package that changed with
+   `python scripts/release.py bump <project> {patch|minor|major}` and open a pull request into
+   `main`. Only `release/*` branches can be merged into `main`; the pull request lists the
+   `<PackageId>@<version>` tags the release will need.
+3. Once it is merged, switch to an up-to-date `main` and tag it. Pushing a `<PackageId>@<version>`
+   tag publishes that package to nuget.org and GitHub Packages:
+
+   ```bash
+   git switch main && git pull
+   python scripts/release.py tag <project> && python scripts/release.py push <project>
+   ```
+
+   The interactive menu (`python scripts/release.py`) can also tag and push every pending package
+   at once.
+4. Open a pull request from `main` into `develop` to bring the release back into the integration
+   branch.
+
+Pull requests into `develop` and `main` must pass the tests and the branch policy check. Only the
+repository owner can push version tags, and the publish workflow rejects tags that do not point at
+a commit on `main`.
+
 ## Versioning
 
 Semantic Versioning (SemVer). Breaking changes bump the major version; new non-breaking behavior bumps

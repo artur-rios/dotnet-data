@@ -1,0 +1,89 @@
+name: Branch Policy
+
+# Enforces the branching model on every pull request:
+#
+#   develop <- feature/*, fix/* (and the other work prefixes below)
+#   develop <- release/*, main  (back-merges after a release)
+#   main    <- release/* only
+#
+# "Branch policy" is a required status check on main and develop, so a pull
+# request from any other branch cannot be merged. The repository owner can
+# bypass it.
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  branch-policy:
+    name: Branch policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+          WORK_PREFIXES: 'feature feat fix bugfix chore refactor docs ci test perf build'
+        run: |
+          set -euo pipefail
+          read -ra PREFIXES <<< "$WORK_PREFIXES"
+          echo "Pull request: $HEAD -> $BASE"
+          case "$BASE" in
+            main)
+              if [[ "$HEAD" != release/* ]]; then
+                echo "::error::Only release/* branches can be merged into main (got '$HEAD'). Open this pull request against develop instead."
+                exit 1
+              fi
+              ;;
+            develop)
+              if [[ "$HEAD" == release/* || "$HEAD" == main ]]; then
+                echo "Back-merge from '$HEAD' accepted."
+                exit 0
+              fi
+              for prefix in "${PREFIXES[@]}"; do
+                if [[ "$HEAD" == "$prefix/"* ]]; then
+                  echo "Work branch '$HEAD' accepted."
+                  exit 0
+                fi
+              done
+              echo "::error::'$HEAD' is not a recognized branch name. Use one of: $(printf '%s/* ' "${PREFIXES[@]}")(or release/*, main for back-merges)."
+              exit 1
+              ;;
+          esac
+
+      - name: Checkout repository
+        if: github.base_ref == 'main'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Packages are versioned independently, so a release branch can carry any
+      # number of version bumps. List the ones this release would publish.
+      - name: List package versions to publish
+        if: github.base_ref == 'main'
+        run: |
+          set -euo pipefail
+          PENDING=()
+          for CSPROJ in src/*/*.csproj; do
+            PACKAGE=$(grep -oP '<PackageId>\K[^<]+' "$CSPROJ" | head -1 || true)
+            VERSION=$(grep -oP '<Version>\K[^<]+' "$CSPROJ" | head -1 || true)
+            [ -n "$PACKAGE" ] && [ -n "$VERSION" ] || continue
+            if [ -z "$(git tag --list "$PACKAGE@$VERSION")" ]; then
+              PENDING+=("$PACKAGE@$VERSION")
+            fi
+          done
+          if [ ${#PENDING[@]} -eq 0 ]; then
+            echo "::warning::No package has an untagged version - this release publishes nothing. Bump the packages that changed with scripts/release.py."
+            exit 0
+          fi
+          # shellcheck disable=SC2016 # the backticks are Markdown, not command substitution
+          {
+            echo "After merging, tag main with:"
+            printf -- '- `%s`\n' "${PENDING[@]}"
+          } | tee -a "$GITHUB_STEP_SUMMARY"

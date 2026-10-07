@@ -6,10 +6,14 @@ Each backend ships as its own NuGet package and is published by
 the form ``<PackageId>@<version>`` (e.g. ``ArturRios.Data.Export@1.0.0``) and
 validates that the tagged commit's csproj ``<Version>`` matches the tag.
 
-This script drives that flow:
+Releases follow the repository's branching model: work lands on ``develop``,
+a ``release/*`` branch carries the version bumps into ``main`` through a pull
+request, and only commits on ``main`` are tagged. This script drives that flow:
 
-  * bump a project's ``<Version>`` (patch / minor / major) and commit it,
-  * create the ``<PackageId>@<version>`` tag from the committed version,
+  * bump a project's ``<Version>`` (patch / minor / major) and commit it - on the
+    release branch, never on ``main``,
+  * create the ``<PackageId>@<version>`` tag from the committed version - on an
+    up-to-date ``main``, after the release pull request is merged,
   * push the tag (which triggers the publish action).
 
 Run with no arguments for an interactive menu, which loops until you exit: every
@@ -23,7 +27,6 @@ Or use subcommands:
     python scripts/release.py bump    <project> {patch|minor|major}
     python scripts/release.py tag     <project>
     python scripts/release.py push    <project>
-    python scripts/release.py release <project> {patch|minor|major}   # bump -> tag -> push
 
 ``<project>`` may be the full PackageId (``ArturRios.Data.Export``) or its short
 suffix (``Export``, ``Export.Excel`` - case-insensitive).
@@ -53,6 +56,9 @@ VERSION_RE = re.compile(r"<Version>\s*(.*?)\s*</Version>")
 SEMVER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 BUMP_PARTS = ("patch", "minor", "major")
+
+# Only commits on this branch are tagged and published.
+RELEASE_BRANCH = "main"
 
 
 # --------------------------------------------------------------------------- #
@@ -211,16 +217,45 @@ def current_branch() -> str:
     return git("rev-parse", "--abbrev-ref", "HEAD", capture=True)
 
 
-def branch_has_unpushed_commits() -> bool:
-    # True when HEAD is ahead of its upstream, or has no upstream at all.
-    upstream = git(
-        "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}",
-        capture=True, check=False,
+def require_main() -> None:
+    """Fail unless HEAD is on main and already pushed to origin/main.
+
+    Tags are only created from released code: the publish workflow rejects a
+    tag whose commit is not on origin/main, so tagging anything else would
+    only produce a failed publish run.
+    """
+    branch = current_branch()
+    if branch != RELEASE_BRANCH:
+        fail(
+            f"tags are created on '{RELEASE_BRANCH}', but you are on '{branch}'. "
+            f"Merge the release/* pull request, then `git switch {RELEASE_BRANCH} && git pull`."
+        )
+    git("fetch", "--no-tags", "origin", RELEASE_BRANCH)
+    if not commit_on_origin_main("HEAD"):
+        fail(
+            f"HEAD is not on origin/{RELEASE_BRANCH}. Only commits merged through a "
+            f"release/* pull request can be tagged - run `git pull` or reset local "
+            f"commits on {RELEASE_BRANCH}."
+        )
+
+
+def commit_on_origin_main(ref: str) -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ref, f"origin/{RELEASE_BRANCH}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
     )
-    if not upstream:
-        return True
-    ahead = git("rev-list", "--count", f"{upstream}..HEAD", capture=True)
-    return ahead not in ("", "0")
+    return result.returncode == 0
+
+
+def require_tags_on_main(tags: list[str]) -> None:
+    git("fetch", "--no-tags", "origin", RELEASE_BRANCH)
+    stray = [tag for tag in tags if not commit_on_origin_main(tag)]
+    if stray:
+        fail(
+            f"tag(s) not on origin/{RELEASE_BRANCH}: {', '.join(stray)}. The publish "
+            "workflow rejects them - delete them (`git tag -d <tag>`) and tag main instead."
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -229,6 +264,11 @@ def branch_has_unpushed_commits() -> bool:
 def do_bump(pkg: Package, part: str, *, commit: bool, assume_yes: bool) -> str:
     if pkg.deferred:
         print(f"warning: {pkg.package_id} is deferred and cannot be published.")
+    if current_branch() == RELEASE_BRANCH:
+        fail(
+            f"version bumps go through a release/* pull request, not straight onto "
+            f"'{RELEASE_BRANCH}'. Run `git switch -c release/<name> develop` first."
+        )
     old = pkg.read_version()
     new = bump_version(old, part)
     print(f"{pkg.package_id}: {old} -> {new}  ({part})")
@@ -251,6 +291,7 @@ def do_bump(pkg: Package, part: str, *, commit: bool, assume_yes: bool) -> str:
 def do_tag(pkg: Package, *, assume_yes: bool) -> str:
     if pkg.deferred:
         fail(f"{pkg.package_id} is deferred and cannot be published - refusing to tag.")
+    require_main()
     if path_is_dirty(pkg.csproj):
         fail(
             f"{rel(pkg.csproj)} has uncommitted changes. Commit the version bump "
@@ -275,30 +316,12 @@ def do_push(pkg: Package, *, assume_yes: bool) -> None:
     tag = pkg.tag_for(version)
     if not tag_exists(tag):
         fail(f"tag '{tag}' does not exist locally. Run `release.py tag {pkg.package_id}` first.")
-
-    branch = current_branch()
-    if branch_has_unpushed_commits():
-        print(
-            f"note: branch '{branch}' has commits not on its remote (including the "
-            "version bump). The tag alone will publish, but origin/"
-            f"{branch} won't reflect the bump until the branch is pushed."
-        )
-        if confirm(f"Push branch '{branch}' to origin first?", assume_yes):
-            git("push", "origin", "HEAD")
-            print(f"pushed branch {branch}")
+    require_tags_on_main([tag])
 
     if not confirm(f"Push tag '{tag}' to origin (this triggers the publish action)?", assume_yes):
         fail("aborted")
     git("push", "origin", tag)
     print(f"pushed tag {tag} - the Publish Package workflow should now run.")
-
-
-def do_release(pkg: Package, part: str, *, assume_yes: bool) -> None:
-    if pkg.deferred:
-        fail(f"{pkg.package_id} is deferred and cannot be published.")
-    do_bump(pkg, part, commit=True, assume_yes=assume_yes)
-    do_tag(pkg, assume_yes=assume_yes)
-    do_push(pkg, assume_yes=assume_yes)
 
 
 def do_tag_all(packages: list[Package], *, assume_yes: bool) -> None:
@@ -308,6 +331,7 @@ def do_tag_all(packages: list[Package], *, assume_yes: bool) -> None:
     (the tag would point at a commit without the version) - are logged and
     skipped rather than treated as errors.
     """
+    require_main()
     head = git("rev-parse", "--short", "HEAD", capture=True)
     print(f"\nTagging packages at HEAD ({head}):")
 
@@ -381,17 +405,7 @@ def do_push_all(packages: list[Package], *, assume_yes: bool,
     print(f"\n{len(pending)} tag(s) to push:")
     for tag in pending:
         print(f"  push    {tag}")
-
-    branch = current_branch()
-    if branch_has_unpushed_commits():
-        print(
-            f"\nnote: branch '{branch}' has commits not on its remote (including "
-            f"version bumps). Tags alone will publish, but origin/{branch} won't "
-            "reflect the bumps until the branch is pushed."
-        )
-        if confirm(f"Push branch '{branch}' to origin first?", assume_yes):
-            git("push", "origin", "HEAD")
-            print(f"pushed branch {branch}")
+    require_tags_on_main(pending)
 
     if not one_at_a_time:
         prompt = (f"\nPush all {len(pending)} tag(s) to origin now (this triggers "
@@ -482,7 +496,6 @@ ACTIONS = (
     "Bump version + commit",
     "Create tag from current version",
     "Push tag (trigger publish)",
-    "Full release (bump -> tag -> push)",
     "Tag all packages at their current versions",
     "Push all package tags (one at a time)",
     "Push all package tags (all at once)",
@@ -501,13 +514,10 @@ def run_action(index: int, packages: list[Package]) -> None:
     elif index == 3:
         do_push(select_package(packages), assume_yes=False)
     elif index == 4:
-        pkg = select_package(packages)
-        do_release(pkg, select_bump_part(pkg), assume_yes=False)
-    elif index == 5:
         do_tag_all(packages, assume_yes=False)
-    elif index == 6:
+    elif index == 5:
         do_push_all(packages, assume_yes=False)
-    elif index == 7:
+    elif index == 6:
         do_push_all(packages, assume_yes=False, one_at_a_time=False)
 
 
@@ -565,11 +575,6 @@ def build_parser() -> argparse.ArgumentParser:
                             help="push the package's tag (triggers publish)")
     p_push.add_argument("project")
 
-    p_release = sub.add_parser("release", parents=[common],
-                               help="bump -> tag -> push in one step")
-    p_release.add_argument("project")
-    p_release.add_argument("part", choices=BUMP_PARTS)
-
     return parser
 
 
@@ -593,8 +598,6 @@ def main(argv: list[str] | None = None) -> None:
         do_tag(pkg, assume_yes=args.yes)
     elif args.command == "push":
         do_push(pkg, assume_yes=args.yes)
-    elif args.command == "release":
-        do_release(pkg, args.part, assume_yes=args.yes)
 
 
 if __name__ == "__main__":
