@@ -9,14 +9,16 @@ namespace ArturRios.Data.Tests.Interfaces;
 [Trait("Category", "Unit")]
 public class IReadOnlyRepositoryTests
 {
-    private static readonly Type Type = typeof(IReadOnlyRepository<>);
+    private static readonly Type Type = typeof(IReadOnlyRepository<,>);
 
     [Fact]
-    public void GivenTheReadOnlyRepositoryContract_WhenInspected_ThenItIsAnInterfaceConstrainedToEntity()
+    public void GivenTheReadOnlyRepositoryContract_WhenInspected_ThenItIsAnInterfaceConstrainedToAKeyedEntity()
     {
         Assert.True(Type.IsInterface);
-        var param = Type.GetGenericArguments()[0];
-        Assert.Contains(typeof(Entity), param.GetGenericParameterConstraints());
+        var args = Type.GetGenericArguments();
+        var constraint = Assert.Single(args[0].GetGenericParameterConstraints());
+        Assert.Equal(typeof(Entity<>), constraint.GetGenericTypeDefinition());
+        Assert.Equal(args[1], constraint.GetGenericArguments()[0]);
     }
 
     [Fact]
@@ -35,10 +37,10 @@ public class IReadOnlyRepositoryTests
     }
 
     [Fact]
-    public void GivenTheGetByIdMethod_WhenInspected_ThenItTakesALongAndReturnsADataOutput()
+    public void GivenTheGetByIdMethod_WhenInspected_ThenItTakesTheKeyTypeAndReturnsADataOutput()
     {
         var m = Type.GetMethod("GetById")!;
-        Assert.Equal(typeof(long), m.GetParameters().Single().ParameterType);
+        Assert.Equal(Type.GetGenericArguments()[1], m.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(DataOutput<>), m.ReturnType.GetGenericTypeDefinition());
     }
 }

@@ -5,7 +5,7 @@ namespace ArturRios.Data.Relational.Core.Configuration;
 
 /// <summary>
 ///     Base <see cref="DbContext" /> that applies shared conventions and refreshes the
-///     optimistic-concurrency stamp of modified <see cref="VersionedEntity" /> instances on save.
+///     optimistic-concurrency stamp of modified <see cref="IVersionedEntity" /> instances on save.
 /// </summary>
 /// <param name="options">The context options supplied by the configured provider.</param>
 public abstract class BaseDbContext(DbContextOptions options) : DbContext(options)
@@ -28,7 +28,7 @@ public abstract class BaseDbContext(DbContextOptions options) : DbContext(option
 
     private void BumpConcurrencyStamps()
     {
-        foreach (var entry in ChangeTracker.Entries<VersionedEntity>()
+        foreach (var entry in ChangeTracker.Entries<IVersionedEntity>()
                      .Where(e => e.State == EntityState.Modified))
         {
             entry.Entity.ConcurrencyStamp = Guid.NewGuid();

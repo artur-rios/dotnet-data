@@ -36,12 +36,15 @@ Requires **.NET 10.0** or later.
 ```csharp
 using ArturRios.Data.Relational.Core;
 
-public class Product : Entity          // or : VersionedEntity for optimistic concurrency
+public class Product : Entity<long>    // or : VersionedEntity<long> for optimistic concurrency
 {
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
 }
 ```
+
+The type argument is the primary key type — any `TKey` that implements `IEquatable<TKey>`, such as
+`long`, `int`, `Guid` or `string`. Repositories take the same key type: `IRepository<Product, long>`.
 
 **2. Define a context** deriving from `BaseDbContext`:
 
@@ -97,15 +100,15 @@ using ArturRios.Data.Relational.Core.Interfaces;
 using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Output;
 
-public class ProductService(IAsyncRepository<Product> repo, IAsyncUnitOfWork unitOfWork)
+public class ProductService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWork unitOfWork)
 {
-    public async Task<int> CreateAsync(Product p)
+    public async Task<long> CreateAsync(Product p)
     {
-        DataOutput<int> result = await repo.CreateAsync(p);
+        DataOutput<long> result = await repo.CreateAsync(p);
         return result.Success ? result.Data : throw new InvalidOperationException(string.Join(", ", result.Errors));
     }
 
-    public Task<DataOutput<int>> CreateTwoAtomicallyAsync(Product a, Product b) =>
+    public Task<DataOutput<long>> CreateTwoAtomicallyAsync(Product a, Product b) =>
         unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var first = await repo.CreateAsync(a);
@@ -119,13 +122,14 @@ public class ProductService(IAsyncRepository<Product> repo, IAsyncUnitOfWork uni
 
 | Service | Implementation | Lifetime |
 |---|---|---|
-| `IReadOnlyRepository<T>` / `IRepository<T>` | `EfRepository<T>` | Scoped |
-| `IAsyncReadOnlyRepository<T>` / `IAsyncRepository<T>` | `EfRepository<T>` | Scoped |
+| `IReadOnlyRepository<T, TKey>` / `IRepository<T, TKey>` | `EfRepository<T, TKey>` | Scoped |
+| `IAsyncReadOnlyRepository<T, TKey>` / `IAsyncRepository<T, TKey>` | `EfRepository<T, TKey>` | Scoped |
 | `IUnitOfWork` / `IAsyncUnitOfWork` | `EfUnitOfWork` | Scoped |
 
 ## Repository surface
 
-Reads: `Query()` (a deferred `IQueryable<T>` escape hatch), `GetAll()`, `GetById(int)`.
+Reads: `Query()` (a deferred `IQueryable<T>` escape hatch), `GetAll()`, `GetById(TKey)`.
+Writes return the affected ids as `TKey`.
 Writes: `Create`, `CreateRange`, `Update`, `UpdateRange`, `Delete`, `DeleteRange` — each with an
 `…Async` counterpart taking a `CancellationToken`.
 
@@ -134,9 +138,24 @@ handle you control.
 
 ## Optimistic concurrency
 
-Derive from `VersionedEntity` to get a `[ConcurrencyCheck]` `ConcurrencyStamp`. `BaseDbContext`
+Derive from `VersionedEntity<TKey>` to get a `[ConcurrencyCheck]` `ConcurrencyStamp`. `BaseDbContext`
 regenerates it on every update, so a stale value fails the write and returns a concurrency error on
 the envelope instead of throwing.
+
+## Upgrading from 4.x
+
+The non-generic `Entity`, `VersionedEntity`, single-argument repository interfaces and
+`EfRepository<T>` were removed; every entity now declares its key type. To keep the previous
+`long` keys, add `<long>` everywhere the old types appear:
+
+| 4.x | 5.x |
+|---|---|
+| `class Product : Entity` | `class Product : Entity<long>` |
+| `class Product : VersionedEntity` | `class Product : VersionedEntity<long>` |
+| `IRepository<Product>` (and the other three interfaces) | `IRepository<Product, long>` |
+| `EfRepository<Product>` | `EfRepository<Product, long>` |
+
+The database schema is unchanged for `long` keys, so no migration is needed.
 
 ## Documentation
 

@@ -9,11 +9,11 @@ namespace ArturRios.Data.Tests.Interfaces;
 [Trait("Category", "Unit")]
 public class IAsyncRepositoryTests
 {
-    private static readonly Type Type = typeof(IAsyncRepository<>);
+    private static readonly Type Type = typeof(IAsyncRepository<,>);
 
     [Fact]
     public void GivenTheAsynchronousRepositoryContract_WhenInspected_ThenItExtendsTheReadOnlyOne() =>
-        Assert.Contains(typeof(IAsyncReadOnlyRepository<>),
+        Assert.Contains(typeof(IAsyncReadOnlyRepository<,>),
             Type.GetInterfaces().Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i));
 
     [Theory]
