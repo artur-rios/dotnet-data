@@ -22,7 +22,7 @@ not a standalone data layer. It is **read-only by design** — writes stay on th
 
 ```bash
 dotnet add package ArturRios.Data.Relational.Core
-dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql
+dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql / .MySql
 dotnet add package ArturRios.Data.Dapper
 ```
 
@@ -34,6 +34,7 @@ Requires **.NET 10.0** or later.
 
 ```csharp
 using ArturRios.Data.Dapper;                           // brings AddDapper()
+using ArturRios.Data.PostgreSql;                       // brings AddPostgreSqlProvider()
 using ArturRios.Data.Relational.Core.DependencyInjection;
 
 builder.Services.AddPostgreSqlProvider();
@@ -78,8 +79,8 @@ interpolating them into the SQL string.
 | Method | Returns |
 |---|---|
 | `QueryAsync<T>` / `Query<T>` | every row mapped to `T` |
-| `QueryFirstOrDefaultAsync<T>` / `QueryFirstOrDefault<T>` | the first row, or a successful `null` when none |
-| `QuerySingleOrDefaultAsync<T>` / `QuerySingleOrDefault<T>` | the single row, or a successful `null` when none |
+| `QueryFirstOrDefaultAsync<T>` / `QueryFirstOrDefault<T>` | the first row, or a successful `default(T)` when none (`null` for reference and nullable types) |
+| `QuerySingleOrDefaultAsync<T>` / `QuerySingleOrDefault<T>` | the single row, or a successful `default(T)` when none (`null` for reference and nullable types) |
 | `ExecuteScalarAsync<T>` / `ExecuteScalar<T>` | the first column of the first row |
 
 Each takes `(string sql, object? parameters = null)`; the async overloads also take a
@@ -103,8 +104,8 @@ await unitOfWork.ExecuteInTransactionAsync(async () =>
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide (incl. the Dapper read path):** <https://artur-rios.github.io/dotnet-data/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 🗄️ **Relational guide (incl. the Dapper read path):** <https://artur-rios.github.io/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 

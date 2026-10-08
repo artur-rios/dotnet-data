@@ -63,7 +63,8 @@ work (`IMongoUnitOfWork` / `IAsyncMongoUnitOfWork`).
 
 ## 4. Use the repository
 
-Inject `IAsyncDocumentRepository<T>` (or the sync `IDocumentRepository<T>`). Every method is enveloped:
+Inject `IAsyncDocumentRepository<T>` (or the sync `IDocumentRepository<T>`). Every method except `Query()` is
+enveloped:
 
 ```csharp
 using ArturRios.Data.MongoDb.Interfaces;
@@ -91,6 +92,14 @@ public class CatalogService(IAsyncDocumentRepository<Product> repo)
 The full surface: `GetById`, `GetAll`, `Find(predicate)` (server-side filter), `Create`/`CreateRange`,
 `Update`/`UpdateRange`, `Delete`/`DeleteRange`, plus the `Query()` escape hatch.
 
+The write semantics match the relational repository:
+
+- `GetById` with an id that is not a valid `ObjectId` is a successful `null`, like any other id that matches nothing.
+- `Update` of a document that no longer exists is a **concurrency-conflict** error, not a silent no-op.
+- `Delete` of a missing plain `Document` succeeds (idempotent). A `VersionedDocument` is deleted only at the
+  version you hold, so a missing or stale one is a concurrency-conflict error.
+- `DeleteRange` returns only the ids it actually deleted.
+
 **`Query()`** returns a composable `IQueryable<T>` (the driver's LINQ provider). Note it **bypasses the
 ambient unit-of-work transaction** — LINQ reads run outside the session, so they will not see
 uncommitted writes made earlier in the same transaction. Use `Find` / `GetAll` for transaction-aware
@@ -116,13 +125,15 @@ public class CatalogService(IAsyncDocumentRepository<Product> repo, IAsyncMongoU
 }
 ```
 
-> Transactions require a **replica set**. On a standalone server the transaction will fail (and, being
-> enveloped, return `Success == false` rather than throwing).
+> Transactions require a **replica set**. On a standalone server the call writes nothing and returns
+> `Success == false` with the generic data-access error, like any other enveloped failure. The context's ambient
+> session is left as it was, so later repository calls on the same context still work.
 
 ## 6. Optimistic concurrency
 
-Derive from `VersionedDocument`. On update the stored `Version` is checked and incremented; a stale
-write returns a **concurrency-conflict** error envelope instead of throwing:
+Derive from `VersionedDocument`. On update the stored `Version` is checked and incremented, and a delete
+is checked against it too; a stale write returns a **concurrency-conflict** error envelope instead of
+throwing:
 
 ```csharp
 var result = await repo.UpdateAsync(product);

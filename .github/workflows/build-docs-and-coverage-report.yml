@@ -8,6 +8,8 @@ on:
       - 'docs/**'
       - 'src/**'
       - 'tests/**'
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
       - '.github/workflows/build-docs-and-coverage-report.yml'
   # Pull requests build the site and the coverage report as a check only - the deploy step
   # below is gated to pushes on main, so a pull request can never publish to GitHub Pages.
@@ -18,6 +20,8 @@ on:
       - 'docs/**'
       - 'src/**'
       - 'tests/**'
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
       - '.github/workflows/build-docs-and-coverage-report.yml'
   workflow_dispatch:
     inputs:

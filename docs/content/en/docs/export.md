@@ -17,7 +17,7 @@ rather than an unhandled exception.
 
 ```bash
 dotnet add package ArturRios.Data.Export
-dotnet add package ArturRios.Data.Export.Excel        # optional — adds ExportFormat.Excel
+dotnet add package ArturRios.Data.Export.Excel        # optional — enables ExportFormat.Excel
 ```
 
 Excel is a separate package on purpose: ClosedXML is a heavy dependency, and only apps that actually
@@ -62,7 +62,7 @@ Each exporter has two methods:
 | Method | Behaviour |
 |---|---|
 | `WriteAsync(data, stream, ct)` | writes to your stream — it is **not** disposed |
-| `WriteToFileAsync(data, path, ct)` | creates/truncates the file and writes to it |
+| `WriteToFileAsync(data, path, ct)` | creates or replaces the file; a failed or cancelled write leaves an existing file untouched |
 
 ## 3. Formats
 
@@ -107,8 +107,16 @@ and is cached per type, so there's no per-row reflection cost.
 
 `Json` and `MessagePack` ignore the column map — they serialize the object graph as-is.
 
-Values in columnar output are rendered culture-invariantly: `null` becomes empty, strings pass through,
-and anything `IFormattable` is formatted with `CultureInfo.InvariantCulture`.
+Values in CSV output are rendered culture-invariantly: `null` becomes empty, strings pass through, and
+anything `IFormattable` is formatted with `CultureInfo.InvariantCulture`. Excel writes booleans, `DateTime`,
+`DateOnly`, `TimeSpan`, `TimeOnly` and numbers as native cell values and renders everything else the same way
+(including `NaN` and infinities, which a cell cannot hold as a number).
+
+CSV also guards against **formula injection**: a text value that starts with `=`, `+`, `-`, `@`, a tab or a
+carriage return is written with a leading `'`, so a spreadsheet shows it as text instead of running it.
+Numbers and other formatted values are never changed, so `-5` stays a number. Set
+`options.Csv.EscapeFormulas = false` when the file is never opened in a spreadsheet and the exact text
+matters. Excel needs no such guard — it stores text as text.
 
 ## 5. Options
 
@@ -118,6 +126,7 @@ builder.Services.AddExport(options =>
     options.Csv.Delimiter = ';';
     options.Csv.IncludeHeader = true;
     options.Csv.Encoding = new UTF8Encoding(false);
+    options.Csv.EscapeFormulas = true;    // default; prefixes spreadsheet formulas with '
     options.Json.WriteIndented = true;
     options.Txt.NewLine = "\n";
 });
@@ -152,4 +161,5 @@ otherwise defaults to the contractless standard resolver.
   itself comes from `CsvOptions.Delimiter` and lines end with the platform's newline, so the output is
   strictly RFC 4180 only when the delimiter is a comma and the platform's newline is CRLF.
 - **Column order.** Columns carrying `[ExportColumn(Order = n)]` come first, ascending. The rest follow in
-  declaration order; only two properties declared in different types fall back to sorting by name.
+  metadata (declaration) order; the name is only a tie-breaker for properties declared in different
+  assemblies whose metadata tokens coincide.

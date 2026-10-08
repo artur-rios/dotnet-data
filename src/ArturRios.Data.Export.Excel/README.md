@@ -9,8 +9,8 @@ The **Excel (.xlsx)** add-on for
 [ClosedXML](https://github.com/ClosedXML/ClosedXML).
 
 It's a separate package on purpose: ClosedXML is a heavy dependency, and only apps that actually
-export spreadsheets should pay for it. Install it and the core exporter factory starts resolving
-`ExportFormat.Excel`; everything else — the column map, the attributes, the envelope model — is
+export spreadsheets should pay for it. Install it and call `AddExcelExport()`, and the core exporter
+factory starts resolving `ExportFormat.Excel`; everything else — the column map, the attributes, the envelope model — is
 unchanged.
 
 ## Installation
@@ -85,8 +85,9 @@ public class Product
 
 ## Type mapping
 
-Booleans and `DateTime` are written as native Excel values; numeric types are written as numbers;
-everything else is rendered to an invariant-culture string.
+Booleans, `DateTime`, `DateOnly`, `TimeSpan` and `TimeOnly` are written as native Excel values; numeric
+types are written as numbers (`NaN` and infinities, which a cell cannot hold, as text); everything else is
+rendered to an invariant-culture string. Text is always stored as text, never as a formula.
 
 > **Numeric precision.** The .xlsx format stores every number as an IEEE-754 double. `long`/`ulong`
 > values beyond 2^53 and high-precision `decimal` values will lose precision — export those as strings
@@ -95,7 +96,7 @@ everything else is rendered to an invariant-culture string.
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 
