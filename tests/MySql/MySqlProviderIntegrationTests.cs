@@ -1,8 +1,10 @@
+using ArturRios.Data.MySql;
 using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Data.Tests.MySql.TestSupport;
 using ArturRios.Data.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
+using Microting.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 namespace ArturRios.Data.Tests.MySql;
 
@@ -22,6 +24,25 @@ public class MySqlProviderIntegrationTests(MySqlDatabaseFixture fixture)
 
         Assert.Equal("Microting.EntityFrameworkCore.MySql", context.Database.ProviderName);
         Assert.True(context.Database.CanConnect());
+    }
+
+    [MySqlFact]
+    public void GivenTheSameConnectionString_WhenConfiguredTwice_ThenTheServerVersionIsDetectedOnceAndReused()
+    {
+        var provider = new MySqlProvider();
+        var connectionString = MySqlTestServer.ConnectionStringFor(fixture.Database);
+        var first = new DbContextOptionsBuilder<TestDbContext>();
+        var second = new DbContextOptionsBuilder<TestDbContext>();
+
+        provider.Configure(first, connectionString);
+        provider.Configure(second, connectionString);
+
+        // The options extension is the only place the configured server version is exposed.
+#pragma warning disable EF1001
+        var firstVersion = first.Options.FindExtension<MySqlOptionsExtension>()!.ServerVersion;
+        var secondVersion = second.Options.FindExtension<MySqlOptionsExtension>()!.ServerVersion;
+#pragma warning restore EF1001
+        Assert.Same(firstVersion, secondVersion);
     }
 
     [MySqlFact]
