@@ -4,6 +4,7 @@ name: Branch Policy
 #
 #   develop <- feature/*, fix/* (and the other work prefixes below)
 #   develop <- release/*, main  (back-merges after a release)
+#   develop <- dependabot/*     (dependency updates)
 #   main    <- release/* only
 #
 # "Branch policy" is a required status check on main and develop, so a pull
@@ -46,13 +47,17 @@ jobs:
                 echo "Back-merge from '$HEAD' accepted."
                 exit 0
               fi
+              if [[ "$HEAD" == dependabot/* ]]; then
+                echo "Dependabot update '$HEAD' accepted."
+                exit 0
+              fi
               for prefix in "${PREFIXES[@]}"; do
                 if [[ "$HEAD" == "$prefix/"* ]]; then
                   echo "Work branch '$HEAD' accepted."
                   exit 0
                 fi
               done
-              echo "::error::'$HEAD' is not a recognized branch name. Use one of: $(printf '%s/* ' "${PREFIXES[@]}")(or release/*, main for back-merges)."
+              echo "::error::'$HEAD' is not a recognized branch name. Use one of: $(printf '%s/* ' "${PREFIXES[@]}")(or release/*, main for back-merges, dependabot/*)."
               exit 1
               ;;
           esac

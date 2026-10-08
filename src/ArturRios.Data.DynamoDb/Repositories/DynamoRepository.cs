@@ -1,8 +1,8 @@
-﻿using Amazon.DynamoDBv2.DataModel;
-using Amazon.Runtime;
+﻿using System.Runtime.CompilerServices;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
-using System.Runtime.CompilerServices;
+using Amazon.Runtime;
 using ArturRios.Data.DynamoDb.Interfaces;
 using ArturRios.Output;
 using Microsoft.Extensions.Logging;
@@ -30,7 +30,8 @@ public class DynamoRepository<T>(IDynamoDBContext context, ILogger<DynamoReposit
     protected const string OperationFailedMessage = "A data-access error occurred.";
 
     /// <summary>Message returned on an optimistic-concurrency conflict.</summary>
-    protected const string ConcurrencyMessage = "Concurrency conflict: the item was modified by another process.";
+    protected const string ConcurrencyMessage =
+        "Concurrency conflict: the item was modified or removed by another process.";
 
     /// <summary>Message returned when the failure is transient and the operation may be retried.</summary>
     protected const string TransientMessage = "The data store is temporarily unavailable. Please retry.";

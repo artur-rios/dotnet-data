@@ -14,6 +14,7 @@ public class OptionsDefaultsTests
         Assert.Equal(',', options.Csv.Delimiter);
         Assert.True(options.Csv.IncludeHeader);
         Assert.IsType<UTF8Encoding>(options.Csv.Encoding);
+        Assert.True(options.Csv.EscapeFormulas);
         Assert.False(options.Json.WriteIndented);
         Assert.Null(options.Json.SerializerOptions);
         Assert.Equal(Environment.NewLine, options.Txt.NewLine);

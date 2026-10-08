@@ -33,4 +33,34 @@ public class BaseDbContextTests
 
         Assert.Equal(stamp, entity.ConcurrencyStamp);
     }
+
+    [Fact]
+    public void GivenAModifiedVersionedEntity_WhenSavingWithoutAcceptingChanges_ThenTheConcurrencyStampIsStillRegenerated()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var entity = new VersionedTestEntity { Name = "one" };
+        context.VersionedItems.Add(entity);
+        context.SaveChanges();
+        var original = entity.ConcurrencyStamp;
+
+        entity.Name = "two";
+        context.SaveChanges(acceptAllChangesOnSuccess: false);
+
+        Assert.NotEqual(original, entity.ConcurrencyStamp);
+    }
+
+    [Fact]
+    public async Task GivenAModifiedVersionedEntity_WhenSavingAsynchronouslyWithoutAcceptingChanges_ThenTheConcurrencyStampIsStillRegenerated()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var entity = new VersionedTestEntity { Name = "one" };
+        context.VersionedItems.Add(entity);
+        await context.SaveChangesAsync();
+        var original = entity.ConcurrencyStamp;
+
+        entity.Name = "two";
+        await context.SaveChangesAsync(acceptAllChangesOnSuccess: false);
+
+        Assert.NotEqual(original, entity.ConcurrencyStamp);
+    }
 }

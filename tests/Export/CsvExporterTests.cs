@@ -67,4 +67,56 @@ public class CsvExporterTests
 
         Assert.Contains("\"line1\nline2\rline3\"", text);
     }
+
+    private sealed class Signed
+    {
+        public string Note { get; set; } = string.Empty;
+        public int Delta { get; set; }
+        public decimal Amount { get; set; }
+    }
+
+    [Theory]
+    [InlineData("=1+1", "'=1+1")]
+    [InlineData("+SUM(A1:A2)", "'+SUM(A1:A2)")]
+    [InlineData("-2+3", "'-2+3")]
+    [InlineData("@SUM(A1)", "'@SUM(A1)")]
+    [InlineData("\tcmd", "'\tcmd")]
+    [InlineData("plain", "plain")]
+    [InlineData("a=b", "a=b")]
+    public async Task GivenTextThatASpreadsheetWouldEvaluate_WhenWritingCsv_ThenItIsPrefixedWithAQuote(
+        string note, string expected)
+    {
+        var text = await WriteAsync(new CsvExporter<Signed>(new CsvOptions { IncludeHeader = false }),
+            [new Signed { Note = note, Delta = 1, Amount = 1m }]);
+
+        Assert.Equal($"{expected},1,1{Environment.NewLine}", text);
+    }
+
+    [Fact]
+    public async Task GivenAFormulaThatNeedsQuoting_WhenWritingCsv_ThenItIsPrefixedAndQuoted()
+    {
+        var text = await WriteAsync(new CsvExporter<Signed>(new CsvOptions { IncludeHeader = false }),
+            [new Signed { Note = "=HYPERLINK(\"http://x\",\"y\")", Delta = 1, Amount = 1m }]);
+
+        Assert.StartsWith("\"'=HYPERLINK(\"\"http://x\"\",\"\"y\"\")\",", text);
+    }
+
+    [Fact]
+    public async Task GivenNegativeNumbers_WhenWritingCsv_ThenTheyAreWrittenAsNumbers()
+    {
+        var text = await WriteAsync(new CsvExporter<Signed>(new CsvOptions { IncludeHeader = false }),
+            [new Signed { Note = "n", Delta = -5, Amount = -2.5m }]);
+
+        Assert.Equal($"n,-5,-2.5{Environment.NewLine}", text);
+    }
+
+    [Fact]
+    public async Task GivenFormulaEscapingIsOff_WhenWritingCsv_ThenTextIsWrittenVerbatim()
+    {
+        var text = await WriteAsync(
+            new CsvExporter<Signed>(new CsvOptions { IncludeHeader = false, EscapeFormulas = false }),
+            [new Signed { Note = "=1+1", Delta = 1, Amount = 1m }]);
+
+        Assert.Equal($"=1+1,1,1{Environment.NewLine}", text);
+    }
 }
