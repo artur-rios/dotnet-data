@@ -12,7 +12,8 @@ public class ExporterBaseTests
         protected override async Task WriteCoreAsync(IEnumerable<string> data, Stream destination, CancellationToken ct)
         {
             await using var writer = new StreamWriter(destination, leaveOpen: true);
-            foreach (var s in data) await writer.WriteAsync(s);
+            foreach (var s in data)
+                await writer.WriteAsync(s);
             await writer.FlushAsync(ct);
         }
     }
@@ -118,5 +119,69 @@ public class ExporterBaseTests
             Assert.Equal("hello", await File.ReadAllTextAsync(path));
         }
         finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
+    [Fact]
+    public async Task GivenAnExistingFile_WhenAWriteToItFails_ThenTheFileIsLeftAsItWasAndNoTemporaryFileRemains()
+    {
+        var directory = Directory.CreateTempSubdirectory("export-").FullName;
+        var path = Path.Combine(directory, "out.txt");
+        try
+        {
+            await File.WriteAllTextAsync(path, "original");
+
+            var result = await new ThrowingExporter().WriteToFileAsync(["a"], path);
+
+            Assert.False(result.Success);
+            Assert.Equal("original", await File.ReadAllTextAsync(path));
+            Assert.Equal([path], Directory.GetFiles(directory));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public async Task GivenAnExistingFile_WhenAWriteToItIsCancelled_ThenTheFileIsLeftAsItWasAndNoTemporaryFileRemains()
+    {
+        var directory = Directory.CreateTempSubdirectory("export-").FullName;
+        var path = Path.Combine(directory, "out.txt");
+        try
+        {
+            await File.WriteAllTextAsync(path, "original");
+
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => new CancelExporter().WriteToFileAsync(["a"], path));
+
+            Assert.Equal("original", await File.ReadAllTextAsync(path));
+            Assert.Equal([path], Directory.GetFiles(directory));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public async Task GivenAnExistingFile_WhenAWriteToItSucceeds_ThenItIsReplaced()
+    {
+        var directory = Directory.CreateTempSubdirectory("export-").FullName;
+        var path = Path.Combine(directory, "out.txt");
+        try
+        {
+            await File.WriteAllTextAsync(path, "a much longer original content");
+
+            var result = await new OkExporter().WriteToFileAsync(["new"], path);
+
+            Assert.True(result.Success);
+            Assert.Equal("new", await File.ReadAllTextAsync(path));
+            Assert.Equal([path], Directory.GetFiles(directory));
+        }
+        finally { Directory.Delete(directory, recursive: true); }
+    }
+
+    [Fact]
+    public async Task GivenADirectoryThatDoesNotExist_WhenWritingToAFile_ThenAnErrorEnvelopeComesBack()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}", "out.txt");
+
+        var result = await new OkExporter().WriteToFileAsync(["a"], path);
+
+        Assert.Equal(["An export error occurred."], result.Errors);
     }
 }
