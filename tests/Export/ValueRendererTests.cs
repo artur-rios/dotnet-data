@@ -17,7 +17,8 @@ public class ValueRendererTests
     {
         var previous = CultureInfo.CurrentCulture;
         CultureInfo.CurrentCulture = new CultureInfo("de-DE"); // comma decimal separator
-        try { Assert.Equal("1234.5", ValueRenderer.Render(1234.5m)); }
+        try
+        { Assert.Equal("1234.5", ValueRenderer.Render(1234.5m)); }
         finally { CultureInfo.CurrentCulture = previous; }
     }
 

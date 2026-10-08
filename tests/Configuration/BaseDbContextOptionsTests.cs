@@ -51,7 +51,8 @@ public class BaseDbContextOptionsTests
     {
         var options = new BaseDbContextOptions
         {
-            DatabaseType = DatabaseType.SqLite, ConnectionString = "Filename=:memory:"
+            DatabaseType = DatabaseType.SqLite,
+            ConnectionString = "Filename=:memory:"
         };
 
         Assert.Equal(DatabaseType.SqLite, options.DatabaseType);

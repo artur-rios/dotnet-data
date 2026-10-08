@@ -18,7 +18,8 @@ public class AddMongoDataTests
         var services = new ServiceCollection();
         services.AddMongoData(new MongoOptions
         {
-            ConnectionString = "mongodb://localhost:27017", DatabaseName = "testdb"
+            ConnectionString = "mongodb://localhost:27017",
+            DatabaseName = "testdb"
         });
 
         using var provider = services.BuildServiceProvider();
@@ -40,7 +41,8 @@ public class AddMongoDataTests
         services.AddLogging();
         services.AddMongoData(new MongoOptions
         {
-            ConnectionString = "mongodb://localhost:27017", DatabaseName = "testdb"
+            ConnectionString = "mongodb://localhost:27017",
+            DatabaseName = "testdb"
         });
 
         using var provider = services.BuildServiceProvider();
