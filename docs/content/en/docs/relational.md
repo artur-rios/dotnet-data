@@ -30,7 +30,7 @@ Derive from `Entity<TKey>`, where `TKey` is the primary key type mapped as the f
 that implements `IEquatable<TKey>` works — typically `long`, `int`, `Guid` or `string`.
 
 ```csharp
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 
 public class Product : Entity<long>    // or : VersionedEntity<long>
 {
@@ -177,6 +177,14 @@ public class OrderService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWork
 }
 ```
 
+Every failure comes back on the envelope, including one to start the transaction (no connection, or a
+transaction already open on the context). After a rollback the context's change tracker is cleared, since
+the database kept none of the transaction's writes.
+
+A failed repository write outside a transaction leaves the context usable as well: the rejected changes are
+discarded, so the next write does not replay them, and a `VersionedEntity<TKey>` keeps the stamp the
+database still holds.
+
 ## 7. Optimistic concurrency
 
 Derive an entity from `VersionedEntity<TKey>` to opt in. On update, the stored `ConcurrencyStamp` is checked;
@@ -203,7 +211,7 @@ dotnet add package ArturRios.Data.Dapper
 ```csharp
 using ArturRios.Data.Dapper;
 
-builder.Services.AddSqliteProvider();                  // or AddPostgreSqlProvider()
+builder.Services.AddSqliteProvider();                  // or AddPostgreSqlProvider() / AddMySqlProvider()
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 builder.Services.AddDapper();
 ```
@@ -230,20 +238,11 @@ The Dapper path is **read-only** — all writes go through the EF repositories. 
 `DbContext` connection** and enlists in the active `IUnitOfWork` transaction, so a Dapper read inside a
 unit of work sees the not-yet-committed EF writes.
 
-## Upgrading from 4.x
+## Upgrading
 
-The non-generic `Entity`, `VersionedEntity`, single-argument repository interfaces and
-`EfRepository<T>` were removed; every entity now declares its key type. To keep the previous
-`long` keys, add `<long>` everywhere the old types appear:
+Upgrade guides live in the [Changelog](../changelog/), in the entry of the version that needs them:
 
-| 4.x | 5.x |
-|---|---|
-| `class Product : Entity` | `class Product : Entity<long>` |
-| `class Product : VersionedEntity` | `class Product : VersionedEntity<long>` |
-| `IRepository<Product>` (and the other three interfaces) | `IRepository<Product, long>` |
-| `EfRepository<Product>` | `EfRepository<Product, long>` |
-
-The database schema is unchanged for `long` keys, so no migration is needed.
+- From 4.x to 5.0: [Upgrading from 4.x to 5.0](../changelog/#upgrading-from-4x-to-50)
 
 ## MySQL and MariaDB
 
@@ -260,7 +259,8 @@ builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, 
 
 The provider calls `UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`, so the
 server version is probed from the connection string at configuration time — the connection must be
-reachable when the `DbContext` options are built.
+reachable the first time `DbContext` options are built for that connection string. The detected version
+is kept and reused, so later contexts (one per request, in a web app) do not query the server again.
 
 ### A note on the underlying EF Core provider
 

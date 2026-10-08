@@ -45,9 +45,9 @@ builder.Services.AddPostgreSqlProvider();
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
-That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
+That's the whole provider-specific surface. From here on you use `IAsyncRepository<T, TKey>`,
 `IAsyncUnitOfWork`, and the rest of the core API — see the
-[Relational guide](https://artur-rios.github.io/dotnet-data/relational/).
+[Relational guide](https://artur-rios.github.io/dotnet-data/docs/relational/).
 
 ## What it does
 
@@ -61,8 +61,8 @@ If the configured `DatabaseType` has no matching provider registered, registrati
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 

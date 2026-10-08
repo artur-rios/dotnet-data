@@ -99,7 +99,7 @@ dotnet add package ArturRios.Data.DynamoDb
 
 # File export (standalone — no core needed):
 dotnet add package ArturRios.Data.Export
-dotnet add package ArturRios.Data.Export.Excel    # optional — adds ExportFormat.Excel
+dotnet add package ArturRios.Data.Export.Excel    # optional — enables ExportFormat.Excel
 ```
 
 Requires **.NET 10.0** or later.
@@ -128,7 +128,7 @@ classDiagram
 **1. Define an entity** (`ArturRios.Data.Relational.Core`):
 
 ```csharp
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 
 public class Product : Entity<long>    // or : VersionedEntity<long> for optimistic concurrency
 {
@@ -256,70 +256,22 @@ The NoSQL packages are **standalone** (no relational core) but keep the same env
 | [DynamoDB](https://artur-rios.github.io/dotnet-data/docs/dynamodb/) | Item POCOs, repository, query/scan/batch, concurrency |
 | [Export](https://artur-rios.github.io/dotnet-data/docs/export/) | Column mapping, the CSV/JSON/TXT/MessagePack exporters, the Excel add-on |
 
-## Testing
+## Upgrading
 
-The test suite is xUnit, and every test is named with the Given / When / Then pattern. Every test class
-carries a `Category` trait, so the three kinds can be run — and reported — separately:
+Upgrade guides live in the changelog, in the entry of the release that needs them:
 
-```bash
-dotnet test src/ArturRios.Data.sln --filter "Category=Unit"
-dotnet test src/ArturRios.Data.sln --filter "Category=Functional"
-dotnet test src/ArturRios.Data.sln --filter "Category=Integration"
-```
+- `ArturRios.Data.Relational.Core` from 4.x to 5.0: [Upgrading from 4.x to 5.0](https://github.com/artur-rios/dotnet-data/blob/main/CHANGELOG.md#upgrading-from-4x-to-50)
 
-Unit tests exercise the code in isolation against test doubles.
-Functional tests run against real stores that the suite provisions itself: SQLite for the relational and Dapper paths, an ephemeral MongoDB replica set, and DynamoDB Local.
-Integration tests need a server the suite cannot provision — today, MySQL. They read a connection string from `ARTURRIOS_DATA_MYSQL_TEST_CONNECTION` and **skip** when it is unset:
+## Changelog
 
-```bash
-ARTURRIOS_DATA_MYSQL_TEST_CONNECTION="Server=localhost;Port=3306;User ID=root;Password=secret;"
-```
+Notable changes in each package release are recorded in
+[CHANGELOG.md](https://github.com/artur-rios/dotnet-data/blob/main/CHANGELOG.md). Each package is versioned
+independently and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-The user in that connection string must be able to create and drop databases: each run creates a
-throwaway `arturrios_data_test_<guid>` database and drops it afterwards, so no existing schema is
-touched. CI runs the three as separate jobs — the integration job supplies MySQL as a service
-container — and all three must pass before a pull request can be merged.
+## Contributing
 
-## Branching and releases
-
-`develop` is the integration branch and the base for all new work; `main` only holds released
-code.
-
-1. Branch off `develop` — `feature/<name>` for features, `fix/<name>` for fixes (`chore/`,
-   `refactor/`, `docs/`, `ci/`, `test/`, `perf/` and `build/` are accepted too) — and open a pull
-   request back into `develop`.
-2. To release, cut `release/<name>` from `develop`, bump each package that changed with
-   `python scripts/release.py bump <project> {patch|minor|major}` and open a pull request into
-   `main`. Only `release/*` branches can be merged into `main`; the pull request lists the
-   `<PackageId>@<version>` tags the release will need.
-3. Once it is merged, switch to an up-to-date `main` and tag it. Pushing a `<PackageId>@<version>`
-   tag publishes that package to nuget.org and GitHub Packages:
-
-   ```bash
-   git switch main && git pull
-   python scripts/release.py tag <project> && python scripts/release.py push <project>
-   ```
-
-   The interactive menu (`python scripts/release.py`) can also tag and push every pending package
-   at once.
-4. Open a pull request from `main` into `develop` to bring the release back into the integration
-   branch.
-
-Pull requests into `develop` and `main` must pass the tests and the branch policy check. Only the
-repository owner can push version tags, and the publish workflow rejects tags that do not point at
-a commit on `main`.
-
-## Versioning
-
-Semantic Versioning (SemVer). Breaking changes bump the major version; new non-breaking behavior bumps
-the minor; fixes bump the patch.
-
-## Build, test and publish
-
-Use the official [.NET CLI](https://learn.microsoft.com/en-us/dotnet/core/tools/) to build, test and
-publish, and Git for source control. Optional helper toolsets:
-[Dotnet Tools](https://github.com/artur-rios/dotnet-tools) ·
-[Python Dotnet Tools](https://github.com/artur-rios/python-dotnet-tools).
+Building from source, running the tests, the branching model and the release process are described in
+[CONTRIBUTING.md](https://github.com/artur-rios/dotnet-data/blob/main/CONTRIBUTING.md).
 
 ## Legal Details
 Licensed under the [MIT License](https://en.wikipedia.org/wiki/MIT_License) — see [LICENSE](./LICENSE).

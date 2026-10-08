@@ -18,13 +18,14 @@ This package is engine-agnostic on its own. Pair it with a provider package:
 |---|---|
 | [`ArturRios.Data.Sqlite`](https://www.nuget.org/packages/ArturRios.Data.Sqlite) | SQLite |
 | [`ArturRios.Data.PostgreSql`](https://www.nuget.org/packages/ArturRios.Data.PostgreSql) | PostgreSQL (Npgsql) |
+| [`ArturRios.Data.MySql`](https://www.nuget.org/packages/ArturRios.Data.MySql) | MySQL / MariaDB |
 | [`ArturRios.Data.Dapper`](https://www.nuget.org/packages/ArturRios.Data.Dapper) | Raw-SQL read path (add-on) |
 
 ## Installation
 
 ```bash
 dotnet add package ArturRios.Data.Relational.Core
-dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql
+dotnet add package ArturRios.Data.Sqlite          # or .PostgreSql / .MySql
 ```
 
 Requires **.NET 10.0** or later.
@@ -34,7 +35,7 @@ Requires **.NET 10.0** or later.
 **1. Define an entity:**
 
 ```csharp
-using ArturRios.Data.Relational.Core;
+using ArturRios.Data.Relational.Core.Entities;
 
 public class Product : Entity<long>    // or : VersionedEntity<long> for optimistic concurrency
 {
@@ -142,26 +143,15 @@ Derive from `VersionedEntity<TKey>` to get a `[ConcurrencyCheck]` `ConcurrencySt
 regenerates it on every update, so a stale value fails the write and returns a concurrency error on
 the envelope instead of throwing.
 
-## Upgrading from 4.x
+## Upgrading
 
-The non-generic `Entity`, `VersionedEntity`, single-argument repository interfaces and
-`EfRepository<T>` were removed; every entity now declares its key type. To keep the previous
-`long` keys, add `<long>` everywhere the old types appear:
-
-| 4.x | 5.x |
-|---|---|
-| `class Product : Entity` | `class Product : Entity<long>` |
-| `class Product : VersionedEntity` | `class Product : VersionedEntity<long>` |
-| `IRepository<Product>` (and the other three interfaces) | `IRepository<Product, long>` |
-| `EfRepository<Product>` | `EfRepository<Product, long>` |
-
-The database schema is unchanged for `long` keys, so no migration is needed.
+- From 4.x to 5.0: [Upgrading from 4.x to 5.0](https://github.com/artur-rios/dotnet-data/blob/main/CHANGELOG.md#upgrading-from-4x-to-50)
 
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 

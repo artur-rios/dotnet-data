@@ -46,9 +46,9 @@ builder.Services.AddMySqlProvider();
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
-That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
+That's the whole provider-specific surface. From here on you use `IAsyncRepository<T, TKey>`,
 `IAsyncUnitOfWork`, and the rest of the core API — see the
-[Relational guide](https://artur-rios.github.io/dotnet-data/relational/).
+[Relational guide](https://artur-rios.github.io/dotnet-data/docs/relational/).
 
 ## What it does
 
@@ -56,8 +56,9 @@ That's the whole provider-specific surface. From here on you use `IAsyncReposito
 `Type => DatabaseType.MySql`. When `AddDataConfigFromSettings<TContext>` builds your context and the
 configured `DatabaseType` is `MySql`, this provider is selected and calls
 `UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`. Note that `AutoDetect` opens
-a connection to the server to determine its version, so the server must be reachable when the context
-options are built.
+a connection to the server to determine its version, so the server must be reachable the first time
+context options are built for a connection string. The provider keeps the detected version per connection
+string and reuses it, so later contexts do not query the server again.
 
 If the configured `DatabaseType` has no matching provider registered, registration fails fast with a
 `DataAccessException` naming the missing provider.
@@ -78,8 +79,8 @@ your code.
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 

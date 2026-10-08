@@ -125,8 +125,8 @@ conditional write, and a concurrent modification returns an error on the envelop
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- ⚡ **DynamoDB guide:** <https://artur-rios.github.io/dotnet-data/dynamodb/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- ⚡ **DynamoDB guide:** <https://artur-rios.github.io/dotnet-data/docs/dynamodb/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 

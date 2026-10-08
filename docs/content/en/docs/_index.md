@@ -87,7 +87,7 @@ dotnet add package ArturRios.Data.DynamoDb
 
 # File export (standalone — no core needed):
 dotnet add package ArturRios.Data.Export
-dotnet add package ArturRios.Data.Export.Excel    # optional — adds ExportFormat.Excel
+dotnet add package ArturRios.Data.Export.Excel    # optional — enables ExportFormat.Excel
 ```
 
 ## The result envelope

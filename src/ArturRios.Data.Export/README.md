@@ -19,7 +19,7 @@ packages. For **Excel (.xlsx)**, add the
 
 ```bash
 dotnet add package ArturRios.Data.Export
-dotnet add package ArturRios.Data.Export.Excel        # optional — adds ExportFormat.Excel
+dotnet add package ArturRios.Data.Export.Excel        # optional — enables ExportFormat.Excel
 ```
 
 Requires **.NET 10.0** or later.
@@ -52,7 +52,9 @@ public class ProductReport(IExporterFactory exporters)
 
 You can also inject a concrete exporter directly (`CsvExporter<Product>`, `JsonExporter<Product>`, …)
 when the format is fixed at compile time. Both `WriteAsync(data, stream)` and
-`WriteToFileAsync(data, path)` are available; the stream overload does **not** dispose your stream.
+`WriteToFileAsync(data, path)` are available; the stream overload does **not** dispose your stream. The
+file overload replaces the file only once the write completes, so a failed or cancelled export leaves an
+existing file untouched.
 
 ## Formats
 
@@ -91,8 +93,13 @@ public class Product
 Columns sort by `Order` ascending; unordered columns sort last. The plan is compiled to delegate
 getters and cached per type, so there is no per-row reflection cost.
 
-Values are rendered culture-invariantly: `null` becomes empty, strings pass through, and anything
-`IFormattable` is formatted with `CultureInfo.InvariantCulture`.
+CSV values are rendered culture-invariantly: `null` becomes empty, strings pass through, and anything
+`IFormattable` is formatted with `CultureInfo.InvariantCulture`. Excel writes booleans, dates, times and
+numbers as native cell values.
+
+CSV text that a spreadsheet would run as a formula (starting with `=`, `+`, `-`, `@`, a tab or a carriage
+return) is written with a leading `'` so it shows as text. Numbers are never changed. Turn it off with
+`options.Csv.EscapeFormulas = false`.
 
 ## Options
 
@@ -113,7 +120,7 @@ Both `Json` and `MessagePack` also accept explicit `SerializerOptions`, used as-
 ## Documentation
 
 - 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
 
 ## Legal
 
