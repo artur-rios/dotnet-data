@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Export.svg)](https://www.nuget.org/packages/ArturRios.Data.Export)
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 **File writers** for the **`ArturRios.Data`** toolkit: turn any `IEnumerable<T>` into **CSV**, **JSON**,
 **TXT**, or **MessagePack**, over a stream or straight to a file.
@@ -124,4 +124,4 @@ Both `Json` and `MessagePack` also accept explicit `SerializerOptions`, used as-
 
 ## Legal
 
-Licensed under the [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE).
+This project is licensed under the [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

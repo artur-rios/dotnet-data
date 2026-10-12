@@ -1,7 +1,7 @@
 ﻿# Dotnet Data
 
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](./LICENSE)
 [![Relational.Core](https://img.shields.io/nuget/v/ArturRios.Data.Relational.Core.svg?label=Relational.Core)](https://www.nuget.org/packages/ArturRios.Data.Relational.Core)
 [![Sqlite](https://img.shields.io/nuget/v/ArturRios.Data.Sqlite.svg?label=Sqlite)](https://www.nuget.org/packages/ArturRios.Data.Sqlite)
 [![PostgreSql](https://img.shields.io/nuget/v/ArturRios.Data.PostgreSql.svg?label=PostgreSql)](https://www.nuget.org/packages/ArturRios.Data.PostgreSql)
@@ -274,4 +274,4 @@ Building from source, running the tests, the branching model and the release pro
 [CONTRIBUTING.md](https://github.com/artur-rios/dotnet-data/blob/main/CONTRIBUTING.md).
 
 ## Legal Details
-Licensed under the [MIT License](https://en.wikipedia.org/wiki/MIT_License) — see [LICENSE](./LICENSE).
+This project is licensed under the [Artur Rios Attribution License](./LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

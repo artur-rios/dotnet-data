@@ -123,4 +123,4 @@ classDiagram
   map and its attributes, and the options.
 
 The source lives at [github.com/artur-rios/dotnet-data](https://github.com/artur-rios/dotnet-data),
-licensed under the MIT License.
+licensed under the Artur Rios Attribution License.

@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Export.Excel.svg)](https://www.nuget.org/packages/ArturRios.Data.Export.Excel)
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 The **Excel (.xlsx)** add-on for
 [`ArturRios.Data.Export`](https://www.nuget.org/packages/ArturRios.Data.Export), backed by
@@ -100,4 +100,4 @@ rendered to an invariant-culture string. Text is always stored as text, never as
 
 ## Legal
 
-Licensed under the [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE).
+This project is licensed under the [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

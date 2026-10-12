@@ -61,7 +61,7 @@ locale = 'en-us'
       description = "Every read/write operation returns a [`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output) envelope, so infrastructure failures —..."
 
 [params]
-  copyright.authors = 'Artur Rios | [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)'
+  copyright.authors = 'Artur Rios | [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)'
   privacy_policy = ''
   github_repo = 'https://github.com/artur-rios/dotnet-data'
   github_branch = 'main'
