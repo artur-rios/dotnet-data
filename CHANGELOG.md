@@ -17,6 +17,8 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ### Changed
 
+- All packages: the project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
 - `ArturRios.Data.Sqlite`: depends on `ArturRios.Data.Relational.Core` 5.0.0 instead of 4.0.1. No code changes: the
   package's public API (`SqliteProvider`, `AddSqliteProvider()`) uses only `IDatabaseProvider` and `DatabaseType`,
   which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.0; see

@@ -1,7 +1,7 @@
 # ArturRios.Data.MongoDb
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.MongoDb.svg)](https://www.nuget.org/packages/ArturRios.Data.MongoDb)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 A **MongoDB document store** for the **`ArturRios.Data`** toolkit — the same enveloped repository style
@@ -123,9 +123,9 @@ standalone `mongod`.
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🍃 **MongoDB guide:** <https://artur-rios.github.io/dotnet-data/docs/mongodb/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🍃 **MongoDB guide:** <https://docs.artur-rios.tech/dotnet-data/docs/mongodb/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 

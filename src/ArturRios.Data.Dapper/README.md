@@ -1,7 +1,7 @@
 # ArturRios.Data.Dapper
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Dapper.svg)](https://www.nuget.org/packages/ArturRios.Data.Dapper)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 A **read-only raw-SQL path** for the **`ArturRios.Data`** toolkit, backed by
@@ -103,9 +103,9 @@ await unitOfWork.ExecuteInTransactionAsync(async () =>
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide (incl. the Dapper read path):** <https://artur-rios.github.io/dotnet-data/docs/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🗄️ **Relational guide (incl. the Dapper read path):** <https://docs.artur-rios.tech/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 

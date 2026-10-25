@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <PackageId>ArturRios.Data.MySql</PackageId>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
+    <PackageProjectUrl>https://docs.artur-rios.tech/dotnet-data</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>utilities;data access;.net;mysql</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>

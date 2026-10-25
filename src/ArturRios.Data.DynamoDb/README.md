@@ -1,7 +1,7 @@
 # ArturRios.Data.DynamoDb
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.DynamoDb.svg)](https://www.nuget.org/packages/ArturRios.Data.DynamoDb)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 An **AWS DynamoDB** store for the **`ArturRios.Data`** toolkit — the same enveloped repository style as
@@ -124,9 +124,9 @@ conditional write, and a concurrent modification returns an error on the envelop
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- ⚡ **DynamoDB guide:** <https://artur-rios.github.io/dotnet-data/docs/dynamodb/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- ⚡ **DynamoDB guide:** <https://docs.artur-rios.tech/dotnet-data/docs/dynamodb/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 

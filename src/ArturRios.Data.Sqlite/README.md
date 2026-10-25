@@ -1,7 +1,7 @@
 # ArturRios.Data.Sqlite
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Sqlite.svg)](https://www.nuget.org/packages/ArturRios.Data.Sqlite)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 The **SQLite** provider for the **`ArturRios.Data`** toolkit. It plugs SQLite into
@@ -48,7 +48,7 @@ builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, 
 
 That's the whole provider-specific surface. From here on you use `IAsyncRepository<T, TKey>`,
 `IAsyncUnitOfWork`, and the rest of the core API — see the
-[Relational guide](https://artur-rios.github.io/dotnet-data/docs/relational/).
+[Relational guide](https://docs.artur-rios.tech/dotnet-data/docs/relational/).
 
 ## What it does
 
@@ -75,9 +75,9 @@ of the database, since it is dropped when the last connection closes:
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/docs/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🗄️ **Relational guide:** <https://docs.artur-rios.tech/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 
