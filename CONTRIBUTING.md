@@ -115,7 +115,8 @@ packs only the package the tag names, and fails when that package's `<Version>` 
    versions, and no tag is ever a bare date. It also rejects a branch that carries a commit `develop` does not have.
 3. Once its checks have passed, the owner merges it with a merge commit. Then switch to an up-to-date `main` and tag
    it. `release.py` makes annotated tags (Jenkins dates a lightweight tag by its commit and only builds tags at most a
-   day old). Pushing a `<PackageId>@<version>` tag publishes that package to nuget.org:
+   day old). Tag and push on the same day: Jenkins builds a tag only within a day of its creation. Pushing a
+   `<PackageId>@<version>` tag publishes that package to nuget.org:
 
    ```bash
    git switch main && git pull
