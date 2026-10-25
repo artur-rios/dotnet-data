@@ -10,16 +10,20 @@
 #                        pinned. Started with the Docker engine the check is given (`docker: true` in yggdrasil.yml),
 #                        and ARTURRIOS_DATA_MYSQL_TEST_CONNECTION exported for the tests. When that variable is set
 #                        already (a server of your own), nothing is started. stop_mysql removes the server; the
-#                        callers run it on EXIT.
-#   fail_if_skipped <trx> <what>   fails when a test of the .trx did not run: the MySQL tests skip themselves when
-#                        the server is not configured, and `dotnet test` exits 0 when every test skips.
+#                        callers run it on EXIT. A check killed outright (SIGKILL: a timeout, an agent restart) runs no
+#                        trap, so each server is labelled with the check container it serves, and start_mysql first
+#                        removes the servers whose check container is gone (see _services_sweep).
+#   fail_if_skipped <trx> <what>   fails when a test of the .trx did not run, or the .trx is missing: the MySQL
+#                        tests skip themselves when the server is not configured, and `dotnet test` exits 0 when every
+#                        test skips.
 #
 # Renovate follows the versions (the comment above each, and the image through renovate.json's MySQL rule), not the
 # checksums: when it moves the JRE or the Docker client, copy the new file's sha256 here by hand (Adoptium's release
 # page lists the JRE's; download.docker.com publishes none for the static Docker client, so that one is taken from the
 # download, over HTTPS, as yggdrasil's ci/tools.sh does).
 
-# renovate: datasource=java-version depName=java-jre
+# Regex versioning: Adoptium's versions are 17.0.21+9, and the build after the + counts (semver would ignore it).
+# renovate: datasource=java-version depName=java-jre versioning=regex:^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)\+(?<build>\d+)$
 JAVA_VERSION=17.0.21+9
 JAVA_SHA256=9f41bf88c7900c7097444a1bdeb84146ae692bc08842490ab098063c74bf9a8a
 # renovate: datasource=docker depName=docker versioning=docker
@@ -29,6 +33,12 @@ DOCKER_SHA256=9ac225999fd5e863f7694c728ef23d480616b1e5639328fa309befd4243d69eb
 MYSQL_IMAGE=mysql:8.0.46@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
 # The workflows' root password: a throwaway server that only this run can reach, not a secret.
 MYSQL_ROOT_PASSWORD=arturrios-data-ci
+
+# The label of every server start_mysql runs, and the one that names the check container it serves.
+_services_label=yggdrasil.ci=dotnet-data-mysql
+_services_parent_label=yggdrasil.ci-parent
+# A server with no check container to follow (started outside a container) is an orphan after this long.
+_services_orphan_seconds=$((4 * 60 * 60))
 
 _services_mysql_name=""
 
@@ -83,6 +93,25 @@ _services_docker() {
   export PATH="$_services_tools/bin:$PATH"
 }
 
+# Removes the servers that a check killed outright left behind: those whose check container (the parent label) is no
+# longer running, and those without a parent started more than 4 hours ago. A running check's server is left alone.
+_services_sweep() {
+  local id parent created created_seconds
+  docker ps --all --quiet --filter "label=$_services_label" | while IFS= read -r id; do
+    parent=$(docker inspect --format "{{index .Config.Labels \"$_services_parent_label\"}}" "$id" 2>/dev/null) || continue
+    if [ -n "$parent" ]; then
+      if [ "$(docker inspect --format '{{.State.Running}}' "$parent" 2>/dev/null)" = true ]; then continue; fi
+      echo "ci/services.sh: removing MySQL container $id: its check container $parent is gone"
+    else
+      created=$(docker inspect --format '{{.Created}}' "$id" 2>/dev/null) || continue
+      created_seconds=$(date -d "$created" +%s 2>/dev/null) || continue
+      [ $(($(date +%s) - created_seconds)) -gt "$_services_orphan_seconds" ] || continue
+      echo "ci/services.sh: removing MySQL container $id: started outside a check container more than 4 hours ago"
+    fi
+    docker rm --force "$id" >/dev/null 2>&1 || true
+  done
+}
+
 start_mysql() {
   if [ -n "${ARTURRIOS_DATA_MYSQL_TEST_CONNECTION:-}" ]; then
     echo "ci/services.sh: ARTURRIOS_DATA_MYSQL_TEST_CONNECTION is set: the integration tests use that server"
@@ -93,17 +122,19 @@ start_mysql() {
     echo "ci/services.sh: the integration tests need MySQL, and there is no Docker engine to start it with (docker: true in yggdrasil.yml), nor ARTURRIOS_DATA_MYSQL_TEST_CONNECTION" >&2
     return 1
   fi
+  _services_sweep
   local network host port
   _services_mysql_name="dotnet-data-mysql-$(hostname)-$$"
   if [ -f /.dockerenv ]; then
     # In a container (the check's): the server joins its network, so it is at 127.0.0.1:3306, as the service
-    # container was on the runner. A port published on the engine's host would not be reachable from here.
-    network=(--network "container:$(hostname)")
+    # container was on the runner. A port published on the engine's host would not be reachable from here. The
+    # container's hostname is its id, which the parent label records for _services_sweep.
+    network=(--network "container:$(hostname)" --label "$_services_parent_label=$(hostname)")
   else
     network=(--publish 127.0.0.1::3306)
   fi
   echo "ci/services.sh: starting $MYSQL_IMAGE"
-  docker run --detach --rm --name "$_services_mysql_name" "${network[@]}" \
+  docker run --detach --rm --name "$_services_mysql_name" --label "$_services_label" "${network[@]}" \
     --env "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" "$MYSQL_IMAGE" >/dev/null
   if [ -f /.dockerenv ]; then
     host=127.0.0.1 port=3306
@@ -143,6 +174,7 @@ services_cleanup() {
 }
 
 fail_if_skipped() {
+  [ -f "$1" ] || { echo "ci/services.sh: $2 left no results file: $1" >&2; return 1; }
   if grep -q 'outcome="NotExecuted"' "$1"; then
     echo "ci/services.sh: $2 were skipped: is the MySQL server reachable?" >&2
     return 1
