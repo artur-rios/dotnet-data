@@ -1,0 +1,31 @@
+{
+  "extends": ["local>artur-rios/yggdrasil//renovate/default"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The MySQL server of the integration tests, pinned by version and digest in ci/services.sh: MYSQL_IMAGE=mysql:<tag>@sha256:<digest>.",
+      "managerFilePatterns": ["/(^|/)ci/services\\.sh$/"],
+      "matchStrings": [
+        "MYSQL_IMAGE=(?<depName>[^\\s:@]+):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "The workflows' MySQL service was mysql:8.0: stay on 8.0, and take its patches and digests.",
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["mysql"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "description": "ci/services.sh downloads the Temurin 17 JRE (the runner's Java) from the temurin17 releases: take its updates within 17.",
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["java-jre"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
+}
