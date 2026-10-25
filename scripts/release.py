@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """Release helper for the ArturRios.Data multi-package repository.
 
-Each backend ships as its own NuGet package and is published by
-`.github/workflows/publish-package.yml`, which triggers on a per-package tag of
-the form ``<PackageId>@<version>`` (e.g. ``ArturRios.Data.Export@1.0.0``) and
-validates that the tagged commit's csproj ``<Version>`` matches the tag.
+Each backend ships as its own NuGet package and is published by Jenkins
+(yggdrasil's pipeline: ``publish.nuget`` in ``yggdrasil.yml``, ``ci/pack.sh``),
+which builds a per-package tag of the form ``<PackageId>@<version>`` (e.g.
+``ArturRios.Data.Export@1.0.0``) and validates that the tagged commit's csproj
+``<Version>`` matches the tag.
 
-Releases follow the repository's branching model: work lands on ``develop``,
-a ``release/*`` branch carries the version bumps into ``main`` through a pull
-request, and only commits on ``main`` are tagged. This script drives that flow:
+Releases follow the repository's branching model: the version bumps land on
+``develop`` through a ``feature/`` or ``fix/`` pull request, a
+``release/<x.y.z>`` branch - a snapshot of ``develop`` - carries them into
+``main`` through a pull request, and only commits on ``main`` are tagged. This
+script drives that flow:
 
-  * bump a project's ``<Version>`` (patch / minor / major) and commit it - on the
-    release branch, never on ``main``,
-  * create the ``<PackageId>@<version>`` tag from the committed version - on an
-    up-to-date ``main``, after the release pull request is merged,
-  * push the tag (which triggers the publish action).
+  * bump a project's ``<Version>`` (patch / minor / major) and commit it - on a
+    branch cut from ``develop``, never on ``main`` or a release branch,
+  * create the annotated ``<PackageId>@<version>`` tag from the committed
+    version - on an up-to-date ``main``, after the release pull request is merged,
+  * push the tag (which starts the Jenkins build that publishes the package).
 
 Run with no arguments for an interactive menu, which loops until you exit: every
 menu accepts ``q`` to quit, and sub-menus accept ``b`` to go back. Alongside the
@@ -220,7 +223,7 @@ def current_branch() -> str:
 def require_main() -> None:
     """Fail unless HEAD is on main and already pushed to origin/main.
 
-    Tags are only created from released code: the publish workflow rejects a
+    Tags are only created from released code: the release build rejects a
     tag whose commit is not on origin/main, so tagging anything else would
     only produce a failed publish run.
     """
@@ -253,8 +256,8 @@ def require_tags_on_main(tags: list[str]) -> None:
     stray = [tag for tag in tags if not commit_on_origin_main(tag)]
     if stray:
         fail(
-            f"tag(s) not on origin/{RELEASE_BRANCH}: {', '.join(stray)}. The publish "
-            "workflow rejects them - delete them (`git tag -d <tag>`) and tag main instead."
+            f"tag(s) not on origin/{RELEASE_BRANCH}: {', '.join(stray)}. The release "
+            "build rejects them - delete them (`git tag -d <tag>`) and tag main instead."
         )
 
 
@@ -264,10 +267,12 @@ def require_tags_on_main(tags: list[str]) -> None:
 def do_bump(pkg: Package, part: str, *, commit: bool, assume_yes: bool) -> str:
     if pkg.deferred:
         print(f"warning: {pkg.package_id} is deferred and cannot be published.")
-    if current_branch() == RELEASE_BRANCH:
+    branch = current_branch()
+    if branch == RELEASE_BRANCH or branch.startswith("release/"):
         fail(
-            f"version bumps go through a release/* pull request, not straight onto "
-            f"'{RELEASE_BRANCH}'. Run `git switch -c release/<name> develop` first."
+            f"version bumps land on develop through a feature/ or fix/ pull request, "
+            f"not on '{branch}' (a release branch is a snapshot of develop). "
+            f"Run `git switch -c feature/<name> develop` first."
         )
     old = pkg.read_version()
     new = bump_version(old, part)
@@ -304,7 +309,9 @@ def do_tag(pkg: Package, *, assume_yes: bool) -> str:
         fail(f"tag '{tag}' already exists. Bump the version before tagging again.")
     if not confirm(f"Create tag '{tag}' at HEAD ({git('rev-parse', '--short', 'HEAD', capture=True)})?", assume_yes):
         fail("aborted")
-    git("tag", tag)
+    # Annotated: Jenkins only discovers a tag at most a day old, and dates a
+    # lightweight tag by its commit.
+    git("tag", "--annotate", tag, "--message", tag)
     print(f"created tag {tag}")
     return tag
 
@@ -318,10 +325,10 @@ def do_push(pkg: Package, *, assume_yes: bool) -> None:
         fail(f"tag '{tag}' does not exist locally. Run `release.py tag {pkg.package_id}` first.")
     require_tags_on_main([tag])
 
-    if not confirm(f"Push tag '{tag}' to origin (this triggers the publish action)?", assume_yes):
+    if not confirm(f"Push tag '{tag}' to origin (this starts the release build)?", assume_yes):
         fail("aborted")
     git("push", "origin", tag)
-    print(f"pushed tag {tag} - the Publish Package workflow should now run.")
+    print(f"pushed tag {tag} - the Jenkins release build should now run.")
 
 
 def do_tag_all(packages: list[Package], *, assume_yes: bool) -> None:
@@ -355,7 +362,7 @@ def do_tag_all(packages: list[Package], *, assume_yes: bool) -> None:
     if not confirm(f"\nCreate {len(pending)} tag(s) at {head}?", assume_yes):
         fail("aborted")
     for _pkg, tag in pending:
-        git("tag", tag)
+        git("tag", "--annotate", tag, "--message", tag)
         print(f"created tag {tag}")
 
 
@@ -420,7 +427,7 @@ def do_push_all(packages: list[Package], *, assume_yes: bool,
         for tag in pending:
             git("push", "origin", tag)
             print(f"pushed tag {tag}")
-        print(f"\nPushed {len(pending)} tag(s) - the Publish Package workflow "
+        print(f"\nPushed {len(pending)} tag(s) - the Jenkins release build "
               "should now run for each.")
         return
 
@@ -432,7 +439,7 @@ def do_push_all(packages: list[Package], *, assume_yes: bool,
             continue
         git("push", "origin", tag)
         pushed += 1
-        print(f"pushed tag {tag} - the Publish Package workflow should now run.")
+        print(f"pushed tag {tag} - the Jenkins release build should now run.")
     print(f"\nPushed {pushed} of {len(pending)} tag(s).")
 
 
