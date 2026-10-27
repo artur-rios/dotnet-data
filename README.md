@@ -6,7 +6,7 @@
 
 ﻿# Dotnet Data
 
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](./LICENSE)
 [![Relational.Core](https://img.shields.io/nuget/v/ArturRios.Data.Relational.Core.svg?label=Relational.Core)](https://www.nuget.org/packages/ArturRios.Data.Relational.Core)
 [![Sqlite](https://img.shields.io/nuget/v/ArturRios.Data.Sqlite.svg?label=Sqlite)](https://www.nuget.org/packages/ArturRios.Data.Sqlite)
@@ -18,6 +18,8 @@
 [![Export](https://img.shields.io/nuget/v/ArturRios.Data.Export.svg?label=Export)](https://www.nuget.org/packages/ArturRios.Data.Export)
 [![Export.Excel](https://img.shields.io/nuget/v/ArturRios.Data.Export.Excel.svg?label=Export.Excel)](https://www.nuget.org/packages/ArturRios.Data.Export.Excel)
 
+This repository lives at <https://git.techcraftsmen.net/artur-rios/dotnet-data>. The GitHub repository is a read-only mirror of it.
+
 **`ArturRios.Data`** — a modular data-access toolkit for .NET. One consistent, envelope-based repository
 style across **relational** databases (EF Core over PostgreSQL / MySQL / SQLite, plus a Dapper read
 path) and **NoSQL** stores (**MongoDB**, **DynamoDB**), plus **file export** writers (CSV, JSON, TXT,
@@ -26,11 +28,11 @@ MessagePack, Excel). Every operation returns a
 infrastructure failures — including optimistic-concurrency conflicts — surface as errors on the result
 instead of unhandled exceptions.
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🧩 **Architecture & diagrams:** [Architecture](https://artur-rios.github.io/dotnet-data/docs/architecture/)
-- 🗄️ **Guides:** [Relational](https://artur-rios.github.io/dotnet-data/docs/relational/) ·
-  [MongoDB](https://artur-rios.github.io/dotnet-data/docs/mongodb/) ·
-  [DynamoDB](https://artur-rios.github.io/dotnet-data/docs/dynamodb/)
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🧩 **Architecture & diagrams:** [Architecture](https://docs.artur-rios.tech/dotnet-data/docs/architecture/)
+- 🗄️ **Guides:** [Relational](https://docs.artur-rios.tech/dotnet-data/docs/relational/) ·
+  [MongoDB](https://docs.artur-rios.tech/dotnet-data/docs/mongodb/) ·
+  [DynamoDB](https://docs.artur-rios.tech/dotnet-data/docs/dynamodb/)
 
 ## The package family
 
@@ -203,7 +205,7 @@ public class ProductService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWo
 
 The full relational guide (providers, sync + async interfaces, the `Query()` escape hatch, concurrency,
 transactions, and the Dapper read path) is at
-**[Relational](https://artur-rios.github.io/dotnet-data/docs/relational/)**.
+**[Relational](https://docs.artur-rios.tech/dotnet-data/docs/relational/)**.
 
 ### Relational repository model
 
@@ -246,21 +248,21 @@ The NoSQL packages are **standalone** (no relational core) but keep the same env
 - **MongoDB** — a document repository (`IAsyncDocumentRepository<T>`) with `Document` / `VersionedDocument`
   identity, `Find(predicate)` server-side filtering, a `Query()` LINQ escape hatch, opt-in optimistic
   concurrency, and multi-document transactions (`IMongoUnitOfWork`, requires a replica set).
-  → **[MongoDB guide](https://artur-rios.github.io/dotnet-data/docs/mongodb/)**
+  → **[MongoDB guide](https://docs.artur-rios.tech/dotnet-data/docs/mongodb/)**
 - **DynamoDB** — an async-only repository (`IAsyncDynamoRepository<T>`) over the AWS object-persistence
   model with POCO-attribute keys, `[DynamoDBVersion]` optimistic concurrency, Query/Scan/batch, and a
   `ServiceUrl` for DynamoDB Local / LocalStack.
-  → **[DynamoDB guide](https://artur-rios.github.io/dotnet-data/docs/dynamodb/)**
+  → **[DynamoDB guide](https://docs.artur-rios.tech/dotnet-data/docs/dynamodb/)**
 
 ## Documentation
 
 | Page | What's there |
 |---|---|
-| [Architecture](https://artur-rios.github.io/dotnet-data/docs/architecture/) | Package diagram, class diagrams, the envelope model, design principles |
-| [Relational](https://artur-rios.github.io/dotnet-data/docs/relational/) | EF Core setup, providers, repositories, unit of work, concurrency, Dapper |
-| [MongoDB](https://artur-rios.github.io/dotnet-data/docs/mongodb/) | Documents, repository, transactions, concurrency |
-| [DynamoDB](https://artur-rios.github.io/dotnet-data/docs/dynamodb/) | Item POCOs, repository, query/scan/batch, concurrency |
-| [Export](https://artur-rios.github.io/dotnet-data/docs/export/) | Column mapping, the CSV/JSON/TXT/MessagePack exporters, the Excel add-on |
+| [Architecture](https://docs.artur-rios.tech/dotnet-data/docs/architecture/) | Package diagram, class diagrams, the envelope model, design principles |
+| [Relational](https://docs.artur-rios.tech/dotnet-data/docs/relational/) | EF Core setup, providers, repositories, unit of work, concurrency, Dapper |
+| [MongoDB](https://docs.artur-rios.tech/dotnet-data/docs/mongodb/) | Documents, repository, transactions, concurrency |
+| [DynamoDB](https://docs.artur-rios.tech/dotnet-data/docs/dynamodb/) | Item POCOs, repository, query/scan/batch, concurrency |
+| [Export](https://docs.artur-rios.tech/dotnet-data/docs/export/) | Column mapping, the CSV/JSON/TXT/MessagePack exporters, the Excel add-on |
 
 ## Upgrading
 

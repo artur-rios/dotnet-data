@@ -1,7 +1,7 @@
 # ArturRios.Data.Export.Excel
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Export.Excel.svg)](https://www.nuget.org/packages/ArturRios.Data.Export.Excel)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 The **Excel (.xlsx)** add-on for
@@ -95,8 +95,8 @@ rendered to an invariant-culture string. Text is always stored as text, never as
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 

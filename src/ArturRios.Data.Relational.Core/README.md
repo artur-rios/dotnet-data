@@ -1,7 +1,7 @@
 # ArturRios.Data.Relational.Core
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Relational.Core.svg)](https://www.nuget.org/packages/ArturRios.Data.Relational.Core)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 The shared EF Core foundation of the **`ArturRios.Data`** toolkit: repository and unit-of-work
@@ -149,9 +149,9 @@ the envelope instead of throwing.
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/docs/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🗄️ **Relational guide:** <https://docs.artur-rios.tech/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 

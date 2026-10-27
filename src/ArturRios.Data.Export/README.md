@@ -1,7 +1,7 @@
 # ArturRios.Data.Export
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.Export.svg)](https://www.nuget.org/packages/ArturRios.Data.Export)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
 [![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 **File writers** for the **`ArturRios.Data`** toolkit: turn any `IEnumerable<T>` into **CSV**, **JSON**,
@@ -119,8 +119,8 @@ Both `Json` and `MessagePack` also accept explicit `SerializerOptions`, used as-
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/docs/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 
