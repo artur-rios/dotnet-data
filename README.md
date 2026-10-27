@@ -1,3 +1,9 @@
+> [!NOTE]
+> This is the real, open-source code of dotnet-data. Its home is Forgejo, at
+> https://git.techcraftsmen.net/artur-rios/dotnet-data; the copy on GitHub is a read-only mirror, for viewing only, and
+> its issues and pull requests are not followed. If you want to contribute, email me at
+> arturdev@duck.com.
+
 ﻿# Dotnet Data
 
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
