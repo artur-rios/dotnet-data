@@ -10,95 +10,192 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+## [ArturRios.Data.Relational.Core 5.0.1] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+
+### Fixed
+
+- The package README imports `Entity<TKey>` from its namespace, lists the MySQL
+  provider, links to pages that exist, and links to the upgrade guide in this file instead of repeating it.
+- A failed `EfRepository` write no longer poisons the context. EF Core keeps a
+  rejected change pending, so after an error envelope (a unique violation, say) every later write on the same
+  scoped context replayed it and failed too; the pending changes are now discarded.
+- When a save fails, `BaseDbContext` restores the concurrency stamps it had
+  just regenerated, so a `VersionedEntity<TKey>` keeps the stamp the database still holds and a retry is not
+  reported as a concurrency conflict.
+- `BaseDbContext` regenerates concurrency stamps on every save overload,
+  including `SaveChanges(bool)` and `SaveChangesAsync(bool, CancellationToken)`, which skipped it before.
+- `EfUnitOfWork` returns an error envelope when the transaction cannot begin
+  (no connection, or a transaction already open on the context) instead of throwing, and clears the change
+  tracker after a rollback, which still held the rolled-back writes as saved.
+- The "no `IDatabaseProvider` registered" error names the package and the
+  registration call that exist (for example `ArturRios.Data.Sqlite` and `AddSqliteProvider()`), not
+  `ArturRios.Data.Core.SqLite` and `AddSqLiteProvider()`.
+
+## [ArturRios.Data.Sqlite 4.0.0] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.1 instead of 4.0.1. No code changes: the
+  package's public API (`SqliteProvider`, `AddSqliteProvider()`) uses only `IDatabaseProvider` and `DatabaseType`,
+  which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.1; see
+  [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
+
+### Fixed
+
+- The package README names the
+  two-argument repository interfaces, and its documentation links point at pages that exist.
+
+## [ArturRios.Data.PostgreSql 4.0.0] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.1 instead of 4.0.1. No code changes:
+  the package's public API (`PostgreSqlProvider`, `AddPostgreSqlProvider()`) uses only `IDatabaseProvider` and
+  `DatabaseType`, which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.1; see
+  [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
+
+### Fixed
+
+- The package README names the
+  two-argument repository interfaces, and its documentation links point at pages that exist.
+
+## [ArturRios.Data.MySql 2.0.0] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.1 instead of 4.0.1. No code changes: the
+  package's public API (`MySqlProvider`, `AddMySqlProvider()`) uses only `IDatabaseProvider` and `DatabaseType`,
+  which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.1; see
+  [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
+
+### Fixed
+
+- The package README names the
+  two-argument repository interfaces, and its documentation links point at pages that exist.
+- `MySqlProvider` detects the server version once per connection string and reuses it.
+  Before, every DI scope (every request, in a web app) opened a connection to query the server version again.
+
+## [ArturRios.Data.Dapper 5.0.0] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.1 instead of 4.0.1. No code changes: the
+  package's public API uses `BaseDbContext` and `RelationalErrors`, which 5.0.0 left unchanged. Upgrading it moves
+  the application onto `Relational.Core` 5.0.1; see [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
+
+### Fixed
+
+- The package README's documentation links point at pages that exist, and its examples
+  list MySQL among the providers and import the provider they register.
+- The `QueryFirstOrDefault` and `QuerySingleOrDefault` docs say that no row gives
+  `default(T)`, which is `0` rather than `null` for a non-nullable value type.
+
+## [ArturRios.Data.MongoDb 3.0.0] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- `Update`/`UpdateAsync` (and the range variants) of a document that no longer exists
+  return the concurrency-conflict error, as `EfRepository` does. Before, the write matched nothing and reported
+  success.
+- `Delete`/`DeleteAsync` of a `VersionedDocument` deletes only at the version the
+  caller holds; a stale or missing one returns the concurrency-conflict error, as `EfRepository` and
+  `DynamoRepository` do. Before, a stale delete removed the newer version. Deleting a plain `Document` stays
+  idempotent.
+- `DeleteRange`/`DeleteRangeAsync` return only the ids actually deleted, as the
+  interface documents and `EfRepository` does. Before, they returned every id passed in.
+
+### Fixed
+
+- The
+  package README's documentation links point at pages that exist.
+- The package README lists every service `AddMongoData` registers and says that `Query()`
+  is not enveloped.
+- When `MongoUnitOfWork` cannot start a transaction, for example on a standalone server,
+  it returns an error envelope and restores the context's previous session. Before, the exception escaped the
+  envelope and the context kept the disposed session, so every later repository call on that context failed.
+- `GetById`/`GetByIdAsync` with an id that is not a valid `ObjectId` return a successful
+  `null`, like any other id that matches nothing, instead of a data-access error. `DeleteRange` skips such ids.
+- `CreateRange`/`CreateRangeAsync` with no documents succeed with an empty result, as
+  `EfRepository` does, instead of returning a data-access error.
+
+## [ArturRios.Data.DynamoDb 2.0.2] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- The concurrency-conflict message reads "the item was modified or removed by another
+  process", matching the relational and MongoDB messages; a conditional check also fails when the item is gone.
+
+### Fixed
+
+- The
+  package README's documentation links point at pages that exist.
+
+## [ArturRios.Data.Export 2.2.0] - 2026-10-29
+
 ### Added
 
-- `ArturRios.Data.Export`: `CsvOptions.EscapeFormulas` (default `true`) controls the CSV formula-injection guard
+- `CsvOptions.EscapeFormulas` (default `true`) controls the CSV formula-injection guard
   described under Security.
 
 ### Changed
 
-- All packages: the project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
   since the site moved from GitHub Pages.
-- `ArturRios.Data.Sqlite`: depends on `ArturRios.Data.Relational.Core` 5.0.0 instead of 4.0.1. No code changes: the
-  package's public API (`SqliteProvider`, `AddSqliteProvider()`) uses only `IDatabaseProvider` and `DatabaseType`,
-  which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.0; see
-  [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
-- `ArturRios.Data.PostgreSql`: depends on `ArturRios.Data.Relational.Core` 5.0.0 instead of 4.0.1. No code changes:
-  the package's public API (`PostgreSqlProvider`, `AddPostgreSqlProvider()`) uses only `IDatabaseProvider` and
-  `DatabaseType`, which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.0; see
-  [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
-- `ArturRios.Data.MySql`: depends on `ArturRios.Data.Relational.Core` 5.0.0 instead of 4.0.1. No code changes: the
-  package's public API (`MySqlProvider`, `AddMySqlProvider()`) uses only `IDatabaseProvider` and `DatabaseType`,
-  which 5.0.0 left unchanged. Upgrading it moves the application onto `Relational.Core` 5.0.0; see
-  [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
-- `ArturRios.Data.Dapper`: depends on `ArturRios.Data.Relational.Core` 5.0.0 instead of 4.0.1. No code changes: the
-  package's public API uses `BaseDbContext` and `RelationalErrors`, which 5.0.0 left unchanged. Upgrading it moves
-  the application onto `Relational.Core` 5.0.0; see [Upgrading from 4.x to 5.0](#upgrading-from-4x-to-50).
-- `ArturRios.Data.MongoDb`: `Update`/`UpdateAsync` (and the range variants) of a document that no longer exists
-  return the concurrency-conflict error, as `EfRepository` does. Before, the write matched nothing and reported
-  success.
-- `ArturRios.Data.MongoDb`: `Delete`/`DeleteAsync` of a `VersionedDocument` deletes only at the version the
-  caller holds; a stale or missing one returns the concurrency-conflict error, as `EfRepository` and
-  `DynamoRepository` do. Before, a stale delete removed the newer version. Deleting a plain `Document` stays
-  idempotent.
-- `ArturRios.Data.MongoDb`: `DeleteRange`/`DeleteRangeAsync` return only the ids actually deleted, as the
-  interface documents and `EfRepository` does. Before, they returned every id passed in.
-- `ArturRios.Data.DynamoDb`: the concurrency-conflict message reads "the item was modified or removed by another
-  process", matching the relational and MongoDB messages; a conditional check also fails when the item is gone.
-- `ArturRios.Data.Export.Excel`: `DateOnly`, `TimeSpan` and `TimeOnly` values are written as native date and
-  time cells instead of text.
-- `ArturRios.Data.Export`, `ArturRios.Data.Export.Excel`: `WriteToFileAsync` writes to a temporary file beside
+- `WriteToFileAsync` writes to a temporary file beside
   the target and moves it into place when the write completes. A failed or cancelled export leaves an existing
   file untouched and no partial file behind; before, the file was truncated first and left half-written.
 
 ### Fixed
 
-- `ArturRios.Data.Sqlite`, `ArturRios.Data.PostgreSql`, `ArturRios.Data.MySql`: the package README names the
-  two-argument repository interfaces, and its documentation links point at pages that exist.
-- `ArturRios.Data.Dapper`: the package README's documentation links point at pages that exist, and its examples
-  list MySQL among the providers and import the provider they register.
-- `ArturRios.Data.Relational.Core`: the package README imports `Entity<TKey>` from its namespace, lists the MySQL
-  provider, links to pages that exist, and links to the upgrade guide in this file instead of repeating it.
-- `ArturRios.Data.MongoDb`, `ArturRios.Data.DynamoDb`, `ArturRios.Data.Export`, `ArturRios.Data.Export.Excel`: the
+- The
   package README's documentation links point at pages that exist.
-- `ArturRios.Data.MongoDb`: the package README lists every service `AddMongoData` registers and says that `Query()`
-  is not enveloped.
-- `ArturRios.Data.Export`, `ArturRios.Data.Export.Excel`: the package README says that Excel writes booleans, dates
+- The package README says that Excel writes booleans, dates
   and numbers as native cell values, and that `ExportFormat.Excel` needs `AddExcelExport()`.
-- `ArturRios.Data.MongoDb`: when `MongoUnitOfWork` cannot start a transaction, for example on a standalone server,
-  it returns an error envelope and restores the context's previous session. Before, the exception escaped the
-  envelope and the context kept the disposed session, so every later repository call on that context failed.
-- `ArturRios.Data.Relational.Core`: a failed `EfRepository` write no longer poisons the context. EF Core keeps a
-  rejected change pending, so after an error envelope (a unique violation, say) every later write on the same
-  scoped context replayed it and failed too; the pending changes are now discarded.
-- `ArturRios.Data.Relational.Core`: when a save fails, `BaseDbContext` restores the concurrency stamps it had
-  just regenerated, so a `VersionedEntity<TKey>` keeps the stamp the database still holds and a retry is not
-  reported as a concurrency conflict.
-- `ArturRios.Data.Relational.Core`: `BaseDbContext` regenerates concurrency stamps on every save overload,
-  including `SaveChanges(bool)` and `SaveChangesAsync(bool, CancellationToken)`, which skipped it before.
-- `ArturRios.Data.Relational.Core`: `EfUnitOfWork` returns an error envelope when the transaction cannot begin
-  (no connection, or a transaction already open on the context) instead of throwing, and clears the change
-  tracker after a rollback, which still held the rolled-back writes as saved.
-- `ArturRios.Data.Relational.Core`: the "no `IDatabaseProvider` registered" error names the package and the
-  registration call that exist (for example `ArturRios.Data.Sqlite` and `AddSqliteProvider()`), not
-  `ArturRios.Data.Core.SqLite` and `AddSqLiteProvider()`.
-- `ArturRios.Data.MySql`: `MySqlProvider` detects the server version once per connection string and reuses it.
-  Before, every DI scope (every request, in a web app) opened a connection to query the server version again.
-- `ArturRios.Data.MongoDb`: `GetById`/`GetByIdAsync` with an id that is not a valid `ObjectId` return a successful
-  `null`, like any other id that matches nothing, instead of a data-access error. `DeleteRange` skips such ids.
-- `ArturRios.Data.MongoDb`: `CreateRange`/`CreateRangeAsync` with no documents succeed with an empty result, as
-  `EfRepository` does, instead of returning a data-access error.
-- `ArturRios.Data.Export.Excel`: a `double` or `float` that is `NaN` or infinite is written as text. Before, it
-  failed the whole export.
-- `ArturRios.Data.Dapper`: the `QueryFirstOrDefault` and `QuerySingleOrDefault` docs say that no row gives
-  `default(T)`, which is `0` rather than `null` for a non-nullable value type.
 
 ### Security
 
-- `ArturRios.Data.Export`: `CsvExporter` neutralizes formula injection. A text value that starts with `=`, `+`,
+- `CsvExporter` neutralizes formula injection. A text value that starts with `=`, `+`,
   `-`, `@`, a tab or a carriage return is written with a leading `'`, so a spreadsheet that opens the file shows
   it as text instead of running it (for example `=HYPERLINK(...)` or a DDE payload supplied by a user). Numbers
   and other formatted values are unchanged. Set `CsvOptions.EscapeFormulas = false` to write text verbatim.
+
+## [ArturRios.Data.Export.Excel 2.1.0] - 2026-10-29
+
+### Changed
+
+- The project URL is the documentation site's new address, `https://docs.artur-rios.tech/dotnet-data`,
+  since the site moved from GitHub Pages.
+- `DateOnly`, `TimeSpan` and `TimeOnly` values are written as native date and
+  time cells instead of text.
+- `WriteToFileAsync` writes to a temporary file beside
+  the target and moves it into place when the write completes. A failed or cancelled export leaves an existing
+  file untouched and no partial file behind; before, the file was truncated first and left half-written.
+
+### Fixed
+
+- The
+  package README's documentation links point at pages that exist.
+- The package README says that Excel writes booleans, dates
+  and numbers as native cell values, and that `ExportFormat.Excel` needs `AddExcelExport()`.
+- A `double` or `float` that is `NaN` or infinite is written as text. Before, it
+  failed the whole export.
 
 ## [ArturRios.Data.Relational.Core 5.0.0] - 2026-10-07
 
@@ -561,7 +658,16 @@ The database schema is unchanged for `long` keys, so no migration is needed.
 - `Entity`, `ICrudRepository`, `IRangeRepository`, `IReadOnlyRepository` and `BaseDbContextOptions`, with XML
   documentation.
 
-[Unreleased]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.0...HEAD
+[Unreleased]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.1...HEAD
+[ArturRios.Data.Relational.Core 5.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.0...ArturRios.Data.Relational.Core@5.0.1
+[ArturRios.Data.Sqlite 4.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Sqlite@3.1.0...ArturRios.Data.Sqlite@4.0.0
+[ArturRios.Data.PostgreSql 4.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.PostgreSql@3.0.2...ArturRios.Data.PostgreSql@4.0.0
+[ArturRios.Data.MySql 2.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.MySql@1.0.0...ArturRios.Data.MySql@2.0.0
+[ArturRios.Data.Dapper 5.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Dapper@4.0.1...ArturRios.Data.Dapper@5.0.0
+[ArturRios.Data.MongoDb 3.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.MongoDb@2.0.1...ArturRios.Data.MongoDb@3.0.0
+[ArturRios.Data.DynamoDb 2.0.2]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.DynamoDb@2.0.1...ArturRios.Data.DynamoDb@2.0.2
+[ArturRios.Data.Export 2.2.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Export@2.1.0...ArturRios.Data.Export@2.2.0
+[ArturRios.Data.Export.Excel 2.1.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Export.Excel@2.0.1...ArturRios.Data.Export.Excel@2.1.0
 [ArturRios.Data.Relational.Core 5.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@4.0.1...ArturRios.Data.Relational.Core@5.0.0
 [ArturRios.Data.MySql 1.0.0]: https://github.com/artur-rios/dotnet-data/releases/tag/ArturRios.Data.MySql@1.0.0
 [ArturRios.Data.Export 2.1.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Export@2.0.0...ArturRios.Data.Export@2.1.0
