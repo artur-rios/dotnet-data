@@ -1,8 +1,8 @@
 # ArturRios.Data.MySql
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.MySql.svg)](https://www.nuget.org/packages/ArturRios.Data.MySql)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 The **MySQL / MariaDB** provider for the **`ArturRios.Data`** toolkit, backed by
 [Microting.EntityFrameworkCore.MySql](https://github.com/microting/Pomelo.EntityFrameworkCore.MySql).
@@ -46,9 +46,9 @@ builder.Services.AddMySqlProvider();
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
-That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
+That's the whole provider-specific surface. From here on you use `IAsyncRepository<T, TKey>`,
 `IAsyncUnitOfWork`, and the rest of the core API — see the
-[Relational guide](https://artur-rios.github.io/dotnet-data/relational/).
+[Relational guide](https://docs.artur-rios.tech/dotnet-data/docs/relational/).
 
 ## What it does
 
@@ -56,8 +56,9 @@ That's the whole provider-specific surface. From here on you use `IAsyncReposito
 `Type => DatabaseType.MySql`. When `AddDataConfigFromSettings<TContext>` builds your context and the
 configured `DatabaseType` is `MySql`, this provider is selected and calls
 `UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))`. Note that `AutoDetect` opens
-a connection to the server to determine its version, so the server must be reachable when the context
-options are built.
+a connection to the server to determine its version, so the server must be reachable the first time
+context options are built for a connection string. The provider keeps the detected version per connection
+string and reuses it, so later contexts do not query the server again.
 
 If the configured `DatabaseType` has no matching provider registered, registration fails fast with a
 `DataAccessException` naming the missing provider.
@@ -77,10 +78,10 @@ your code.
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🗄️ **Relational guide:** <https://docs.artur-rios.tech/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 
-Licensed under the [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE).
+This project is licensed under the [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

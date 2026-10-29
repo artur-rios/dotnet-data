@@ -1,15 +1,15 @@
 # ArturRios.Data.MongoDb
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.MongoDb.svg)](https://www.nuget.org/packages/ArturRios.Data.MongoDb)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 A **MongoDB document store** for the **`ArturRios.Data`** toolkit — the same enveloped repository style
 as the relational packages, over the official
 [MongoDB .NET driver](https://www.mongodb.com/docs/drivers/csharp/).
 
-Every operation returns a [`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output)
-envelope, so infrastructure failures — including optimistic-concurrency conflicts — surface as errors
+Every operation except the `Query()` escape hatch returns a
+[`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output) envelope, so infrastructure failures — including optimistic-concurrency conflicts — surface as errors
 on the result instead of unhandled exceptions.
 
 This package is **standalone**: it does not need `ArturRios.Data.Relational.Core`.
@@ -93,13 +93,17 @@ public class ProductService(IAsyncDocumentRepository<Product> repo, IAsyncMongoU
 | `IAsyncDocumentReadOnlyRepository<T>` / `IAsyncDocumentRepository<T>` | `MongoDocumentRepository<T>` | Scoped |
 | `IMongoUnitOfWork` / `IAsyncMongoUnitOfWork` | `MongoUnitOfWork` | Scoped |
 | `IMongoClient` | driver client | Singleton |
+| `IMongoDatabase` | `client.GetDatabase(DatabaseName)` | Scoped |
+| `MongoContext` | `MongoContext` | Scoped |
 
 ## Repository surface
 
 Reads: `GetAll()`, `GetById(string)`, `Find(predicate)` (a server-side filter), and `Query()` — a
 deferred `IQueryable<T>` escape hatch.
 Writes: `Create`, `CreateRange`, `Update`, `UpdateRange`, `Delete`, `DeleteRange` — each with an
-`…Async` counterpart taking a `CancellationToken`.
+`…Async` counterpart taking a `CancellationToken`. `Update` of a document that no longer exists returns a
+concurrency-conflict error; `Delete` of a missing plain document succeeds; `DeleteRange` returns only the
+ids it deleted; `GetById` with an id that is not a valid `ObjectId` is a successful `null`.
 
 > **`Query()` is not transaction-aware.** The driver's LINQ provider does not use the session, so a
 > `Query()` inside a unit of work will **not** see writes made earlier in that same transaction. Use
@@ -108,8 +112,8 @@ Writes: `Create`, `CreateRange`, `Update`, `UpdateRange`, `Delete`, `DeleteRange
 ## Optimistic concurrency
 
 Derive from `VersionedDocument` to opt in. It adds a monotonic `Version` that is incremented on each
-update and checked on write, so a concurrent modification fails the update and returns an error on the
-envelope rather than silently overwriting.
+update and checked on write, so a concurrent modification fails the update — or the delete — and returns
+an error on the envelope rather than silently overwriting or removing the newer version.
 
 ## Transactions
 
@@ -119,10 +123,10 @@ standalone `mongod`.
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🍃 **MongoDB guide:** <https://artur-rios.github.io/dotnet-data/mongodb/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🍃 **MongoDB guide:** <https://docs.artur-rios.tech/dotnet-data/docs/mongodb/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 
-Licensed under the [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE).
+This project is licensed under the [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

@@ -14,13 +14,19 @@ public interface ISqlQuery
     /// <typeparam name="T">The row type to map to.</typeparam>
     DataOutput<IEnumerable<T>> Query<T>(string sql, object? parameters = null);
 
-    /// <summary>Returns the first row mapped to <typeparamref name="T" />, or a successful null when none.</summary>
+    /// <summary>
+    ///     Returns the first row mapped to <typeparamref name="T" />, or a successful <c>default(T)</c> when none
+    ///     (<see langword="null" /> for reference and nullable types).
+    /// </summary>
     /// <param name="sql">The SQL query text.</param>
     /// <param name="parameters">An object whose properties are bound as Dapper parameters.</param>
     /// <typeparam name="T">The row type to map to.</typeparam>
     DataOutput<T?> QueryFirstOrDefault<T>(string sql, object? parameters = null);
 
-    /// <summary>Returns the single row mapped to <typeparamref name="T" />, or a successful null when none.</summary>
+    /// <summary>
+    ///     Returns the single row mapped to <typeparamref name="T" />, or a successful <c>default(T)</c> when none
+    ///     (<see langword="null" /> for reference and nullable types).
+    /// </summary>
     /// <param name="sql">The SQL query text.</param>
     /// <param name="parameters">An object whose properties are bound as Dapper parameters.</param>
     /// <typeparam name="T">The row type to map to.</typeparam>

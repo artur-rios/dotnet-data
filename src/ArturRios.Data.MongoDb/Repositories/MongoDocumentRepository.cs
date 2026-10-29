@@ -56,7 +56,9 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
 
     /// <inheritdoc />
     public Task<DataOutput<T?>> GetByIdAsync(string id, CancellationToken ct = default) =>
-        GuardedAsync<T?>(async () => await FindFluent(IdFilter(id)).FirstOrDefaultAsync(ct).ConfigureAwait(false));
+        GuardedAsync<T?>(async () => IsObjectId(id)
+            ? await FindFluent(IdFilter(id)).FirstOrDefaultAsync(ct).ConfigureAwait(false)
+            : null);
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> FindAsync(Expression<Func<T, bool>> predicate,
@@ -83,7 +85,11 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
                 EnsureId(d);
             }
 
-            await InsertManyAsync(list, ct).ConfigureAwait(false);
+            if (list.Count > 0)
+            {
+                await InsertManyAsync(list, ct).ConfigureAwait(false);
+            }
+
             return list.Select(d => d.Id).ToList();
         });
 
@@ -113,7 +119,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
     public Task<DataOutput<string>> DeleteAsync(T document, CancellationToken ct = default) =>
         GuardedAsync(async () =>
         {
-            await DeleteManyAsync(IdFilter(document.Id), ct).ConfigureAwait(false);
+            await DeleteOneAsync(document, ct).ConfigureAwait(false);
             return document.Id;
         });
 
@@ -122,9 +128,20 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
         CancellationToken ct = default) =>
         GuardedAsync<IEnumerable<string>>(async () =>
         {
-            var idList = ids.ToList();
-            await DeleteManyAsync(Builders<T>.Filter.In(d => d.Id, idList), ct).ConfigureAwait(false);
-            return idList;
+            var candidates = ExistingIdCandidates(ids);
+            if (candidates.Count == 0)
+            {
+                return [];
+            }
+
+            var found = await FindFluent(Builders<T>.Filter.In(d => d.Id, candidates)).Project(d => d.Id)
+                .ToListAsync(ct).ConfigureAwait(false);
+            if (found.Count > 0)
+            {
+                await DeleteManyAsync(Builders<T>.Filter.In(d => d.Id, found), ct).ConfigureAwait(false);
+            }
+
+            return InRequestOrder(candidates, found);
         });
 
     /// <inheritdoc />
@@ -136,7 +153,7 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
 
     /// <inheritdoc />
     public DataOutput<T?> GetById(string id) =>
-        Guarded<T?>(() => FindFluent(IdFilter(id)).FirstOrDefault());
+        Guarded<T?>(() => IsObjectId(id) ? FindFluent(IdFilter(id)).FirstOrDefault() : null);
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate) =>
@@ -159,7 +176,11 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
             EnsureId(d);
         }
 
-        InsertMany(list);
+        if (list.Count > 0)
+        {
+            InsertMany(list);
+        }
+
         return list.Select(d => d.Id).ToList();
     });
 
@@ -185,20 +206,66 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
     /// <inheritdoc />
     public DataOutput<string> Delete(T document) => Guarded(() =>
     {
-        DeleteMany(IdFilter(document.Id));
+        DeleteOne(document);
         return document.Id;
     });
 
     /// <inheritdoc />
     public DataOutput<IEnumerable<string>> DeleteRange(IEnumerable<string> ids) => Guarded(IEnumerable<string> () =>
     {
-        var idList = ids.ToList();
-        DeleteMany(Builders<T>.Filter.In(d => d.Id, idList));
-        return idList;
+        var candidates = ExistingIdCandidates(ids);
+        if (candidates.Count == 0)
+        {
+            return [];
+        }
+
+        var found = FindFluent(Builders<T>.Filter.In(d => d.Id, candidates)).Project(d => d.Id).ToList();
+        if (found.Count > 0)
+        {
+            DeleteMany(Builders<T>.Filter.In(d => d.Id, found));
+        }
+
+        return InRequestOrder(candidates, found);
     });
 
     // --- session-aware driver helpers (sync) ---
     private static FilterDefinition<T> IdFilter(string id) => Builders<T>.Filter.Eq(d => d.Id, id);
+
+    // Document.Id is stored as an ObjectId, so a string that is not one cannot match any document. It is
+    // answered as not-found rather than sent to the server, where serializing the filter would fail.
+    private static bool IsObjectId(string? id) => ObjectId.TryParse(id, out _);
+
+    private static List<string> ExistingIdCandidates(IEnumerable<string> ids) =>
+        ids.Where(IsObjectId).Distinct().ToList();
+
+    private static List<string> InRequestOrder(List<string> requested, List<string> found)
+    {
+        var deleted = found.ToHashSet();
+        return requested.Where(deleted.Contains).ToList();
+    }
+
+    // A versioned document is deleted only at the version the caller holds, as the relational and
+    // DynamoDB repositories do; a stale delete is a concurrency conflict rather than a silent removal of
+    // someone else's newer write. A plain document's delete stays idempotent.
+    private static FilterDefinition<T> DeleteFilter(T document) =>
+        document is VersionedDocument versioned
+            ? Builders<T>.Filter.And(IdFilter(document.Id),
+                Builders<T>.Filter.Eq(VersionElementName, versioned.Version))
+            : IdFilter(document.Id);
+
+    private static void EnsureDeleted(T document, DeleteResult result)
+    {
+        if (document is VersionedDocument && result.IsAcknowledged && result.DeletedCount == 0)
+        {
+            throw new MongoConcurrencyException();
+        }
+    }
+
+    private void DeleteOne(T document)
+    {
+        var filter = DeleteFilter(document);
+        EnsureDeleted(document, Session is { } s ? Collection.DeleteOne(s, filter) : Collection.DeleteOne(filter));
+    }
 
     private static void EnsureId(T document)
     {
@@ -279,7 +346,18 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
             return;
         }
 
-        ReplaceOne(IdFilter(document.Id), document);
+        EnsureMatched(ReplaceOne(IdFilter(document.Id), document));
+    }
+
+    // Update replaces an existing document. One that matched nothing was removed by another process (or
+    // never existed), which the relational repository reports as a concurrency conflict too - so this one
+    // does, instead of reporting a write that never happened as a success.
+    private static void EnsureMatched(ReplaceOneResult result)
+    {
+        if (result.IsAcknowledged && result.MatchedCount == 0)
+        {
+            throw new MongoConcurrencyException();
+        }
     }
 
     private ReplaceOneResult ReplaceOne(FilterDefinition<T> filter, T document) =>
@@ -319,6 +397,14 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
     private Task DeleteManyAsync(FilterDefinition<T> filter, CancellationToken ct) =>
         Session is { } s ? Collection.DeleteManyAsync(s, filter, null, ct) : Collection.DeleteManyAsync(filter, ct);
 
+    private async Task DeleteOneAsync(T document, CancellationToken ct)
+    {
+        var filter = DeleteFilter(document);
+        EnsureDeleted(document, Session is { } s
+            ? await Collection.DeleteOneAsync(s, filter, null, ct).ConfigureAwait(false)
+            : await Collection.DeleteOneAsync(filter, ct).ConfigureAwait(false));
+    }
+
     private async Task ReplaceAsync(T document, CancellationToken ct)
     {
         if (document is VersionedDocument versioned)
@@ -352,14 +438,11 @@ public class MongoDocumentRepository<T>(MongoContext context, ILogger<MongoDocum
         }
 
         var idFilter = IdFilter(document.Id);
-        if (Session is { } session)
-        {
-            await Collection.ReplaceOneAsync(session, idFilter, document, cancellationToken: ct).ConfigureAwait(false);
-        }
-        else
-        {
-            await Collection.ReplaceOneAsync(idFilter, document, cancellationToken: ct).ConfigureAwait(false);
-        }
+        var replaced = Session is { } session
+            ? await Collection.ReplaceOneAsync(session, idFilter, document, cancellationToken: ct).ConfigureAwait(false)
+            : await Collection.ReplaceOneAsync(idFilter, document, cancellationToken: ct).ConfigureAwait(false);
+
+        EnsureMatched(replaced);
     }
 
     /// <summary>Runs an asynchronous operation, converting failures to envelope errors.</summary>

@@ -1,0 +1,32 @@
+# The pipeline file of dotnet-data and of its docs site. One file, two catalog entries: the library (dotnet-data: checks
+# test and coverage, publish.nuget) and its docs site (dotnet-data-docs: deploy.inputs coverage). Each job runs only
+# its own entry's checks. Reference: yggdrasil's docs/catalog.md, "Repository pipeline file". Check it where the
+# catalog is, in the yggdrasil checkout:
+#   python3 scripts/pipeline_config.py describe dotnet-data <this repository's checkout>
+#   python3 scripts/pipeline_config.py describe dotnet-data-docs <this repository's checkout>
+# The scripts under ci/ run from the repository's root, so you can run them on your machine too. The packages are
+# versioned apart and released one at a time, by a tag <PackageId>@<version> (ArturRios.Data.Sqlite@3.1.0).
+
+checks:
+  test:                                  # format, build, test categories, tests (ci/test.sh)
+    image: mcr.microsoft.com/dotnet/sdk:10.0.402@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2
+    run: ci/test.sh
+    docker: true                         # the integration tests' MySQL server is started with the CI engine
+    archive: "artifacts/test-results/**" # the .trx results, kept with the build
+  coverage:                              # the tests with coverage, and the HTML report (ci/coverage.sh)
+    image: mcr.microsoft.com/dotnet/sdk:10.0.402@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2
+    run: ci/coverage.sh
+    docker: true                         # every test runs here, the MySQL integration tests too
+    credentials:
+      # ReportGenerator's PRO license. Not bound on renovate/* builds, nor when missing: the free report is made.
+      REPORTGENERATOR_LICENSE: reportgenerator-license
+    archive: "coverage-report/**"        # the docs site's image is built with it
+
+deploy:
+  inputs: [coverage]                     # the docs application's deploy runs coverage, and copies its archive in
+
+publish:
+  nuget:                                 # on the owner's version tag: packed here with no credential, pushed later
+    image: mcr.microsoft.com/dotnet/sdk:10.0.402@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2
+    run: ci/pack.sh                      # only the package RELEASE_TAG (<PackageId>@<version>) names, at that version
+    packages: "artifacts/*.nupkg"

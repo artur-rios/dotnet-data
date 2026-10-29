@@ -1,4 +1,4 @@
-baseURL = 'https://artur-rios.github.io/dotnet-data/'
+baseURL = 'https://docs.artur-rios.tech/dotnet-data/'
 title = 'Dotnet Data'
 
 # Docsy is installed as the @docsy/theme NPM package (see package.json)
@@ -36,6 +36,21 @@ locale = 'en-us'
   [[module.mounts]]
     source = 'static'
     target = 'static'
+  [[module.mounts]]
+    source = 'layouts'
+    target = 'layouts'
+  # Mounting into assets/ (below) replaces Hugo's default assets mount; keep the project's own.
+  [[module.mounts]]
+    source = 'assets'
+    target = 'assets'
+  # CHANGELOG.md and CONTRIBUTING.md live at the repository root; the site renders them
+  # (see layouts/_shortcodes/repo-file.html) instead of keeping copies.
+  [[module.mounts]]
+    source = '../CHANGELOG.md'
+    target = 'assets/repo/CHANGELOG.md'
+  [[module.mounts]]
+    source = '../CONTRIBUTING.md'
+    target = 'assets/repo/CONTRIBUTING.md'
 
 [languages]
   [languages.en]
@@ -46,7 +61,7 @@ locale = 'en-us'
       description = "Every read/write operation returns a [`DataOutput` / `ProcessOutput`](https://www.nuget.org/packages/ArturRios.Output) envelope, so infrastructure failures —..."
 
 [params]
-  copyright.authors = 'Artur Rios | [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)'
+  copyright.authors = 'Artur Rios | [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)'
   privacy_policy = ''
   github_repo = 'https://github.com/artur-rios/dotnet-data'
   github_branch = 'main'

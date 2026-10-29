@@ -291,20 +291,3 @@ await using var txScope = tx.ConfigureAwait(false);
 Writing `await using var tx = (…).ConfigureAwait(false)` would make `tx` a `ConfiguredAsyncDisposable`,
 which is not the transaction the surrounding code needs. Splitting it keeps the variable's own type and
 still configures the disposal await.
-
-## Testing
-
-The test suite is xUnit, and every test is named with the Given / When / Then pattern. Every test class
-carries a `Category` trait, so the two kinds can be run — and reported — separately:
-
-```bash
-dotnet test src/ArturRios.Data.sln --filter "Category=Unit"
-dotnet test src/ArturRios.Data.sln --filter "Category=Functional"
-```
-
-Unit tests exercise the code in isolation against test doubles: contracts, options, dependency-injection
-registration, the column map and the exporters over in-memory streams.
-Functional tests run against real stores — SQLite for the relational and Dapper paths, an ephemeral
-MongoDB replica set for the document repository and its transactions, and DynamoDB Local for the item
-repository.
-CI runs the two as separate jobs, and both must pass before a pull request can be merged.

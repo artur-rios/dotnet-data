@@ -87,7 +87,7 @@ dotnet add package ArturRios.Data.DynamoDb
 
 # File export (standalone — no core needed):
 dotnet add package ArturRios.Data.Export
-dotnet add package ArturRios.Data.Export.Excel    # optional — adds ExportFormat.Excel
+dotnet add package ArturRios.Data.Export.Excel    # optional — enables ExportFormat.Excel
 ```
 
 ## The result envelope
@@ -123,4 +123,4 @@ classDiagram
   map and its attributes, and the options.
 
 The source lives at [github.com/artur-rios/dotnet-data](https://github.com/artur-rios/dotnet-data),
-licensed under the MIT License.
+licensed under the Artur Rios Attribution License.

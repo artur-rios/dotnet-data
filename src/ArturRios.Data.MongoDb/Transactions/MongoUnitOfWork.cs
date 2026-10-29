@@ -13,125 +13,101 @@ namespace ArturRios.Data.MongoDb.Transactions;
 public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongoUnitOfWork, IAsyncMongoUnitOfWork
 {
     /// <inheritdoc />
-    public async Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default)
-    {
-        using var session = await client.StartSessionAsync(cancellationToken: ct).ConfigureAwait(false);
-        var previousSession = context.Session;
-        context.Session = session;
-        session.StartTransaction();
-        try
+    public Task<ProcessOutput> ExecuteInTransactionAsync(Func<Task> work, CancellationToken ct = default) =>
+        RunAsync(async () =>
         {
             await work().ConfigureAwait(false);
-            await session.CommitTransactionAsync(ct).ConfigureAwait(false);
             return ProcessOutput.New;
-        }
-        catch (Exception ex)
-        {
-            await AbortQuietlyAsync(session).ConfigureAwait(false);
-
-            if (ex is OperationCanceledException)
-            {
-                throw;
-            }
-
-            return ProcessOutput.New.WithError(MongoErrors.Describe(ex));
-        }
-        finally
-        {
-            context.Session = previousSession;
-        }
-    }
+        }, error => ProcessOutput.New.WithError(error), ct);
 
     /// <inheritdoc />
-    public async Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work,
-        CancellationToken ct = default)
-    {
-        using var session = await client.StartSessionAsync(cancellationToken: ct).ConfigureAwait(false);
-        var previousSession = context.Session;
-        context.Session = session;
-        session.StartTransaction();
-        try
-        {
-            var result = await work().ConfigureAwait(false);
-            await session.CommitTransactionAsync(ct).ConfigureAwait(false);
-            return DataOutput<TResult>.New.WithData(result);
-        }
-        catch (Exception ex)
-        {
-            await AbortQuietlyAsync(session).ConfigureAwait(false);
-
-            if (ex is OperationCanceledException)
-            {
-                throw;
-            }
-
-            return DataOutput<TResult>.New.WithError(MongoErrors.Describe(ex));
-        }
-        finally
-        {
-            context.Session = previousSession;
-        }
-    }
+    public Task<DataOutput<TResult>> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> work,
+        CancellationToken ct = default) =>
+        RunAsync(async () => DataOutput<TResult>.New.WithData(await work().ConfigureAwait(false)),
+            error => DataOutput<TResult>.New.WithError(error), ct);
 
     /// <inheritdoc />
-    public ProcessOutput ExecuteInTransaction(Action work)
-    {
-        using var session = client.StartSession();
-        var previousSession = context.Session;
-        context.Session = session;
-        session.StartTransaction();
-        try
+    public ProcessOutput ExecuteInTransaction(Action work) =>
+        Run(() =>
         {
             work();
-            session.CommitTransaction();
             return ProcessOutput.New;
-        }
-        catch (OperationCanceledException)
-        {
-            AbortQuietly(session);
+        }, error => ProcessOutput.New.WithError(error));
 
-            throw;
+    /// <inheritdoc />
+    public DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work) =>
+        Run(() => DataOutput<TResult>.New.WithData(work()), error => DataOutput<TResult>.New.WithError(error));
+
+    // Every step that can fail — opening the session, starting the transaction (which throws on a standalone
+    // server), the work and the commit — runs inside the guard, so a failure is enveloped like any other and
+    // the finally always restores the caller's ambient session before the session is disposed. The session is
+    // made ambient only once its transaction has started.
+    private async Task<TOutput> RunAsync<TOutput>(Func<Task<TOutput>> work, Func<string, TOutput> fail,
+        CancellationToken ct)
+    {
+        var previousSession = context.Session;
+        IClientSessionHandle? session = null;
+        try
+        {
+            session = await client.StartSessionAsync(cancellationToken: ct).ConfigureAwait(false);
+            session.StartTransaction();
+            context.Session = session;
+            var output = await work().ConfigureAwait(false);
+            await session.CommitTransactionAsync(ct).ConfigureAwait(false);
+            return output;
         }
         catch (Exception ex)
         {
-            AbortQuietly(session);
+            if (session is not null)
+            {
+                await AbortQuietlyAsync(session).ConfigureAwait(false);
+            }
 
-            return ProcessOutput.New.WithError(MongoErrors.Describe(ex));
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            return fail(MongoErrors.Describe(ex));
         }
         finally
         {
             context.Session = previousSession;
+            session?.Dispose();
         }
     }
 
-    /// <inheritdoc />
-    public DataOutput<TResult> ExecuteInTransaction<TResult>(Func<TResult> work)
+    private TOutput Run<TOutput>(Func<TOutput> work, Func<string, TOutput> fail)
     {
-        using var session = client.StartSession();
         var previousSession = context.Session;
-        context.Session = session;
-        session.StartTransaction();
+        IClientSessionHandle? session = null;
         try
         {
-            var result = work();
+            session = client.StartSession();
+            session.StartTransaction();
+            context.Session = session;
+            var output = work();
             session.CommitTransaction();
-            return DataOutput<TResult>.New.WithData(result);
-        }
-        catch (OperationCanceledException)
-        {
-            AbortQuietly(session);
-
-            throw;
+            return output;
         }
         catch (Exception ex)
         {
-            AbortQuietly(session);
+            if (session is not null)
+            {
+                AbortQuietly(session);
+            }
 
-            return DataOutput<TResult>.New.WithError(MongoErrors.Describe(ex));
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            return fail(MongoErrors.Describe(ex));
         }
         finally
         {
             context.Session = previousSession;
+            session?.Dispose();
         }
     }
 
@@ -146,7 +122,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
         }
         catch
         {
-            // Already aborted, or the session is gone. Disposing the session completes the cleanup.
+            // Never started, already aborted, or the session is gone. Disposing the session completes the cleanup.
         }
     }
 
@@ -158,7 +134,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
         }
         catch
         {
-            // Already aborted, or the session is gone. Disposing the session completes the cleanup.
+            // Never started, already aborted, or the session is gone. Disposing the session completes the cleanup.
         }
     }
 }

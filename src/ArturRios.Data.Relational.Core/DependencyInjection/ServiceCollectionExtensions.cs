@@ -39,11 +39,25 @@ public static class ServiceCollectionExtensions
             return;
         }
 
-        throw new DataAccessException(
+        throw MissingProvider(type);
+    }
+
+    // Names the package and the registration call that actually exist for the type, so the message
+    // can be followed as written (DatabaseType.SqLite is registered by AddSqliteProvider, for example).
+    private static DataAccessException MissingProvider(DatabaseType type)
+    {
+        var (package, registration) = type switch
+        {
+            DatabaseType.PostgreSql => ("ArturRios.Data.PostgreSql", "AddPostgreSqlProvider"),
+            DatabaseType.MySql => ("ArturRios.Data.MySql", "AddMySqlProvider"),
+            DatabaseType.SqLite => ("ArturRios.Data.Sqlite", "AddSqliteProvider"),
+            _ => ("the matching provider package", "its provider registration")
+        };
+
+        return new DataAccessException(
         [
             $"No IDatabaseProvider registered for DatabaseType '{type}'. " +
-            $"Install and register the matching provider package " +
-            $"(e.g. ArturRios.Data.Core.{type}) by calling its Add{type}Provider() extension."
+            $"Install {package} and call services.{registration}()."
         ]);
     }
 
@@ -81,12 +95,7 @@ public static class ServiceCollectionExtensions
         var match = providers.FirstOrDefault(p => p.Type == type);
         if (match is null)
         {
-            throw new DataAccessException(
-            [
-                $"No IDatabaseProvider registered for DatabaseType '{type}'. " +
-                $"Install and register the matching provider package " +
-                $"(e.g. ArturRios.Data.Core.{type}) by calling its Add{type}Provider() extension."
-            ]);
+            throw MissingProvider(type);
         }
 
         return match;

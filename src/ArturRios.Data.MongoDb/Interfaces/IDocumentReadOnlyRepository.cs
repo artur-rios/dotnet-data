@@ -18,7 +18,10 @@ public interface IDocumentReadOnlyRepository<T> where T : Document
     /// <summary>Returns all documents.</summary>
     DataOutput<IEnumerable<T>> GetAll();
 
-    /// <summary>Returns the document with the given id, or a successful null when none.</summary>
+    /// <summary>
+    ///     Returns the document with the given id, or a successful null when none - including when the id
+    ///     is not a valid ObjectId, since no document can have it.
+    /// </summary>
     DataOutput<T?> GetById(string id);
 
     /// <summary>Returns documents matching the predicate (server-side filter).</summary>

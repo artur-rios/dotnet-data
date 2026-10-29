@@ -33,6 +33,21 @@ public class DapperSqlQueryTests
     }
 
     [Fact]
+    public void GivenNoMatchingRows_WhenQueryingTheFirstValueTypedRow_ThenASuccessfulDefaultComesBack()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var sut = new DapperSqlQuery(context);
+
+        var plain = sut.QueryFirstOrDefault<long>("SELECT Id FROM Items");
+        var nullable = sut.QueryFirstOrDefault<long?>("SELECT Id FROM Items");
+
+        Assert.True(plain.Success);
+        Assert.Equal(0L, plain.Data);
+        Assert.True(nullable.Success);
+        Assert.Null(nullable.Data);
+    }
+
+    [Fact]
     public void GivenNoMatchingRows_WhenQuerying_ThenASuccessfulEmptySequenceComesBack()
     {
         using var context = SqliteTestContextFactory.Create();

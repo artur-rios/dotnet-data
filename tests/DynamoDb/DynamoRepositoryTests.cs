@@ -78,6 +78,21 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task GivenAVersionedItemThatWasRemoved_WhenDeleted_ThenTheConflictSaysItWasModifiedOrRemoved()
+    {
+        var repo = NewVersionedRepo();
+        var item = new VersionedTestItem { Id = Guid.NewGuid().ToString(), Name = "A" };
+        await repo.SaveAsync(item);
+        var copy = (await repo.LoadAsync(item.Id)).Data!;
+        Assert.True((await repo.DeleteAsync(copy)).Success);
+
+        var conflict = await repo.DeleteAsync(item);
+
+        Assert.False(conflict.Success);
+        Assert.Equal(["Concurrency conflict: the item was modified or removed by another process."], conflict.Errors);
+    }
+
+    [Fact]
     public async Task GivenATableThatDoesNotExist_WhenSaving_ThenAnErrorEnvelopeComesBackWithoutThrowing()
     {
         // A repository for a type whose table was never created.

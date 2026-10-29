@@ -66,4 +66,66 @@ public class ExcelExporterTests
         var exporter = provider.GetRequiredService<IExporterFactory>().Resolve<Widget>(ExportFormat.Excel);
         Assert.IsType<ExcelExporter<Widget>>(exporter);
     }
+
+    private sealed class TypedRow
+    {
+        public double Ratio { get; set; }
+        public DateOnly Day { get; set; }
+        public TimeSpan Duration { get; set; }
+        public TimeOnly At { get; set; }
+        public string Formula { get; set; } = string.Empty;
+    }
+
+    private static async Task<XLWorkbook> WriteSingleRowAsync(TypedRow row)
+    {
+        using var stream = new MemoryStream();
+        var result = await new ExcelExporter<TypedRow>(new ExcelExportOptions()).WriteAsync([row], stream);
+        Assert.True(result.Success);
+
+        return new XLWorkbook(new MemoryStream(stream.ToArray()));
+    }
+
+    [Theory]
+    [InlineData(double.NaN, "NaN")]
+    [InlineData(double.PositiveInfinity, "Infinity")]
+    [InlineData(double.NegativeInfinity, "-Infinity")]
+    public async Task GivenANonFiniteNumber_WhenWritingAWorkbook_ThenTheExportSucceedsAndTheValueIsWrittenAsText(
+        double value, string expected)
+    {
+        using var workbook = await WriteSingleRowAsync(new TypedRow { Ratio = value });
+        var ws = workbook.Worksheet(1);
+
+        Assert.Equal(XLDataType.Text, ws.Cell(2, 1).DataType);
+        Assert.Equal(expected, ws.Cell(2, 1).GetString());
+    }
+
+    [Fact]
+    public async Task GivenDateAndTimeValues_WhenWritingAWorkbook_ThenTheyAreNativeDateAndTimeCells()
+    {
+        using var workbook = await WriteSingleRowAsync(new TypedRow
+        {
+            Ratio = 1,
+            Day = new DateOnly(2026, 10, 8),
+            Duration = TimeSpan.FromMinutes(90),
+            At = new TimeOnly(13, 30)
+        });
+        var ws = workbook.Worksheet(1);
+
+        Assert.Equal(XLDataType.DateTime, ws.Cell(2, 2).DataType);
+        Assert.Equal(new DateTime(2026, 10, 8), ws.Cell(2, 2).GetDateTime());
+        Assert.Equal(XLDataType.TimeSpan, ws.Cell(2, 3).DataType);
+        Assert.Equal(TimeSpan.FromMinutes(90), ws.Cell(2, 3).GetTimeSpan());
+        Assert.Equal(XLDataType.TimeSpan, ws.Cell(2, 4).DataType);
+        Assert.Equal(new TimeSpan(13, 30, 0), ws.Cell(2, 4).GetTimeSpan());
+    }
+
+    [Fact]
+    public async Task GivenTextThatLooksLikeAFormula_WhenWritingAWorkbook_ThenItIsStoredAsTextNotAFormula()
+    {
+        using var workbook = await WriteSingleRowAsync(new TypedRow { Formula = "=HYPERLINK(\"http://x\")" });
+        var ws = workbook.Worksheet(1);
+
+        Assert.False(ws.Cell(2, 5).HasFormula);
+        Assert.Equal(XLDataType.Text, ws.Cell(2, 5).DataType);
+    }
 }

@@ -24,7 +24,8 @@ public class ServiceCollectionExtensionsTests
         services.AddSingleton<IDatabaseProvider>(new FakeSqliteProvider(connection));
         services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
         {
-            DatabaseType = DatabaseType.SqLite, ConnectionString = "Filename=:memory:"
+            DatabaseType = DatabaseType.SqLite,
+            ConnectionString = "Filename=:memory:"
         });
 
         using var provider = services.BuildServiceProvider();
@@ -49,6 +50,23 @@ public class ServiceCollectionExtensionsTests
             services.AddDataConfig<TestDbContext>(new BaseDbContextOptions { DatabaseType = DatabaseType.SqLite }));
     }
 
+    [Theory]
+    [InlineData(DatabaseType.SqLite, "ArturRios.Data.Sqlite", "AddSqliteProvider()")]
+    [InlineData(DatabaseType.PostgreSql, "ArturRios.Data.PostgreSql", "AddPostgreSqlProvider()")]
+    [InlineData(DatabaseType.MySql, "ArturRios.Data.MySql", "AddMySqlProvider()")]
+    public void GivenNoDatabaseProvider_WhenAddingTheDataConfiguration_ThenTheErrorNamesThePackageAndCallThatExist(
+        DatabaseType type, string package, string registration)
+    {
+        var services = new ServiceCollection();
+
+        var exception = Assert.Throws<DataAccessException>(() =>
+            services.AddDataConfig<TestDbContext>(new BaseDbContextOptions { DatabaseType = type }));
+
+        var message = Assert.Single(exception.Messages);
+        Assert.Contains(package, message);
+        Assert.Contains(registration, message);
+    }
+
     [Fact]
     public void GivenAProviderWithConstructorDependencies_WhenAddingTheDataConfiguration_ThenValidationDefersInsteadOfFailing()
     {
@@ -60,7 +78,8 @@ public class ServiceCollectionExtensionsTests
         var exception = Record.Exception(() =>
             services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
             {
-                DatabaseType = DatabaseType.SqLite, ConnectionString = "Filename=:memory:"
+                DatabaseType = DatabaseType.SqLite,
+                ConnectionString = "Filename=:memory:"
             }));
 
         Assert.Null(exception);
@@ -80,7 +99,8 @@ public class ServiceCollectionExtensionsTests
         var exception = Record.Exception(() =>
             services.AddDataConfig<TestDbContext>(new BaseDbContextOptions
             {
-                DatabaseType = DatabaseType.SqLite, ConnectionString = "Filename=:memory:"
+                DatabaseType = DatabaseType.SqLite,
+                ConnectionString = "Filename=:memory:"
             }));
 
         Assert.Null(exception);

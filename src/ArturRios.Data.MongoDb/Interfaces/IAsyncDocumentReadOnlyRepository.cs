@@ -18,7 +18,10 @@ public interface IAsyncDocumentReadOnlyRepository<T> where T : Document
     /// <summary>Returns all documents.</summary>
     Task<DataOutput<IEnumerable<T>>> GetAllAsync(CancellationToken ct = default);
 
-    /// <summary>Returns the document with the given id, or a successful null when none.</summary>
+    /// <summary>
+    ///     Returns the document with the given id, or a successful null when none - including when the id
+    ///     is not a valid ObjectId, since no document can have it.
+    /// </summary>
     Task<DataOutput<T?>> GetByIdAsync(string id, CancellationToken ct = default);
 
     /// <summary>Returns documents matching the predicate (server-side filter).</summary>

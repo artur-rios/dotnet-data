@@ -9,7 +9,8 @@ namespace ArturRios.Data.Relational.Core.Repositories;
 /// <summary>
 ///     Provider-agnostic Entity Framework Core implementation of the repository contracts.
 ///     Every write auto-saves; inside an active unit-of-work transaction,
-///     saves flush without committing. Infrastructure failures are returned as <see cref="DataOutput{T}" /> errors.
+///     saves flush without committing. Infrastructure failures are returned as <see cref="DataOutput{T}" /> errors;
+///     a failed write discards the changes still pending in the context, so the context stays usable.
 /// </summary>
 /// <typeparam name="T">The entity type.</typeparam>
 /// <typeparam name="TKey">The entity's primary key type.</typeparam>
@@ -39,7 +40,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
 
     /// <inheritdoc />
     public Task<DataOutput<TKey>> CreateAsync(T entity, CancellationToken ct = default) =>
-        GuardedAsync(async () =>
+        WriteAsync(async () =>
         {
             await Set.AddAsync(entity, ct).ConfigureAwait(false);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
@@ -50,7 +51,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<TKey>>>
         CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<TKey>>(async () =>
+        WriteAsync<IEnumerable<TKey>>(async () =>
         {
             var list = entities.ToList();
             await Set.AddRangeAsync(list, ct).ConfigureAwait(false);
@@ -61,7 +62,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
 
     /// <inheritdoc />
     public Task<DataOutput<T>> UpdateAsync(T entity, CancellationToken ct = default) =>
-        GuardedAsync(async () =>
+        WriteAsync(async () =>
         {
             Set.Update(entity);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
@@ -71,7 +72,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<T>>> UpdateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<T>>(async () =>
+        WriteAsync<IEnumerable<T>>(async () =>
         {
             var list = entities.ToList();
             Set.UpdateRange(list);
@@ -82,7 +83,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
 
     /// <inheritdoc />
     public Task<DataOutput<TKey>> DeleteAsync(T entity, CancellationToken ct = default) =>
-        GuardedAsync(async () =>
+        WriteAsync(async () =>
         {
             Set.Remove(entity);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
@@ -92,7 +93,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
 
     /// <inheritdoc />
     public Task<DataOutput<IEnumerable<TKey>>> DeleteRangeAsync(IEnumerable<TKey> ids, CancellationToken ct = default) =>
-        GuardedAsync<IEnumerable<TKey>>(async () =>
+        WriteAsync<IEnumerable<TKey>>(async () =>
         {
             var idList = ids.ToList();
             var matches = await Set.Where(e => idList.Contains(e.Id)).ToListAsync(ct).ConfigureAwait(false);
@@ -114,7 +115,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
         Guarded(() => Set.FirstOrDefault(e => e.Id.Equals(id)));
 
     /// <inheritdoc />
-    public DataOutput<TKey> Create(T entity) => Guarded(() =>
+    public DataOutput<TKey> Create(T entity) => Write(() =>
     {
         Set.Add(entity);
         context.SaveChanges();
@@ -122,7 +123,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<TKey>> CreateRange(IEnumerable<T> entities) => Guarded(IEnumerable<TKey> () =>
+    public DataOutput<IEnumerable<TKey>> CreateRange(IEnumerable<T> entities) => Write(IEnumerable<TKey> () =>
     {
         var list = entities.ToList();
         Set.AddRange(list);
@@ -131,7 +132,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     });
 
     /// <inheritdoc />
-    public DataOutput<T> Update(T entity) => Guarded(() =>
+    public DataOutput<T> Update(T entity) => Write(() =>
     {
         Set.Update(entity);
         context.SaveChanges();
@@ -139,7 +140,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities) => Guarded(IEnumerable<T> () =>
+    public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities) => Write(IEnumerable<T> () =>
     {
         var list = entities.ToList();
         Set.UpdateRange(list);
@@ -148,7 +149,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     });
 
     /// <inheritdoc />
-    public DataOutput<TKey> Delete(T entity) => Guarded(() =>
+    public DataOutput<TKey> Delete(T entity) => Write(() =>
     {
         Set.Remove(entity);
         context.SaveChanges();
@@ -156,7 +157,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     });
 
     /// <inheritdoc />
-    public DataOutput<IEnumerable<TKey>> DeleteRange(IEnumerable<TKey> ids) => Guarded(IEnumerable<TKey> () =>
+    public DataOutput<IEnumerable<TKey>> DeleteRange(IEnumerable<TKey> ids) => Write(IEnumerable<TKey> () =>
     {
         var idList = ids.ToList();
         var matches = Set.Where(e => idList.Contains(e.Id)).ToList();
@@ -172,6 +173,61 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     /// </summary>
     private static DataOutput<TResult> Fail<TResult>(Exception ex) =>
         DataOutput<TResult>.New.WithError(RelationalErrors.Describe(ex));
+
+    /// <summary>
+    ///     Runs a write, converting failures to envelope errors. A failed save leaves its changes
+    ///     pending in the change tracker, and the caller keeps using the same scoped context after an
+    ///     error envelope, so the pending changes are discarded: otherwise the next save on the context
+    ///     would replay the rejected change and fail again.
+    /// </summary>
+    private DataOutput<TResult> Write<TResult>(Func<TResult> operation)
+    {
+        try
+        {
+            var output = Guarded(operation);
+            if (!output.Success)
+            {
+                DiscardPendingChanges();
+            }
+
+            return output;
+        }
+        catch (OperationCanceledException)
+        {
+            DiscardPendingChanges();
+            throw;
+        }
+    }
+
+    /// <inheritdoc cref="Write{TResult}" />
+    private async Task<DataOutput<TResult>> WriteAsync<TResult>(Func<Task<TResult>> operation)
+    {
+        try
+        {
+            var output = await GuardedAsync(operation).ConfigureAwait(false);
+            if (!output.Success)
+            {
+                DiscardPendingChanges();
+            }
+
+            return output;
+        }
+        catch (OperationCanceledException)
+        {
+            DiscardPendingChanges();
+            throw;
+        }
+    }
+
+    private void DiscardPendingChanges()
+    {
+        foreach (var entry in context.ChangeTracker.Entries()
+                     .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+                     .ToList())
+        {
+            entry.State = EntityState.Detached;
+        }
+    }
 
     /// <summary>Runs a synchronous data operation, converting failures to envelope errors.</summary>
     protected static DataOutput<TResult> Guarded<TResult>(Func<TResult> operation)

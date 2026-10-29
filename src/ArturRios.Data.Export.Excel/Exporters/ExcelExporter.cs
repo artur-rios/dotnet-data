@@ -27,7 +27,8 @@ public class ExcelExporter<T>(ExcelExportOptions options, ILogger<ExcelExporter<
             {
                 var cell = worksheet.Cell(row, i + 1);
                 cell.Value = columns[i].Header;
-                if (options.BoldHeader) cell.Style.Font.Bold = true;
+                if (options.BoldHeader)
+                    cell.Style.Font.Bold = true;
             }
 
             row++;
@@ -53,6 +54,9 @@ public class ExcelExporter<T>(ExcelExportOptions options, ILogger<ExcelExporter<
         return Task.CompletedTask;
     }
 
+    // Built-in number format 14: the short date in the reader's locale.
+    private const int ShortDateFormatId = 14;
+
     private static void SetCell(IXLCell cell, object? value)
     {
         switch (value)
@@ -64,6 +68,24 @@ public class ExcelExporter<T>(ExcelExportOptions options, ILogger<ExcelExporter<
                 break;
             case DateTime dt:
                 cell.Value = dt;
+                break;
+            case DateOnly date:
+                cell.Value = date.ToDateTime(TimeOnly.MinValue);
+                cell.Style.NumberFormat.NumberFormatId = ShortDateFormatId;
+                break;
+            case TimeSpan span:
+                cell.Value = span;
+                break;
+            case TimeOnly time:
+                cell.Value = time.ToTimeSpan();
+                break;
+            // A cell cannot hold NaN or an infinity - ClosedXML rejects them, which would fail the whole
+            // export - so they are written as text, the way CSV renders them.
+            case double d when !double.IsFinite(d):
+                cell.Value = ValueRenderer.Render(d);
+                break;
+            case float f when !float.IsFinite(f):
+                cell.Value = ValueRenderer.Render(f);
                 break;
             // xlsx stores all numbers as IEEE-754 double; long/ulong > 2^53 and high-precision decimals lose precision.
             case sbyte or byte or short or ushort or int or uint or long or ulong or float or double or decimal:

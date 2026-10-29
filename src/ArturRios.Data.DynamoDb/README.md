@@ -1,8 +1,8 @@
 # ArturRios.Data.DynamoDb
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.DynamoDb.svg)](https://www.nuget.org/packages/ArturRios.Data.DynamoDb)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 An **AWS DynamoDB** store for the **`ArturRios.Data`** toolkit — the same enveloped repository style as
 the rest of the family, over the AWS SDK's
@@ -124,10 +124,10 @@ conditional write, and a concurrent modification returns an error on the envelop
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- ⚡ **DynamoDB guide:** <https://artur-rios.github.io/dotnet-data/dynamodb/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- ⚡ **DynamoDB guide:** <https://docs.artur-rios.tech/dotnet-data/docs/dynamodb/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 
-Licensed under the [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE).
+This project is licensed under the [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

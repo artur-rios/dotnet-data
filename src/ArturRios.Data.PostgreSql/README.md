@@ -1,8 +1,8 @@
 # ArturRios.Data.PostgreSql
 
 [![NuGet](https://img.shields.io/nuget/v/ArturRios.Data.PostgreSql.svg)](https://www.nuget.org/packages/ArturRios.Data.PostgreSql)
-[![Docs](https://img.shields.io/badge/docs-website-blue)](https://artur-rios.github.io/dotnet-data)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
+[![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
+[![License: Attribution](https://img.shields.io/badge/License-Attribution-blue.svg)](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE)
 
 The **PostgreSQL** provider for the **`ArturRios.Data`** toolkit, backed by
 [Npgsql](https://www.npgsql.org/). It plugs PostgreSQL into
@@ -45,9 +45,9 @@ builder.Services.AddPostgreSqlProvider();
 builder.Services.AddDataConfigFromSettings<AppDbContext>(builder.Configuration, "ArturRios.Data.Core");
 ```
 
-That's the whole provider-specific surface. From here on you use `IAsyncRepository<T>`,
+That's the whole provider-specific surface. From here on you use `IAsyncRepository<T, TKey>`,
 `IAsyncUnitOfWork`, and the rest of the core API — see the
-[Relational guide](https://artur-rios.github.io/dotnet-data/relational/).
+[Relational guide](https://docs.artur-rios.tech/dotnet-data/docs/relational/).
 
 ## What it does
 
@@ -60,10 +60,10 @@ If the configured `DatabaseType` has no matching provider registered, registrati
 
 ## Documentation
 
-- 📚 **Full documentation:** <https://artur-rios.github.io/dotnet-data>
-- 🗄️ **Relational guide:** <https://artur-rios.github.io/dotnet-data/relational/>
-- 🧩 **Architecture & diagrams:** <https://artur-rios.github.io/dotnet-data/architecture/>
+- 📚 **Full documentation:** <https://docs.artur-rios.tech/dotnet-data>
+- 🗄️ **Relational guide:** <https://docs.artur-rios.tech/dotnet-data/docs/relational/>
+- 🧩 **Architecture & diagrams:** <https://docs.artur-rios.tech/dotnet-data/docs/architecture/>
 
 ## Legal
 
-Licensed under the [MIT License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE).
+This project is licensed under the [Artur Rios Attribution License](https://github.com/artur-rios/dotnet-data/blob/main/LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

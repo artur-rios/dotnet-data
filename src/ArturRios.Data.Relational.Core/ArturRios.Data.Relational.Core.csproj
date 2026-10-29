@@ -13,12 +13,12 @@
     <IncludeSymbols>false</IncludeSymbols>
     <Nullable>enable</Nullable>
     <PackageId>ArturRios.Data.Relational.Core</PackageId>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://artur-rios.github.io/dotnet-data</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://docs.artur-rios.tech/dotnet-data</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>utilities;data access;.net</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
-    <Version>5.0.0</Version>
+    <Version>5.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ArturRios.Output" Version="3.2.0" />
@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath=""/>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
   <!-- Provider packages live in sibling subfolders under src/. Exclude them from the
        core project's default compile glob so their sources and generated obj artifacts

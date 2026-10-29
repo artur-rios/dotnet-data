@@ -41,8 +41,10 @@ public abstract class ExporterBase<T>(ILogger? logger = null) : IExporter<T> whe
     protected async Task<ProcessOutput> GuardedWriteAsync(IEnumerable<T> data, Stream destination,
         Func<Stream, Task> write)
     {
-        if (data is null) return ProcessOutput.New.WithError(NullDataMessage);
-        if (destination is null) return ProcessOutput.New.WithError(NullDestinationMessage);
+        if (data is null)
+            return ProcessOutput.New.WithError(NullDataMessage);
+        if (destination is null)
+            return ProcessOutput.New.WithError(NullDestinationMessage);
 
         try
         {
@@ -53,23 +55,61 @@ public abstract class ExporterBase<T>(ILogger? logger = null) : IExporter<T> whe
         catch (Exception ex) { return Fail(ex, destination: null); }
     }
 
-    /// <summary>Guards a file write: opens/truncates the file, then delegates to <paramref name="write" />.</summary>
+    /// <summary>
+    ///     Guards a file write: writes through <paramref name="write" /> to a temporary file beside
+    ///     <paramref name="path" />, then moves it over <paramref name="path" />. A write that fails or is
+    ///     cancelled leaves an existing file untouched and no partial file behind.
+    /// </summary>
     protected async Task<ProcessOutput> GuardedFileAsync(IEnumerable<T> data, string path, Func<Stream, Task> write)
     {
-        if (data is null) return ProcessOutput.New.WithError(NullDataMessage);
-        if (string.IsNullOrEmpty(path)) return ProcessOutput.New.WithError(EmptyPathMessage);
+        if (data is null)
+            return ProcessOutput.New.WithError(NullDataMessage);
+        if (string.IsNullOrEmpty(path))
+            return ProcessOutput.New.WithError(EmptyPathMessage);
+
+        string? temporaryPath = null;
+        try
+        {
+            var fullPath = Path.GetFullPath(path);
+            temporaryPath = Path.Combine(Path.GetDirectoryName(fullPath)!,
+                $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
+
+            var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            await using (stream.ConfigureAwait(false))
+            {
+                await write(stream).ConfigureAwait(false);
+            }
+
+            File.Move(temporaryPath, fullPath, overwrite: true);
+            return ProcessOutput.New;
+        }
+        catch (OperationCanceledException)
+        {
+            DeleteQuietly(temporaryPath);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            DeleteQuietly(temporaryPath);
+            return Fail(ex, path);
+        }
+    }
+
+    private static void DeleteQuietly(string? path)
+    {
+        if (path is null)
+        {
+            return;
+        }
 
         try
         {
-            var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-
-            await using var streamScope = stream.ConfigureAwait(false);
-
-            await write(stream).ConfigureAwait(false);
-            return ProcessOutput.New;
+            File.Delete(path);
         }
-        catch (OperationCanceledException) { throw; }
-        catch (Exception ex) { return Fail(ex, path); }
+        catch
+        {
+            // Best effort: the temporary file is hidden and uniquely named, so a leftover never collides.
+        }
     }
 
     /// <summary>

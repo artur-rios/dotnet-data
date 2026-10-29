@@ -16,6 +16,16 @@ public class CsvOptions
 
     /// <summary>Text encoding. Default UTF-8 without BOM.</summary>
     public Encoding Encoding { get; set; } = new UTF8Encoding(false);
+
+    /// <summary>
+    ///     Whether to neutralize text that a spreadsheet would run as a formula (CSV / formula injection).
+    ///     When on, a text value that starts with <c>=</c>, <c>+</c>, <c>-</c>, <c>@</c>, a tab or a carriage
+    ///     return is written with a leading <c>'</c>, so Excel, LibreOffice and Google Sheets show it as text
+    ///     instead of evaluating it. Numbers, dates and other formatted values are never changed, so a negative
+    ///     number stays a number. Default true; turn it off only when the file is never opened in a spreadsheet
+    ///     and the exact text matters.
+    /// </summary>
+    public bool EscapeFormulas { get; set; } = true;
 }
 
 /// <summary>Options for the JSON exporter.</summary>
