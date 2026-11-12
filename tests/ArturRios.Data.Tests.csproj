@@ -16,7 +16,7 @@
     <PackageReference Include="EphemeralMongo" Version="3.2.0"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11"/>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11"/>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.103.4" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.110.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0"/>
     <PackageReference Include="MongoDB.Driver" Version="3.11.0"/>
     <PackageReference Include="MySqlConnector" Version="2.6.1"/>
