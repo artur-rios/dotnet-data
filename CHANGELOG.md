@@ -10,6 +10,20 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+### Changed
+
+- `ArturRios.Data.Relational.Core`: EF Core and `Microsoft.Extensions.*` updated from 10.0.11 to 10.0.15, and
+  `ArturRios.Output` from 3.2.0 to 3.3.1.
+- `ArturRios.Data.Sqlite`: `Microsoft.EntityFrameworkCore.Sqlite` and `Microsoft.Extensions.*` updated to 10.0.15.
+- `ArturRios.Data.PostgreSql`: `Microsoft.Extensions.DependencyInjection.Abstractions` updated to 10.0.15.
+- `ArturRios.Data.MySql`: `Microting.EntityFrameworkCore.MySql` updated from 10.0.10 to 10.0.14, and
+  `Microsoft.Extensions.DependencyInjection.Abstractions` to 10.0.15.
+- `ArturRios.Data.Dapper`: `Microsoft.Extensions.*` updated to 10.0.15.
+- `ArturRios.Data.MongoDb`: `MongoDB.Driver` updated from 3.11.0 to 3.14.0, `ArturRios.Output` to 3.3.1 and
+  `Microsoft.Extensions.*` to 10.0.15.
+- `ArturRios.Data.DynamoDb`: `ArturRios.Output` updated to 3.3.1 and `Microsoft.Extensions.*` to 10.0.15.
+- `ArturRios.Data.Export`: `ArturRios.Output` updated to 3.3.1 and `Microsoft.Extensions.*` to 10.0.15.
+
 ## [ArturRios.Data.Relational.Core 5.0.1] - 2026-10-29
 
 ### Changed
