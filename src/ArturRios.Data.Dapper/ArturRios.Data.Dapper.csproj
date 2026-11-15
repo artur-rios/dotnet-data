@@ -14,16 +14,16 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>utilities;data access;.net;dapper;sql</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
-    <Version>5.0.0</Version>
+    <Version>5.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath=""/>
     <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.79"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11"/>
+    <PackageReference Include="Dapper" Version="2.1.89"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArturRios.Data.Relational.Core\ArturRios.Data.Relational.Core.csproj"/>

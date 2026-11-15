@@ -10,6 +10,64 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+## [ArturRios.Data.Relational.Core 5.0.2] - 2026-11-14
+
+### Changed
+
+- EF Core and `Microsoft.Extensions.*` updated from 10.0.11 to 10.0.15, and `ArturRios.Output` from
+  3.2.0 to 3.3.1.
+
+## [ArturRios.Data.Sqlite 4.0.1] - 2026-11-14
+
+### Changed
+
+- `Microsoft.EntityFrameworkCore.Sqlite` and `Microsoft.Extensions.DependencyInjection.Abstractions` updated
+  from 10.0.11 to 10.0.15.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.2 instead of 5.0.1.
+
+## [ArturRios.Data.PostgreSql 4.0.1] - 2026-11-14
+
+### Changed
+
+- `Microsoft.Extensions.DependencyInjection.Abstractions` updated from 10.0.11 to 10.0.15.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.2 instead of 5.0.1.
+
+## [ArturRios.Data.MySql 2.0.1] - 2026-11-14
+
+### Changed
+
+- `Microting.EntityFrameworkCore.MySql` updated from 10.0.10 to 10.0.14, and
+  `Microsoft.Extensions.DependencyInjection.Abstractions` from 10.0.11 to 10.0.15.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.2 instead of 5.0.1.
+
+## [ArturRios.Data.Dapper 5.0.1] - 2026-11-14
+
+### Changed
+
+- `Dapper` updated from 2.1.79 to 2.1.89, and `Microsoft.Extensions.*` from 10.0.11 to 10.0.15.
+- Depends on `ArturRios.Data.Relational.Core` 5.0.2 instead of 5.0.1.
+
+## [ArturRios.Data.MongoDb 3.0.1] - 2026-11-14
+
+### Changed
+
+- `MongoDB.Driver` updated from 3.11.0 to 3.14.0, `ArturRios.Output` from 3.2.0 to 3.3.1 and
+  `Microsoft.Extensions.*` from 10.0.11 to 10.0.15.
+
+## [ArturRios.Data.DynamoDb 2.0.3] - 2026-11-14
+
+### Changed
+
+- `AWSSDK.DynamoDBv2` updated from 4.0.103.4 to 4.0.110.3, `ArturRios.Output` from 3.2.0 to 3.3.1 and
+  `Microsoft.Extensions.*` from 10.0.11 to 10.0.15.
+
+## [ArturRios.Data.Export 2.2.1] - 2026-11-14
+
+### Changed
+
+- `MessagePack` updated from 3.1.8 to 3.1.12, `ArturRios.Output` from 3.2.0 to 3.3.1 and
+  `Microsoft.Extensions.*` from 10.0.11 to 10.0.15.
+
 ## [ArturRios.Data.Relational.Core 5.0.1] - 2026-10-29
 
 ### Changed
@@ -658,7 +716,15 @@ The database schema is unchanged for `long` keys, so no migration is needed.
 - `Entity`, `ICrudRepository`, `IRangeRepository`, `IReadOnlyRepository` and `BaseDbContextOptions`, with XML
   documentation.
 
-[Unreleased]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.1...HEAD
+[Unreleased]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.2...HEAD
+[ArturRios.Data.Relational.Core 5.0.2]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.1...ArturRios.Data.Relational.Core@5.0.2
+[ArturRios.Data.Sqlite 4.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Sqlite@4.0.0...ArturRios.Data.Sqlite@4.0.1
+[ArturRios.Data.PostgreSql 4.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.PostgreSql@4.0.0...ArturRios.Data.PostgreSql@4.0.1
+[ArturRios.Data.MySql 2.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.MySql@2.0.0...ArturRios.Data.MySql@2.0.1
+[ArturRios.Data.Dapper 5.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Dapper@5.0.0...ArturRios.Data.Dapper@5.0.1
+[ArturRios.Data.MongoDb 3.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.MongoDb@3.0.0...ArturRios.Data.MongoDb@3.0.1
+[ArturRios.Data.DynamoDb 2.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.DynamoDb@2.0.2...ArturRios.Data.DynamoDb@2.0.3
+[ArturRios.Data.Export 2.2.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Export@2.2.0...ArturRios.Data.Export@2.2.1
 [ArturRios.Data.Relational.Core 5.0.1]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.0...ArturRios.Data.Relational.Core@5.0.1
 [ArturRios.Data.Sqlite 4.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Sqlite@3.1.0...ArturRios.Data.Sqlite@4.0.0
 [ArturRios.Data.PostgreSql 4.0.0]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.PostgreSql@3.0.2...ArturRios.Data.PostgreSql@4.0.0

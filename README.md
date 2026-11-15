@@ -1,9 +1,3 @@
-> [!NOTE]
-> This is the real, open-source code of dotnet-data. Its home is Forgejo, at
-> https://git.techcraftsmen.net/artur-rios/dotnet-data; the copy on GitHub is a read-only mirror, for viewing only, and
-> its issues and pull requests are not followed. If you want to contribute, email me at
-> arturdev@duck.com.
-
 ﻿# Dotnet Data
 
 [![Docs](https://img.shields.io/badge/docs-website-blue)](https://docs.artur-rios.tech/dotnet-data)
@@ -17,8 +11,6 @@
 [![DynamoDb](https://img.shields.io/nuget/v/ArturRios.Data.DynamoDb.svg?label=DynamoDb)](https://www.nuget.org/packages/ArturRios.Data.DynamoDb)
 [![Export](https://img.shields.io/nuget/v/ArturRios.Data.Export.svg?label=Export)](https://www.nuget.org/packages/ArturRios.Data.Export)
 [![Export.Excel](https://img.shields.io/nuget/v/ArturRios.Data.Export.Excel.svg?label=Export.Excel)](https://www.nuget.org/packages/ArturRios.Data.Export.Excel)
-
-This repository lives at <https://git.techcraftsmen.net/artur-rios/dotnet-data>. The GitHub repository is a read-only mirror of it.
 
 **`ArturRios.Data`** — a modular data-access toolkit for .NET. One consistent, envelope-based repository
 style across **relational** databases (EF Core over PostgreSQL / MySQL / SQLite, plus a Dapper read
@@ -280,6 +272,9 @@ independently and follows [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 Building from source, running the tests, the branching model and the release process are described in
 [CONTRIBUTING.md](https://github.com/artur-rios/dotnet-data/blob/main/CONTRIBUTING.md).
+
+The GitHub repository is a read-only mirror for the real, open-source code of dotnet-data. Its home is Forgejo, at
+https://git.techcraftsmen.net/artur-rios/dotnet-data. If you want to contribute, e-mail me at arturdev@duck.com.
 
 ## Legal Details
 This project is licensed under the [Artur Rios Attribution License](./LICENSE). It is free and open source: you may view, use, fork, modify, and extend it, provided you credit the author, Artur Rios, with a link to [artur-rios.tech](https://artur-rios.tech) or [github.com/artur-rios](https://github.com/artur-rios).

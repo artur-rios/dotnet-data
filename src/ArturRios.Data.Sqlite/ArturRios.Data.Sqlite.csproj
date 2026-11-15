@@ -14,15 +14,15 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>utilities;data access;.net;sqlite</PackageTags>
     <RepositoryUrl>https://github.com/artur-rios/dotnet-data</RepositoryUrl>
-    <Version>4.0.0</Version>
+    <Version>4.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath=""/>
     <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.15"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15"/>
     <!--
       Direct reference only to lift the transitive SQLitePCLRaw chain off 2.1.11, whose bundled
       SQLite has a high-severity vulnerability (GHSA-2m69-gcr7-jv3q, affects <= 2.1.11).
