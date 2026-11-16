@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using ArturRios.Data.Relational.Core.Entities;
 
-namespace ArturRios.Data.Tests;
+namespace ArturRios.Data.Tests.Entities;
 
 [Trait("Category", "Unit")]
 public class EntityTests

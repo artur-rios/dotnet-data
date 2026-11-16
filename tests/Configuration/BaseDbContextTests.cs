@@ -55,11 +55,11 @@ public class BaseDbContextTests
         await using var context = SqliteTestContextFactory.Create();
         var entity = new VersionedTestEntity { Name = "one" };
         context.VersionedItems.Add(entity);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
         var original = entity.ConcurrencyStamp;
 
         entity.Name = "two";
-        await context.SaveChangesAsync(acceptAllChangesOnSuccess: false);
+        await context.SaveChangesAsync(acceptAllChangesOnSuccess: false, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotEqual(original, entity.ConcurrencyStamp);
     }

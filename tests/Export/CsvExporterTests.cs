@@ -119,4 +119,23 @@ public class CsvExporterTests
 
         Assert.Equal($"=1+1,1,1{Environment.NewLine}", text);
     }
+    private sealed class Loose
+    {
+        public char Initial { get; set; }
+        public object? Value { get; set; }
+    }
+
+    [Fact]
+    public async Task GivenACharOrAnUnformattedValueThatASpreadsheetWouldEvaluate_WhenWritingCsv_ThenItIsPrefixedWithAQuote()
+    {
+        var text = await WriteAsync(new CsvExporter<Loose>(new CsvOptions { IncludeHeader = false }),
+            [new Loose { Initial = '=', Value = new Formula("@SUM(A1)") }]);
+
+        Assert.Equal("'=,'@SUM(A1)", text.TrimEnd());
+    }
+
+    private sealed class Formula(string text)
+    {
+        public override string ToString() => text;
+    }
 }

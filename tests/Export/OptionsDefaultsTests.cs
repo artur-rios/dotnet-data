@@ -27,4 +27,39 @@ public class OptionsDefaultsTests
         var preamble = new ExportOptions().Csv.Encoding.GetPreamble();
         Assert.Empty(preamble);
     }
+    [Fact]
+    public void GivenExplicitJsonSerializerOptions_WhenTheEffectiveOptionsAreRead_ThenTheyAreUsedAsIs()
+    {
+        var explicitOptions = new System.Text.Json.JsonSerializerOptions();
+        var options = new ArturRios.Data.Export.Configuration.JsonOptions { WriteIndented = true };
+        var derived = options.Effective;
+
+        options.SerializerOptions = explicitOptions;
+
+        Assert.True(derived.WriteIndented);
+        Assert.Same(explicitOptions, options.Effective);
+    }
+
+    [Fact]
+    public void GivenTheJsonIndentationChanges_WhenTheEffectiveOptionsAreRead_ThenTheyAreRebuiltOnceAndReused()
+    {
+        var options = new ArturRios.Data.Export.Configuration.JsonOptions();
+        var compact = options.Effective;
+
+        options.WriteIndented = true;
+        var indented = options.Effective;
+
+        Assert.False(compact.WriteIndented);
+        Assert.True(indented.WriteIndented);
+        Assert.Same(indented, options.Effective);
+    }
+
+    [Fact]
+    public void GivenExplicitMessagePackSerializerOptions_WhenTheEffectiveOptionsAreRead_ThenTheyAreUsedAsIs()
+    {
+        var explicitOptions = MessagePack.MessagePackSerializerOptions.Standard;
+        var options = new ArturRios.Data.Export.Configuration.MessagePackOptions { SerializerOptions = explicitOptions };
+
+        Assert.Same(explicitOptions, options.Effective);
+    }
 }

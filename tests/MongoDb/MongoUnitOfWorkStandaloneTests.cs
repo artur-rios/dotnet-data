@@ -16,15 +16,15 @@ public class MongoUnitOfWorkStandaloneTests(MongoStandaloneFixture fixture) : IC
         var repo = new MongoDocumentRepository<TestDoc>(context);
         var uow = new MongoUnitOfWork(client, context);
 
-        var result = await uow.ExecuteInTransactionAsync(async () => await repo.CreateAsync(new TestDoc { Name = "a" }));
+        var result = await uow.ExecuteInTransactionAsync(async () => await repo.CreateAsync(new TestDoc { Name = "a" }), TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Equal([MongoErrors.GenericMessage], result.Errors);
         Assert.Null(context.Session);
 
-        var created = await repo.CreateAsync(new TestDoc { Name = "after" });
+        var created = await repo.CreateAsync(new TestDoc { Name = "after" }, TestContext.Current.CancellationToken);
         Assert.True(created.Success);
-        Assert.Equal(["after"], (await repo.GetAllAsync()).Data!.Select(d => d.Name));
+        Assert.Equal(["after"], (await repo.GetAllAsync(TestContext.Current.CancellationToken)).Data!.Select(d => d.Name));
     }
 
     [Fact]

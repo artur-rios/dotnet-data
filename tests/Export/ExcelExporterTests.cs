@@ -17,7 +17,7 @@ public class ExcelExporterTests
     {
         using var stream = new MemoryStream();
         var result = await new ExcelExporter<Widget>(new ExcelExportOptions())
-            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 2.5m }], stream);
+            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 2.5m }], stream, TestContext.Current.CancellationToken);
         Assert.True(result.Success);
 
         stream.Position = 0;
@@ -33,7 +33,7 @@ public class ExcelExporterTests
     public async Task GivenNoRecords_WhenWritingAWorkbook_ThenOnlyTheHeaderIsWritten()
     {
         using var stream = new MemoryStream();
-        var result = await new ExcelExporter<Widget>(new ExcelExportOptions()).WriteAsync([], stream);
+        var result = await new ExcelExporter<Widget>(new ExcelExportOptions()).WriteAsync([], stream, TestContext.Current.CancellationToken);
         Assert.True(result.Success);
 
         stream.Position = 0;
@@ -48,7 +48,7 @@ public class ExcelExporterTests
     {
         using var stream = new MemoryStream();
         await new ExcelExporter<Widget>(new ExcelExportOptions { SheetName = "People" })
-            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 1m }], stream);
+            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 1m }], stream, TestContext.Current.CancellationToken);
 
         stream.Position = 0;
         using var workbook = new XLWorkbook(stream);
@@ -127,5 +127,57 @@ public class ExcelExporterTests
 
         Assert.False(ws.Cell(2, 5).HasFormula);
         Assert.Equal(XLDataType.Text, ws.Cell(2, 5).DataType);
+    }
+    private sealed class MixedRow
+    {
+        public bool Active { get; set; }
+        public DateTime When { get; set; }
+        public float Score { get; set; }
+        public object? Missing { get; set; }
+        public Guid Key { get; set; }
+    }
+
+    [Fact]
+    public async Task GivenBooleanDateTimeAndOtherValues_WhenWritingAWorkbook_ThenEachGetsItsNativeCellType()
+    {
+        var key = Guid.NewGuid();
+        using var stream = new MemoryStream();
+        var result = await new ExcelExporter<MixedRow>(new ExcelExportOptions()).WriteAsync(
+            [new MixedRow { Active = true, When = new DateTime(2026, 11, 16, 8, 30, 0), Score = 1.5f, Key = key }],
+            stream, TestContext.Current.CancellationToken);
+        Assert.True(result.Success);
+
+        using var workbook = new XLWorkbook(new MemoryStream(stream.ToArray()));
+        var ws = workbook.Worksheet(1);
+        Assert.Equal(XLDataType.Boolean, ws.Cell(2, 1).DataType);
+        Assert.True(ws.Cell(2, 1).GetBoolean());
+        Assert.Equal(XLDataType.DateTime, ws.Cell(2, 2).DataType);
+        Assert.Equal(new DateTime(2026, 11, 16, 8, 30, 0), ws.Cell(2, 2).GetDateTime());
+        Assert.Equal(1.5, ws.Cell(2, 3).GetDouble());
+        Assert.True(ws.Cell(2, 4).IsEmpty());
+        Assert.Equal(key.ToString(), ws.Cell(2, 5).GetString());
+    }
+
+    [Fact]
+    public async Task GivenANonFiniteSinglePrecisionNumber_WhenWritingAWorkbook_ThenItIsWrittenAsText()
+    {
+        using var stream = new MemoryStream();
+        var result = await new ExcelExporter<MixedRow>(new ExcelExportOptions())
+            .WriteAsync([new MixedRow { Score = float.NaN }], stream, TestContext.Current.CancellationToken);
+        Assert.True(result.Success);
+
+        using var workbook = new XLWorkbook(new MemoryStream(stream.ToArray()));
+        Assert.Equal(XLDataType.Text, workbook.Worksheet(1).Cell(2, 3).DataType);
+        Assert.Equal("NaN", workbook.Worksheet(1).Cell(2, 3).GetString());
+    }
+
+    [Fact]
+    public void GivenAConfigurationDelegate_WhenAddingTheExcelAddOn_ThenTheConfiguredOptionsAreRegistered()
+    {
+        var services = new ServiceCollection();
+        services.AddExcelExport(o => o.SheetName = "Configured");
+        using var provider = services.BuildServiceProvider();
+
+        Assert.Equal("Configured", provider.GetRequiredService<ExcelExportOptions>().SheetName);
     }
 }

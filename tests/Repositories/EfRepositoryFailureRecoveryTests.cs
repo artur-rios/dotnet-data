@@ -35,13 +35,13 @@ public class EfRepositoryFailureRecoveryTests
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<UniqueTestEntity, long>(context);
-        await repo.CreateAsync(new UniqueTestEntity { Email = "a@b.com" });
-        Assert.False((await repo.CreateAsync(new UniqueTestEntity { Email = "a@b.com" })).Success);
+        await repo.CreateAsync(new UniqueTestEntity { Email = "a@b.com" }, TestContext.Current.CancellationToken);
+        Assert.False((await repo.CreateAsync(new UniqueTestEntity { Email = "a@b.com" }, TestContext.Current.CancellationToken)).Success);
 
-        var result = await repo.CreateAsync(new UniqueTestEntity { Email = "c@d.com" });
+        var result = await repo.CreateAsync(new UniqueTestEntity { Email = "c@d.com" }, TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
-        Assert.Equal(2, (await repo.GetAllAsync()).Data!.Count());
+        Assert.Equal(2, (await repo.GetAllAsync(TestContext.Current.CancellationToken)).Data!.Count());
     }
 
     [Fact]
@@ -115,10 +115,10 @@ public class EfRepositoryFailureRecoveryTests
     {
         await using var context = SqliteTestContextFactory.Create();
         var uow = new EfUnitOfWork(context);
-        await using var manual = await uow.BeginTransactionAsync();
+        await using var manual = await uow.BeginTransactionAsync(TestContext.Current.CancellationToken);
 
-        var result = await uow.ExecuteInTransactionAsync(() => Task.CompletedTask);
-        var typed = await uow.ExecuteInTransactionAsync(() => Task.FromResult(1));
+        var result = await uow.ExecuteInTransactionAsync(() => Task.CompletedTask, TestContext.Current.CancellationToken);
+        var typed = await uow.ExecuteInTransactionAsync(() => Task.FromResult(1), TestContext.Current.CancellationToken);
         var typedSync = uow.ExecuteInTransaction(() => 1);
 
         Assert.False(result.Success);

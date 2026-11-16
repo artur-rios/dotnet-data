@@ -15,11 +15,11 @@ public class MessagePackExporterTests
         var options = new MessagePackOptions();
         using var stream = new MemoryStream();
 
-        var result = await new MessagePackExporter<Widget>(options).WriteAsync(input, stream);
+        var result = await new MessagePackExporter<Widget>(options).WriteAsync(input, stream, TestContext.Current.CancellationToken);
         Assert.True(result.Success);
 
         stream.Position = 0;
-        var output = await MessagePackSerializer.DeserializeAsync<Widget[]>(stream, options.Effective);
+        var output = await MessagePackSerializer.DeserializeAsync<Widget[]>(stream, options.Effective, TestContext.Current.CancellationToken);
         Assert.Equal(input, output);
     }
 
@@ -28,10 +28,24 @@ public class MessagePackExporterTests
     {
         var options = new MessagePackOptions();
         using var stream = new MemoryStream();
-        await new MessagePackExporter<Widget>(options).WriteAsync([], stream);
+        await new MessagePackExporter<Widget>(options).WriteAsync([], stream, TestContext.Current.CancellationToken);
 
         stream.Position = 0;
-        var output = await MessagePackSerializer.DeserializeAsync<Widget[]>(stream, options.Effective);
+        var output = await MessagePackSerializer.DeserializeAsync<Widget[]>(stream, options.Effective, TestContext.Current.CancellationToken);
         Assert.Empty(output);
+    }
+    [Fact]
+    public async Task GivenRecordsThatAreNotAnArray_WhenWritingMessagePack_ThenTheCollectionRoundTrips()
+    {
+        var input = new List<Widget> { new() { Id = 1, Name = "a", Price = 2m } };
+        using var stream = new MemoryStream();
+
+        var result = await new MessagePackExporter<Widget>(new MessagePackOptions())
+            .WriteAsync(input.Where(_ => true), stream, TestContext.Current.CancellationToken);
+
+        Assert.True(result.Success);
+        var output = MessagePackSerializer.Deserialize<Widget[]>(stream.ToArray(), new MessagePackOptions().Effective,
+            TestContext.Current.CancellationToken);
+        Assert.Equal(input, output);
     }
 }

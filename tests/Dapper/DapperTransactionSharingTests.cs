@@ -24,7 +24,7 @@ public class DapperTransactionSharingTests
             await repo.CreateAsync(new TestEntity { Name = "inside-tx" });
             var rows = await dapper.QueryAsync<ItemRow>("SELECT Id, Name FROM Items");
             return rows.Data!.Count();
-        });
+        }, TestContext.Current.CancellationToken);
 
         Assert.True(seen.Success);
         Assert.Equal(1, seen.Data); // Dapper saw the uncommitted EF insert via the shared connection+transaction
@@ -42,9 +42,9 @@ public class DapperTransactionSharingTests
         {
             await repo.CreateAsync(new TestEntity { Name = "doomed" });
             throw new InvalidOperationException("force rollback");
-        });
+        }, TestContext.Current.CancellationToken);
 
-        var after = await dapper.QueryAsync<ItemRow>("SELECT Id, Name FROM Items");
+        var after = await dapper.QueryAsync<ItemRow>("SELECT Id, Name FROM Items", ct: TestContext.Current.CancellationToken);
         Assert.True(after.Success);
         Assert.Empty(after.Data!);
     }

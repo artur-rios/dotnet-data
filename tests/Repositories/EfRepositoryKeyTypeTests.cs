@@ -41,10 +41,10 @@ public class EfRepositoryKeyTypeTests
     {
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<GuidKeyedTestEntity, Guid>(context);
-        var id = (await repo.CreateAsync(new GuidKeyedTestEntity { Name = "a" })).Data;
+        var id = (await repo.CreateAsync(new GuidKeyedTestEntity { Name = "a" }, TestContext.Current.CancellationToken)).Data;
         context.ChangeTracker.Clear();
 
-        var result = await repo.GetByIdAsync(id);
+        var result = await repo.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Equal("a", result.Data!.Name);
@@ -97,12 +97,12 @@ public class EfRepositoryKeyTypeTests
         await using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<StringKeyedTestEntity, string>(context);
         var entity = new StringKeyedTestEntity { Id = "sku-002", Name = "a" };
-        await repo.CreateAsync(entity);
+        await repo.CreateAsync(entity, TestContext.Current.CancellationToken);
 
-        var result = await repo.DeleteAsync(entity);
+        var result = await repo.DeleteAsync(entity, TestContext.Current.CancellationToken);
 
         Assert.Equal("sku-002", result.Data);
-        Assert.Null((await repo.GetByIdAsync("sku-002")).Data);
+        Assert.Null((await repo.GetByIdAsync("sku-002", TestContext.Current.CancellationToken)).Data);
     }
 
     [Fact]

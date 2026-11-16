@@ -28,4 +28,16 @@ public class ValueRendererTests
         var value = new DateTime(2026, 7, 7, 13, 5, 0, DateTimeKind.Unspecified);
         Assert.Equal(value.ToString(CultureInfo.InvariantCulture), ValueRenderer.Render(value));
     }
+    [Fact]
+    public void GivenAValueThatIsNotFormattable_WhenRendering_ThenItsToStringIsUsed() =>
+        Assert.Equal("plain", ValueRenderer.Render(new Plain("plain")));
+
+    [Fact]
+    public void GivenAValueWhoseToStringIsNull_WhenRendering_ThenAnEmptyStringComesBack() =>
+        Assert.Equal(string.Empty, ValueRenderer.Render(new Plain(null)));
+
+    private sealed class Plain(string? text)
+    {
+        public override string? ToString() => text;
+    }
 }

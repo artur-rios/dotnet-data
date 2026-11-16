@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace ArturRios.Data.Tests.MySql.TestSupport;
 
 /// <summary>
@@ -6,7 +8,9 @@ namespace ArturRios.Data.Tests.MySql.TestSupport;
 /// </summary>
 public sealed class MySqlFactAttribute : FactAttribute
 {
-    public MySqlFactAttribute()
+    public MySqlFactAttribute([CallerFilePath] string? sourceFilePath = null,
+        [CallerLineNumber] int sourceLineNumber = -1)
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (!MySqlTestServer.IsConfigured)
         {

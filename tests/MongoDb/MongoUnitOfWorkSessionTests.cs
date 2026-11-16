@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Repositories;
 using ArturRios.Data.MongoDb.Transactions;
-using ArturRios.Data.Tests.MongoDb.TestSupport;
+using ArturRios.Data.Tests.TestSupport;
 using ArturRios.Output;
 using MongoDB.Driver;
 

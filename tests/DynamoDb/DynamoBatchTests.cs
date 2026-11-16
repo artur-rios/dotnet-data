@@ -10,8 +10,8 @@ namespace ArturRios.Data.Tests.DynamoDb;
 public class DynamoBatchTests(DynamoLocalFixture fixture) : IAsyncLifetime
 {
     // Hash-only table for batch-get by hash key.
-    public Task InitializeAsync() => fixture.CreateTableAsync("VersionedTestItems", "Id");
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async ValueTask InitializeAsync() => await fixture.CreateTableAsync("VersionedTestItems", "Id");
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     private DynamoRepository<VersionedTestItem> NewRepo() => new(fixture.CreateContext());
 
@@ -22,13 +22,13 @@ public class DynamoBatchTests(DynamoLocalFixture fixture) : IAsyncLifetime
         var a = new VersionedTestItem { Id = "a", Name = "A" };
         var b = new VersionedTestItem { Id = "b", Name = "B" };
 
-        Assert.True((await repo.SaveManyAsync([a, b])).Success);
+        Assert.True((await repo.SaveManyAsync([a, b], TestContext.Current.CancellationToken)).Success);
 
-        var loaded = await repo.LoadManyAsync(["a", "b"]);
+        var loaded = await repo.LoadManyAsync(["a", "b"], TestContext.Current.CancellationToken);
         Assert.True(loaded.Success);
         Assert.Equal(2, loaded.Data!.Count());
 
-        Assert.True((await repo.DeleteManyAsync([a, b])).Success);
-        Assert.Empty((await repo.LoadManyAsync(["a", "b"])).Data!);
+        Assert.True((await repo.DeleteManyAsync([a, b], TestContext.Current.CancellationToken)).Success);
+        Assert.Empty((await repo.LoadManyAsync(["a", "b"], TestContext.Current.CancellationToken)).Data!);
     }
 }

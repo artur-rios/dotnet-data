@@ -1,7 +1,10 @@
+using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ArturRios.Data.Dapper;
 using ArturRios.Data.Tests.TestSupport;
+using Microsoft.Extensions.Logging;
 
 namespace ArturRios.Data.Tests.Dapper;
 
@@ -25,7 +28,7 @@ public class DapperSqlQueryAsyncTests
         Seed(context, "a", "b");
         var sut = new DapperSqlQuery(context);
 
-        var result = await sut.QueryAsync<ItemRow>("SELECT Id, Name FROM Items ORDER BY Id");
+        var result = await sut.QueryAsync<ItemRow>("SELECT Id, Name FROM Items ORDER BY Id", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Equal(["a", "b"], result.Data!.Select(r => r.Name));
@@ -38,7 +41,7 @@ public class DapperSqlQueryAsyncTests
         var sut = new DapperSqlQuery(context);
 
         var result =
-            await sut.QueryFirstOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Id = @Id", new { Id = 999 });
+            await sut.QueryFirstOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Id = @Id", new { Id = 999 }, TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Null(result.Data);
@@ -51,8 +54,7 @@ public class DapperSqlQueryAsyncTests
         Seed(context, "dup", "dup");
         var sut = new DapperSqlQuery(context);
 
-        var result = await sut.QuerySingleOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name",
-            new { Name = "dup" });
+        var result = await sut.QuerySingleOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name", new { Name = "dup" }, TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
@@ -65,7 +67,7 @@ public class DapperSqlQueryAsyncTests
         Seed(context, "a", "b");
         var sut = new DapperSqlQuery(context);
 
-        var result = await sut.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM Items");
+        var result = await sut.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM Items", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Equal(2L, result.Data);
@@ -77,10 +79,49 @@ public class DapperSqlQueryAsyncTests
         await using var context = SqliteTestContextFactory.Create();
         var sut = new DapperSqlQuery(context);
 
-        var result = await sut.QueryAsync<ItemRow>("SELECT Id, Name FROM NoSuchTable");
+        var result = await sut.QueryAsync<ItemRow>("SELECT Id, Name FROM NoSuchTable", ct: TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.NotEmpty(result.Errors);
+    }
+
+    [Fact]
+    public async Task GivenACancelledToken_WhenQueryingAsynchronously_ThenCancellationPropagatesInsteadOfBeingEnveloped()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var sut = new DapperSqlQuery(context);
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            sut.QueryAsync<ItemRow>("SELECT Id, Name FROM Items", ct: new CancellationToken(true)));
+    }
+
+    [Fact]
+    public async Task GivenALoggerIsConfigured_WhenAnAsynchronousQueryFails_ThenTheDetailIsLoggedAndTheEnvelopeStaysGeneric()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var logger = new ListLogger<DapperSqlQuery>();
+        var sut = new DapperSqlQuery(context, logger);
+
+        var result = await sut.ExecuteScalarAsync<long>("SELECT COUNT(*) FROM NoSuchTable", ct: TestContext.Current.CancellationToken);
+
+        Assert.Equal(["A data-access error occurred."], result.Errors);
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Error, entry.Level);
+        Assert.Contains("NoSuchTable", entry.Message);
+    }
+
+    [Fact]
+    public async Task GivenOneMatchingRow_WhenQueryingSingleOrDefaultAsynchronously_ThenTheRowComesBack()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        Seed(context, "only");
+        var sut = new DapperSqlQuery(context);
+
+        var result = await sut.QuerySingleOrDefaultAsync<ItemRow>("SELECT Id, Name FROM Items WHERE Name = @Name",
+            new { Name = "only" }, TestContext.Current.CancellationToken);
+
+        Assert.True(result.Success);
+        Assert.Equal("only", result.Data!.Name);
     }
 
     private sealed record ItemRow(long Id, string Name);

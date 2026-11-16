@@ -15,11 +15,11 @@ public class JsonExporterTests
         var input = new[] { new Widget { Id = 1, Name = "a", Price = 2.5m }, new Widget { Id = 2, Name = "b", Price = 3m } };
         using var stream = new MemoryStream();
 
-        var result = await new JsonExporter<Widget>(new JsonOptions()).WriteAsync(input, stream);
+        var result = await new JsonExporter<Widget>(new JsonOptions()).WriteAsync(input, stream, TestContext.Current.CancellationToken);
         Assert.True(result.Success);
 
         stream.Position = 0;
-        var output = await JsonSerializer.DeserializeAsync<List<Widget>>(stream);
+        var output = await JsonSerializer.DeserializeAsync<List<Widget>>(stream, cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(input, output);
     }
 
@@ -27,7 +27,7 @@ public class JsonExporterTests
     public async Task GivenNoRecords_WhenWritingJson_ThenAnEmptyArrayIsWritten()
     {
         using var stream = new MemoryStream();
-        await new JsonExporter<Widget>(new JsonOptions()).WriteAsync([], stream);
+        await new JsonExporter<Widget>(new JsonOptions()).WriteAsync([], stream, TestContext.Current.CancellationToken);
         Assert.Equal("[]", Encoding.UTF8.GetString(stream.ToArray()));
     }
 
@@ -36,7 +36,7 @@ public class JsonExporterTests
     {
         using var stream = new MemoryStream();
         await new JsonExporter<Widget>(new JsonOptions { WriteIndented = true })
-            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 1m }], stream);
+            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 1m }], stream, TestContext.Current.CancellationToken);
 
         Assert.Contains("\n", Encoding.UTF8.GetString(stream.ToArray()));
     }

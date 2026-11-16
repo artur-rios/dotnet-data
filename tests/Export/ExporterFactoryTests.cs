@@ -32,4 +32,11 @@ public class ExporterFactoryTests
         var factory = BuildFactory();
         Assert.Throws<NotSupportedException>(() => factory.Resolve<Widget>(ExportFormat.Excel));
     }
+    [Fact]
+    public void GivenAFormatThatIsNotDefined_WhenResolvingAnExporter_ThenItIsRejected()
+    {
+        var factory = BuildFactory();
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => factory.Resolve<Widget>((ExportFormat)99));
+    }
 }

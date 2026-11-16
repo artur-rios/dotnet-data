@@ -11,8 +11,8 @@ namespace ArturRios.Data.Tests.DynamoDb;
 [Trait("Category", "Functional")]
 public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
 {
-    public Task InitializeAsync() => fixture.CreateTableAsync("TestItems", "Category", "Sku");
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async ValueTask InitializeAsync() => await fixture.CreateTableAsync("TestItems", "Category", "Sku");
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     private DynamoRepository<TestItem> NewRepo() => new(fixture.CreateContext());
 
@@ -20,11 +20,11 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
     public async Task GivenItemsUnderOnePartitionKey_WhenQueryingByIt_ThenThoseItemsComeBack()
     {
         var repo = NewRepo();
-        await repo.SaveAsync(new TestItem { Category = "q", Sku = "a", Name = "A" });
-        await repo.SaveAsync(new TestItem { Category = "q", Sku = "b", Name = "B" });
-        await repo.SaveAsync(new TestItem { Category = "other", Sku = "c", Name = "C" });
+        await repo.SaveAsync(new TestItem { Category = "q", Sku = "a", Name = "A" }, TestContext.Current.CancellationToken);
+        await repo.SaveAsync(new TestItem { Category = "q", Sku = "b", Name = "B" }, TestContext.Current.CancellationToken);
+        await repo.SaveAsync(new TestItem { Category = "other", Sku = "c", Name = "C" }, TestContext.Current.CancellationToken);
 
-        var result = await repo.QueryAsync("q");
+        var result = await repo.QueryAsync("q", TestContext.Current.CancellationToken);
         Assert.True(result.Success);
         Assert.Equal(2, result.Data!.Count());
     }
@@ -33,10 +33,10 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
     public async Task GivenASortKeyCondition_WhenQuerying_ThenOnlyMatchingItemsComeBack()
     {
         var repo = NewRepo();
-        await repo.SaveAsync(new TestItem { Category = "q2", Sku = "a", Name = "A" });
-        await repo.SaveAsync(new TestItem { Category = "q2", Sku = "z", Name = "Z" });
+        await repo.SaveAsync(new TestItem { Category = "q2", Sku = "a", Name = "A" }, TestContext.Current.CancellationToken);
+        await repo.SaveAsync(new TestItem { Category = "q2", Sku = "z", Name = "Z" }, TestContext.Current.CancellationToken);
 
-        var result = await repo.QueryAsync("q2", QueryOperator.BeginsWith, ["a"]);
+        var result = await repo.QueryAsync("q2", QueryOperator.BeginsWith, ["a"], TestContext.Current.CancellationToken);
         Assert.True(result.Success);
         Assert.Single(result.Data!);
         Assert.Equal("A", result.Data!.Single().Name);
@@ -46,10 +46,10 @@ public class DynamoQueryScanTests(DynamoLocalFixture fixture) : IAsyncLifetime
     public async Task GivenAScanCondition_WhenScanning_ThenOnlyMatchingItemsComeBack()
     {
         var repo = NewRepo();
-        await repo.SaveAsync(new TestItem { Category = "s", Sku = "a", Name = "keep" });
-        await repo.SaveAsync(new TestItem { Category = "s", Sku = "b", Name = "drop" });
+        await repo.SaveAsync(new TestItem { Category = "s", Sku = "a", Name = "keep" }, TestContext.Current.CancellationToken);
+        await repo.SaveAsync(new TestItem { Category = "s", Sku = "b", Name = "drop" }, TestContext.Current.CancellationToken);
 
-        var result = await repo.ScanAsync([new ScanCondition("Name", ScanOperator.Equal, "keep")]);
+        var result = await repo.ScanAsync([new ScanCondition("Name", ScanOperator.Equal, "keep")], TestContext.Current.CancellationToken);
         Assert.True(result.Success);
         Assert.Single(result.Data!);
     }

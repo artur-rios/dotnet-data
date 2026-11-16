@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Sourced by ci/test.sh and ci/coverage.sh (not run on its own): what the GitHub runner gave the tests and the pinned
+# Sourced by ci/coverage.sh (not run on its own): what the GitHub runner gave the tests and the pinned
 # .NET SDK image does not have.
 #
 #   ensure_java          a Java runtime, for the DynamoDB functional tests (they download DynamoDB Local and start it

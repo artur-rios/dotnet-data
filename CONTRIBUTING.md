@@ -28,7 +28,7 @@ dotnet build src/ArturRios.Data.sln
 
 ## Testing
 
-The test suite is xUnit, and every test is named with the Given / When / Then pattern. Every test class
+The test suite is xUnit v3, and every test is named with the Given / When / Then pattern. Every test class
 carries a `Category` trait, so the three kinds can be run — and reported — separately:
 
 ```bash
@@ -48,16 +48,18 @@ ARTURRIOS_DATA_MYSQL_TEST_CONNECTION="Server=localhost;Port=3306;User ID=root;Pa
 
 The user in that connection string must be able to create and drop databases: each run creates a
 throwaway `arturrios_data_test_<guid>` database and drops it afterwards, so no existing schema is
-touched. The `test` check runs the three one after the other, and all three must pass before a pull request can be
-merged. It is `ci/test.sh`, which you can run on your machine as well, with Docker: it starts a MySQL 8.0 container for
-the integration tests (unless `ARTURRIOS_DATA_MYSQL_TEST_CONNECTION` names a server already), fetches a Java runtime
-when there is none, and fails when an integration test skips.
+touched.
 
-The check also fails when a test has no `Category` trait, since no run would include it, and when
-`dotnet format --verify-no-changes` finds a file to reformat; run `dotnet format src/ArturRios.Data.sln` before pushing.
+CI runs the suite once, in the `coverage` check (`ci/coverage.sh`): every test of the three kinds, with coverage
+collected, and the HTML report that the docs site serves at `/coverage-report/`. Every test must pass, and none may
+skip, before a pull request can be merged. You can run it on your machine as well, with Docker: it starts a MySQL 8.0
+container for the integration tests (unless `ARTURRIOS_DATA_MYSQL_TEST_CONNECTION` names a server already), fetches a
+Java runtime when there is none, and fails when a test skips.
 
-The `coverage` check (`ci/coverage.sh`) runs every test with coverage collected, MySQL included, and makes the HTML
-report that the docs site serves at `/coverage-report/`.
+The `test` check (`ci/test.sh`) runs no test: it fails when `dotnet format --verify-no-changes` finds a file to
+reformat (run `dotnet format src/ArturRios.Data.sln` before pushing), when the solution does not build, and when a
+test has no `Category` trait, since none of the runs above would include it. Running the suite there too would only
+run it twice: each check runs in a container of its own, at the same time as the other, and cannot read its result.
 
 ## Branching and pull requests
 

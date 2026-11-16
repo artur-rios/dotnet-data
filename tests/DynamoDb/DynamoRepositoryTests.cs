@@ -18,13 +18,13 @@ public class UnmappedItem
 [Trait("Category", "Functional")]
 public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await fixture.CreateTableAsync("TestItems", "Category", "Sku");
         await fixture.CreateTableAsync("VersionedTestItems", "Id");
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     private DynamoRepository<TestItem> NewRepo() => new(fixture.CreateContext());
     private DynamoRepository<VersionedTestItem> NewVersionedRepo() => new(fixture.CreateContext());
@@ -34,13 +34,13 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     {
         var repo = NewRepo();
         var item = new TestItem { Category = "books", Sku = "b1", Name = "A" };
-        Assert.True((await repo.SaveAsync(item)).Success);
+        Assert.True((await repo.SaveAsync(item, TestContext.Current.CancellationToken)).Success);
 
-        var found = await repo.LoadAsync("books", "b1");
+        var found = await repo.LoadAsync("books", "b1", TestContext.Current.CancellationToken);
         Assert.True(found.Success);
         Assert.Equal("A", found.Data!.Name);
 
-        var missing = await repo.LoadAsync("books", "nope");
+        var missing = await repo.LoadAsync("books", "nope", TestContext.Current.CancellationToken);
         Assert.True(missing.Success);
         Assert.Null(missing.Data);
     }
@@ -50,11 +50,11 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     {
         var repo = NewRepo();
         var item = new TestItem { Category = "books", Sku = "d1", Name = "A" };
-        await repo.SaveAsync(item);
+        await repo.SaveAsync(item, TestContext.Current.CancellationToken);
 
-        Assert.True((await repo.DeleteAsync(item)).Success);
-        Assert.Null((await repo.LoadAsync("books", "d1")).Data);
-        Assert.True((await repo.DeleteAsync(item)).Success); // deleting again is not an error
+        Assert.True((await repo.DeleteAsync(item, TestContext.Current.CancellationToken)).Success);
+        Assert.Null((await repo.LoadAsync("books", "d1", TestContext.Current.CancellationToken)).Data);
+        Assert.True((await repo.DeleteAsync(item, TestContext.Current.CancellationToken)).Success); // deleting again is not an error
     }
 
     [Fact]
@@ -62,16 +62,16 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     {
         var repo = NewVersionedRepo();
         var item = new VersionedTestItem { Id = Guid.NewGuid().ToString(), Name = "A" };
-        await repo.SaveAsync(item); // first save: item.Version is now set (SDK-managed)
+        await repo.SaveAsync(item, TestContext.Current.CancellationToken); // first save: item.Version is now set (SDK-managed)
 
         // Load a fresh copy and update it — this advances the stored version.
-        var fresh = (await repo.LoadAsync(item.Id)).Data!;
+        var fresh = (await repo.LoadAsync(item.Id, TestContext.Current.CancellationToken)).Data!;
         fresh.Name = "updated";
-        Assert.True((await repo.SaveAsync(fresh)).Success);
+        Assert.True((await repo.SaveAsync(fresh, TestContext.Current.CancellationToken)).Success);
 
         // The original 'item' still holds the pre-update version -> stale.
         item.Name = "late";
-        var conflict = await repo.SaveAsync(item);
+        var conflict = await repo.SaveAsync(item, TestContext.Current.CancellationToken);
 
         Assert.False(conflict.Success);
         Assert.Contains(conflict.Errors, e => e.Contains("Concurrency conflict"));
@@ -82,11 +82,11 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     {
         var repo = NewVersionedRepo();
         var item = new VersionedTestItem { Id = Guid.NewGuid().ToString(), Name = "A" };
-        await repo.SaveAsync(item);
-        var copy = (await repo.LoadAsync(item.Id)).Data!;
-        Assert.True((await repo.DeleteAsync(copy)).Success);
+        await repo.SaveAsync(item, TestContext.Current.CancellationToken);
+        var copy = (await repo.LoadAsync(item.Id, TestContext.Current.CancellationToken)).Data!;
+        Assert.True((await repo.DeleteAsync(copy, TestContext.Current.CancellationToken)).Success);
 
-        var conflict = await repo.DeleteAsync(item);
+        var conflict = await repo.DeleteAsync(item, TestContext.Current.CancellationToken);
 
         Assert.False(conflict.Success);
         Assert.Equal(["Concurrency conflict: the item was modified or removed by another process."], conflict.Errors);
@@ -97,7 +97,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
     {
         // A repository for a type whose table was never created.
         var repo = new DynamoRepository<UnmappedItem>(fixture.CreateContext());
-        var result = await repo.SaveAsync(new UnmappedItem { Id = "x" });
+        var result = await repo.SaveAsync(new UnmappedItem { Id = "x" }, TestContext.Current.CancellationToken);
         Assert.False(result.Success);
         Assert.Equal(["A data-access error occurred."], result.Errors);
     }
@@ -108,7 +108,7 @@ public class DynamoRepositoryTests(DynamoLocalFixture fixture) : IAsyncLifetime
         var logger = new ListLogger<DynamoRepository<UnmappedItem>>();
         var repo = new DynamoRepository<UnmappedItem>(fixture.CreateContext(), logger);
 
-        var result = await repo.SaveAsync(new UnmappedItem { Id = "x" });
+        var result = await repo.SaveAsync(new UnmappedItem { Id = "x" }, TestContext.Current.CancellationToken);
 
         Assert.Equal(["A data-access error occurred."], result.Errors);
 
