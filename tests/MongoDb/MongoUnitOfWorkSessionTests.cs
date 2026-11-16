@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using ArturRios.Data.MongoDb;
 using ArturRios.Data.MongoDb.Repositories;
@@ -48,6 +49,91 @@ public class MongoUnitOfWorkSessionTests
         Assert.False(result.Success);
         Assert.Same(ambient, context.Session);
     }
+
+    public static TheoryData<string> AsyncOverloads => ["Async", "AsyncWithResult"];
+
+    [Theory]
+    [MemberData(nameof(AsyncOverloads))]
+    public async Task GivenAnAlreadyCancelledToken_WhenExecutingAsynchronously_ThenItThrowsWithoutStartingASessionOrRunningTheWork(
+        string overload)
+    {
+        var session = new RecordingSession();
+        var context = NewContext();
+        var sessionsStarted = 0;
+        var client = InterfaceStub.For<IMongoClient>((method, _) =>
+        {
+            if (method.Name is nameof(IMongoClient.StartSession) or nameof(IMongoClient.StartSessionAsync))
+            {
+                sessionsStarted++;
+            }
+
+            return method.Name == nameof(IMongoClient.StartSessionAsync)
+                ? (true, Task.FromResult(session.Handle))
+                : (false, null);
+        });
+        var uow = new MongoUnitOfWork(client, context);
+        var workRan = false;
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            ExecuteAsync(uow, overload, () => workRan = true, new CancellationToken(true)));
+
+        Assert.Equal(0, sessionsStarted);
+        Assert.False(workRan);
+        Assert.False(session.Committed);
+        Assert.Null(context.Session);
+    }
+
+    [Theory]
+    [MemberData(nameof(AsyncOverloads))]
+    public async Task GivenATokenCancelledDuringWorkThatIgnoresIt_WhenExecutingAsynchronously_ThenItAbortsInsteadOfCommitting(
+        string overload)
+    {
+        var session = new RecordingSession();
+        var context = NewContext();
+        var uow = new MongoUnitOfWork(ClientReturning(session.Handle), context);
+        using var cts = new CancellationTokenSource();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            ExecuteAsync(uow, overload, cts.Cancel, cts.Token));
+
+        Assert.True(session.TransactionStarted);
+        Assert.False(session.Committed);
+        Assert.True(session.Aborted);
+        Assert.True(session.Disposed);
+        Assert.Null(context.Session);
+    }
+
+    [Theory]
+    [MemberData(nameof(AsyncOverloads))]
+    public async Task GivenATokenThatIsNeverCancelled_WhenExecutingAsynchronously_ThenItCommits(string overload)
+    {
+        var session = new RecordingSession();
+        var uow = new MongoUnitOfWork(ClientReturning(session.Handle), NewContext());
+        using var cts = new CancellationTokenSource();
+
+        var result = await ExecuteAsync(uow, overload, () => { }, cts.Token);
+
+        Assert.True(result.Success);
+        Assert.True(session.Committed);
+        Assert.False(session.Aborted);
+    }
+
+    private static async Task<ProcessOutput> ExecuteAsync(MongoUnitOfWork uow, string overload, Action work,
+        CancellationToken ct) =>
+        overload switch
+        {
+            "Async" => await uow.ExecuteInTransactionAsync(() =>
+            {
+                work();
+                return Task.CompletedTask;
+            }, ct),
+            "AsyncWithResult" => await uow.ExecuteInTransactionAsync(() =>
+            {
+                work();
+                return Task.FromResult(1);
+            }, ct),
+            _ => throw new ArgumentOutOfRangeException(nameof(overload))
+        };
 
     private static async Task<ProcessOutput> Execute(MongoUnitOfWork uow, string overload, Action work) =>
         overload switch
@@ -104,6 +190,45 @@ public class MongoUnitOfWorkSessionTests
             });
 
         public IClientSessionHandle Handle { get; }
+
+        public bool Disposed { get; private set; }
+    }
+
+    // A session on a replica set that, like the driver on an empty transaction, checks no token: it records
+    // what the unit of work asks of it.
+    private sealed class RecordingSession
+    {
+        public RecordingSession() =>
+            Handle = InterfaceStub.For<IClientSessionHandle>((method, _) =>
+            {
+                switch (method.Name)
+                {
+                    case nameof(IClientSessionHandle.StartTransaction):
+                        TransactionStarted = true;
+                        return (true, null);
+                    case nameof(IClientSessionHandle.CommitTransaction):
+                    case nameof(IClientSessionHandle.CommitTransactionAsync):
+                        Committed = true;
+                        return (false, null);
+                    case nameof(IClientSessionHandle.AbortTransaction):
+                    case nameof(IClientSessionHandle.AbortTransactionAsync):
+                        Aborted = true;
+                        return (false, null);
+                    case nameof(IDisposable.Dispose):
+                        Disposed = true;
+                        return (true, null);
+                    default:
+                        return (false, null);
+                }
+            });
+
+        public IClientSessionHandle Handle { get; }
+
+        public bool TransactionStarted { get; private set; }
+
+        public bool Committed { get; private set; }
+
+        public bool Aborted { get; private set; }
 
         public bool Disposed { get; private set; }
     }

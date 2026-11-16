@@ -83,6 +83,45 @@ public class EfUnitOfWorkTests
     }
 
     [Fact]
+    public async Task GivenAnAlreadyCancelledToken_WhenWorkThatIgnoresItRunsInATransaction_ThenTheWorkNeverRunsAndNothingPersists()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<TestEntity, long>(context);
+        var uow = new EfUnitOfWork(context);
+        var workRan = false;
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            uow.ExecuteInTransactionAsync(async () =>
+            {
+                workRan = true;
+                await repo.CreateAsync(new TestEntity { Name = "doomed" }, CancellationToken.None);
+            }, new CancellationToken(true)));
+
+        Assert.False(workRan);
+        Assert.Null(context.Database.CurrentTransaction);
+        Assert.Empty((await repo.GetAllAsync(TestContext.Current.CancellationToken)).Data!);
+    }
+
+    [Fact]
+    public async Task GivenATokenCancelledDuringWorkThatIgnoresIt_WhenTheTransactionEnds_ThenItRollsBackAndNothingPersists()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<TestEntity, long>(context);
+        var uow = new EfUnitOfWork(context);
+        using var cts = new CancellationTokenSource();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            uow.ExecuteInTransactionAsync(async () =>
+            {
+                await repo.CreateAsync(new TestEntity { Name = "doomed" }, CancellationToken.None);
+                await cts.CancelAsync();
+            }, cts.Token));
+
+        Assert.Null(context.Database.CurrentTransaction);
+        Assert.Empty((await repo.GetAllAsync(TestContext.Current.CancellationToken)).Data!);
+    }
+
+    [Fact]
     public async Task GivenWorkThatReturnsAResult_WhenExecutedInATransactionAsynchronously_ThenItCommitsAndTheResultComesBack()
     {
         await using var context = SqliteTestContextFactory.Create();

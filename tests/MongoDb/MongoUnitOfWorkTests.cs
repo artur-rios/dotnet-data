@@ -252,6 +252,58 @@ public class MongoUnitOfWorkTests(MongoReplicaSetFixture fixture)
     }
 
     [Fact]
+    public async Task GivenAnAlreadyCancelledToken_WhenWorkThatIgnoresItRunsInATransaction_ThenTheWorkNeverRunsAndNothingPersists()
+    {
+        var context = fixture.NewContext(out var client);
+        var repo = new MongoDocumentRepository<TestDoc>(context);
+        var uow = new MongoUnitOfWork(client, context);
+        var workRan = false;
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            uow.ExecuteInTransactionAsync(async () =>
+            {
+                workRan = true;
+                await repo.CreateAsync(new TestDoc { Name = "doomed" }, CancellationToken.None);
+            }, new CancellationToken(true)));
+
+        Assert.False(workRan);
+        Assert.Null(context.Session);
+        Assert.Empty((await repo.GetAllAsync(TestContext.Current.CancellationToken)).Data!);
+    }
+
+    [Fact]
+    public async Task GivenATokenCancelledDuringWorkThatIgnoresIt_WhenTheTransactionEnds_ThenItRollsBackAndNothingPersists()
+    {
+        var context = fixture.NewContext(out var client);
+        var repo = new MongoDocumentRepository<TestDoc>(context);
+        var uow = new MongoUnitOfWork(client, context);
+        using var cts = new CancellationTokenSource();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            uow.ExecuteInTransactionAsync(async () =>
+            {
+                await repo.CreateAsync(new TestDoc { Name = "doomed" }, CancellationToken.None);
+                await cts.CancelAsync();
+            }, cts.Token));
+
+        Assert.Null(context.Session);
+        Assert.Empty((await repo.GetAllAsync(TestContext.Current.CancellationToken)).Data!);
+    }
+
+    [Fact]
+    public async Task GivenATokenCancelledDuringWorkThatWritesNothing_WhenTheTransactionEnds_ThenCancellationPropagates()
+    {
+        var context = fixture.NewContext(out var client);
+        var uow = new MongoUnitOfWork(client, context);
+        using var cts = new CancellationTokenSource();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            uow.ExecuteInTransactionAsync(() => cts.CancelAsync(), cts.Token));
+
+        Assert.Null(context.Session);
+    }
+
+    [Fact]
     public void GivenWorkThatIsCancelled_WhenExecutingInASynchronousTransaction_ThenCancellationPropagatesAndNothingPersists()
     {
         var context = fixture.NewContext(out var client);
