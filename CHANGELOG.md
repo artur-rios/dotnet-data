@@ -10,6 +10,15 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+### Fixed
+
+- `ArturRios.Data.MongoDb`: `MongoUnitOfWork.ExecuteInTransactionAsync` honours its cancellation token as the
+  relational unit of work does. An already-canceled token throws `OperationCanceledException` before a session is
+  started or the work runs, and a token canceled during work that did not observe it aborts the transaction instead
+  of committing it. Before, the work ran on an already-canceled token, and the transaction committed wherever the
+  MongoDB driver did not check the token itself: it checks none when it starts a session or commits an empty
+  transaction.
+
 ## [ArturRios.Data.Relational.Core 5.0.2] - 2026-11-14
 
 ### Changed
