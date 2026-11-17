@@ -81,7 +81,8 @@ if [ "$project_version" != "$version" ]; then
 fi
 echo "ci/pack.sh: packing $package $version from $csproj"
 
-# Only what this run packs is in artifacts/ (the test check's results are kept elsewhere under it).
+# Only what this run packs is in artifacts/: a previous pack's packages are removed first. No check writes there
+# (the tests run once, in the `coverage` check, whose results are under coverage/ and coverage-report/).
 rm -f artifacts/*.nupkg artifacts/*.snupkg
 dotnet restore "$csproj"
 dotnet pack "$csproj" --configuration Release --no-restore --output artifacts
