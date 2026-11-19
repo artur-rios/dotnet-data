@@ -189,7 +189,13 @@ public class ProductService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWo
         unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var first = await repo.CreateAsync(a);
-            await repo.CreateAsync(b);
+            var second = await repo.CreateAsync(b);
+
+            // A repository returns a failed write on its envelope instead of throwing. Throw, so the unit of work
+            // rolls back: returning would commit `a` even though `b` failed.
+            if (!first.Success || !second.Success)
+                throw new InvalidOperationException(string.Join(", ", first.Errors.Concat(second.Errors)));
+
             return first.Data;
         });
 }

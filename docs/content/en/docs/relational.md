@@ -159,8 +159,8 @@ var page = repo.Query()
 ## 6. Transactions (unit of work)
 
 `AddDataConfigFromSettings` also registers `IUnitOfWork` / `IAsyncUnitOfWork`. Run several repository operations
-atomically with the delegate helper — it commits on success and rolls back on any exception, returning
-an envelope:
+atomically with the delegate helper — it commits when the delegate returns and rolls back when it throws,
+returning an envelope:
 
 ```csharp
 using ArturRios.Data.Relational.Core.Transactions;
@@ -171,7 +171,13 @@ public class OrderService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWork
         unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var first = await repo.CreateAsync(a);
-            await repo.CreateAsync(b);
+            var second = await repo.CreateAsync(b);
+
+            // A repository returns a failed write on its envelope instead of throwing. Throw, so the unit of work
+            // rolls back: returning would commit `a` even though `b` failed.
+            if (!first.Success || !second.Success)
+                throw new InvalidOperationException(string.Join(", ", first.Errors.Concat(second.Errors)));
+
             return first.Data;
         });
 }
@@ -180,6 +186,25 @@ public class OrderService(IAsyncRepository<Product, long> repo, IAsyncUnitOfWork
 Every failure comes back on the envelope, including one to start the transaction (no connection, or a
 transaction already open on the context). After a rollback the context's change tracker is cleared, since
 the database kept none of the transaction's writes.
+
+The unit of work rolls back when the delegate **throws**, not when a repository call inside it returns a failed
+envelope: repositories never throw for a failed write, and EF Core undoes only that write's own changes, so the
+transaction is still healthy and commits the writes before it. Check each envelope and throw, as above. An
+exception of your own comes back as the generic data-access error; to return the failed write's own message
+instead (a unique-key conflict, say), drive the transaction yourself and commit only when every write succeeded —
+disposing an uncommitted handle rolls it back:
+
+```csharp
+await using var transaction = await unitOfWork.BeginTransactionAsync();
+var first = await repo.CreateAsync(a);
+var second = await repo.CreateAsync(b);
+
+if (!first.Success || !second.Success)
+    return first.Success ? second : first; // not committed: disposing the handle rolls back
+
+await transaction.CommitAsync();
+return first;
+```
 
 A failed repository write outside a transaction leaves the context usable as well: the rejected changes are
 discarded, so the next write does not replay them, and a `VersionedEntity<TKey>` keeps the stamp the

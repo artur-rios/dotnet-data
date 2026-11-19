@@ -28,8 +28,10 @@ public static class ColumnMap
 
     private static IReadOnlyList<Column> Build(Type type)
     {
+        // A public getter, not just a readable property: CanRead is also true for { private get; set; }, and the
+        // compiled getter would read a member the type keeps to itself, such as a write-only password hash.
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.CanRead && p.GetIndexParameters().Length == 0
+            .Where(p => p.GetGetMethod() is not null && p.GetIndexParameters().Length == 0
                         && p.GetCustomAttribute<ExportIgnoreAttribute>() is null);
 
         var planned = properties.Select(p =>

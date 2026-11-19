@@ -89,7 +89,7 @@ Full surface:
 |---|---|
 | `SaveAsync(item)` | Put (create or replace); returns the item |
 | `LoadAsync(hashKey)` / `LoadAsync(hashKey, rangeKey)` | Get by key; not-found is a successful null |
-| `DeleteAsync(item)` | Delete (idempotent); returns `ProcessOutput` |
+| `DeleteAsync(item)` | Delete (idempotent, except that a `[DynamoDBVersion]` item's version is checked); returns `ProcessOutput` |
 | `QueryAsync(hashKey)` | All items in a partition |
 | `QueryAsync(hashKey, op, sortValues)` | Partition + a sort-key condition (`QueryOperator`) |
 | `ScanAsync(conditions)` | Full-table scan with `ScanCondition`s — **use sparingly** |

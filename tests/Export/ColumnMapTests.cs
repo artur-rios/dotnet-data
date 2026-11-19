@@ -40,4 +40,23 @@ public class ColumnMapTests
     {
         Assert.Same(ColumnMap.For<Widget>(), ColumnMap.For<Widget>());
     }
+
+    private sealed class Account
+    {
+        public string Name { get; set; } = "ana";
+
+        public string PasswordHash { private get; set; } = "secret";
+
+        public string Region { internal get; set; } = "eu";
+
+        public string Display => Name + PasswordHash + Region;
+    }
+
+    [Fact]
+    public void GivenAPropertyWhoseGetterIsNotPublic_WhenBuildingTheColumnMap_ThenItIsExcluded()
+    {
+        var headers = ColumnMap.For<Account>().Select(c => c.Header).ToArray();
+
+        Assert.Equal(new[] { "Name", "Display" }, headers);
+    }
 }

@@ -119,11 +119,21 @@ public class CatalogService(IAsyncDocumentRepository<Product> repo, IAsyncMongoU
         unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var first = await repo.CreateAsync(a);
-            await repo.CreateAsync(b);
+            var second = await repo.CreateAsync(b);
+
+            // A repository returns a failed write on its envelope instead of throwing. Throw, so the unit of work
+            // aborts: returning would commit `a` even though `b` failed.
+            if (!first.Success || !second.Success)
+                throw new InvalidOperationException(string.Join(", ", first.Errors.Concat(second.Errors)));
+
             return first.Data!;
         });
 }
 ```
+
+The unit of work aborts when the delegate **throws**, not when a repository call inside it returns a failed
+envelope — a stale `UpdateAsync` on a `VersionedDocument`, say, leaves the transaction open — so check each
+envelope and throw, as above. An exception of your own comes back as the generic data-access error.
 
 > Transactions require a **replica set**. On a standalone server the call writes nothing and returns
 > `Success == false` with the generic data-access error, like any other enveloped failure. The context's ambient

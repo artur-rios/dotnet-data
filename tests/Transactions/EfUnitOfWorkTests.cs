@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Data.Relational.Core.Transactions;
 using ArturRios.Data.Tests.TestSupport;
+using ArturRios.Output;
 
 namespace ArturRios.Data.Tests.Transactions;
 
@@ -63,6 +64,80 @@ public class EfUnitOfWorkTests
 
         Assert.False(result.Success);
         Assert.Equal(["Conflict: a record with the same unique value already exists."], result.Errors);
+    }
+
+    // A repository reports a failed write on its envelope rather than throwing, and the unit of work rolls back
+    // only when the work throws: the documented examples check each write's envelope and throw on a failure.
+    [Fact]
+    public async Task GivenAFailedRepositoryWriteWhoseEnvelopeIsIgnored_WhenExecutedInATransaction_ThenTheEarlierWriteCommits()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<UniqueTestEntity, long>(context);
+        var uow = new EfUnitOfWork(context);
+        await repo.CreateAsync(new UniqueTestEntity { Email = "taken@b.com" }, TestContext.Current.CancellationToken);
+
+        var result = await uow.ExecuteInTransactionAsync(async () =>
+        {
+            await repo.CreateAsync(new UniqueTestEntity { Email = "new@b.com" }, TestContext.Current.CancellationToken);
+            await repo.CreateAsync(new UniqueTestEntity { Email = "taken@b.com" }, TestContext.Current.CancellationToken);
+        }, TestContext.Current.CancellationToken);
+
+        Assert.True(result.Success);
+        Assert.Contains(context.UniqueItems, item => item.Email == "new@b.com");
+    }
+
+    [Fact]
+    public async Task GivenAFailedRepositoryWriteTheWorkThrowsOn_WhenExecutedInATransaction_ThenNothingCommits()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<UniqueTestEntity, long>(context);
+        var uow = new EfUnitOfWork(context);
+        await repo.CreateAsync(new UniqueTestEntity { Email = "taken@b.com" }, TestContext.Current.CancellationToken);
+
+        var result = await uow.ExecuteInTransactionAsync(async () =>
+        {
+            var first = await repo.CreateAsync(new UniqueTestEntity { Email = "new@b.com" }, TestContext.Current.CancellationToken);
+            var second = await repo.CreateAsync(new UniqueTestEntity { Email = "taken@b.com" }, TestContext.Current.CancellationToken);
+
+            if (!first.Success || !second.Success)
+            {
+                throw new InvalidOperationException(string.Join(", ", first.Errors.Concat(second.Errors)));
+            }
+
+            return first.Data;
+        }, TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
+        Assert.DoesNotContain(context.UniqueItems, item => item.Email == "new@b.com");
+        Assert.Single(context.UniqueItems);
+    }
+
+    [Fact]
+    public async Task GivenAFailedRepositoryWrite_WhenTheTransactionIsLeftUncommitted_ThenNothingCommitsAndItsEnvelopeIsKept()
+    {
+        await using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<UniqueTestEntity, long>(context);
+        var uow = new EfUnitOfWork(context);
+        await repo.CreateAsync(new UniqueTestEntity { Email = "taken@b.com" }, TestContext.Current.CancellationToken);
+
+        DataOutput<long> result;
+        await using (var transaction = await uow.BeginTransactionAsync(TestContext.Current.CancellationToken))
+        {
+            var first = await repo.CreateAsync(new UniqueTestEntity { Email = "new@b.com" }, TestContext.Current.CancellationToken);
+            var second = await repo.CreateAsync(new UniqueTestEntity { Email = "taken@b.com" }, TestContext.Current.CancellationToken);
+
+            if (first.Success && second.Success)
+            {
+                await transaction.CommitAsync(TestContext.Current.CancellationToken);
+            }
+
+            result = second.Success ? first : second;
+        }
+
+        context.ChangeTracker.Clear();
+        Assert.False(result.Success);
+        Assert.Equal(["Conflict: a record with the same unique value already exists."], result.Errors);
+        Assert.DoesNotContain(context.UniqueItems, item => item.Email == "new@b.com");
     }
 
     [Fact]

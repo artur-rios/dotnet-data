@@ -3,7 +3,10 @@ namespace ArturRios.Data.DynamoDb.Configuration;
 /// <summary>Connection options for the DynamoDB store.</summary>
 public class DynamoOptions
 {
-    /// <summary>AWS region system name (e.g. "us-east-1"). Ignored when <see cref="ServiceUrl" /> is set.</summary>
+    /// <summary>
+    ///     AWS region system name (e.g. "us-east-1"). When <see cref="ServiceUrl" /> is set, it is the region requests
+    ///     are signed for (LocalStack and VPC endpoints check it), and may be left empty.
+    /// </summary>
     public string Region { get; init; } = string.Empty;
 
     /// <summary>Optional service URL for DynamoDB Local / LocalStack (e.g. "http://localhost:8000").</summary>

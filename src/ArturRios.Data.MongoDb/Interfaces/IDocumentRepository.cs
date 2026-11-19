@@ -9,7 +9,12 @@ public interface IDocumentRepository<T> : IDocumentReadOnlyRepository<T> where T
     /// <summary>Inserts a document and returns its id.</summary>
     DataOutput<string> Create(T document);
 
-    /// <summary>Inserts multiple documents and returns their ids.</summary>
+    /// <summary>
+    ///     Inserts multiple documents, in order, and returns their ids. A document without an id is given one
+    ///     before the insert. The insert stops at the first document that fails (a duplicate id, say) and keeps
+    ///     the ones before it, which have their ids, so retrying the same list fails on them: run it in a unit of
+    ///     work to make it all-or-nothing.
+    /// </summary>
     DataOutput<IEnumerable<string>> CreateRange(IEnumerable<T> documents);
 
     /// <summary>

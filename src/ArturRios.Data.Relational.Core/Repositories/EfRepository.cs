@@ -64,7 +64,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     public Task<DataOutput<T>> UpdateAsync(T entity, CancellationToken ct = default) =>
         WriteAsync(async () =>
         {
-            Set.Update(entity);
+            MarkUpdated(entity);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return entity;
@@ -75,7 +75,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
         WriteAsync<IEnumerable<T>>(async () =>
         {
             var list = entities.ToList();
-            Set.UpdateRange(list);
+            list.ForEach(MarkUpdated);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return list;
@@ -85,7 +85,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     public Task<DataOutput<TKey>> DeleteAsync(T entity, CancellationToken ct = default) =>
         WriteAsync(async () =>
         {
-            Set.Remove(entity);
+            MarkDeleted(entity);
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
 
             return entity.Id;
@@ -134,7 +134,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     /// <inheritdoc />
     public DataOutput<T> Update(T entity) => Write(() =>
     {
-        Set.Update(entity);
+        MarkUpdated(entity);
         context.SaveChanges();
         return entity;
     });
@@ -143,7 +143,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     public DataOutput<IEnumerable<T>> UpdateRange(IEnumerable<T> entities) => Write(IEnumerable<T> () =>
     {
         var list = entities.ToList();
-        Set.UpdateRange(list);
+        list.ForEach(MarkUpdated);
         context.SaveChanges();
         return list;
     });
@@ -151,7 +151,7 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
     /// <inheritdoc />
     public DataOutput<TKey> Delete(T entity) => Write(() =>
     {
-        Set.Remove(entity);
+        MarkDeleted(entity);
         context.SaveChanges();
         return entity.Id;
     });
@@ -165,6 +165,60 @@ public class EfRepository<T, TKey>(BaseDbContext context) : IRepository<T, TKey>
         context.SaveChanges();
         return matches.Select(e => e.Id).ToList();
     });
+
+    /// <summary>Tracks <paramref name="entity" /> as modified; see <see cref="TrackAsTheCallersInstance" />.</summary>
+    private void MarkUpdated(T entity)
+    {
+        TrackAsTheCallersInstance(entity);
+        Set.Update(entity);
+        CheckTheCallersStamp(entity);
+    }
+
+    /// <summary>Tracks <paramref name="entity" /> as deleted; see <see cref="TrackAsTheCallersInstance" />.</summary>
+    private void MarkDeleted(T entity)
+    {
+        TrackAsTheCallersInstance(entity);
+        Set.Remove(entity);
+        CheckTheCallersStamp(entity);
+    }
+
+    /// <summary>
+    ///     Lets go of another instance with <paramref name="entity" />'s key that the context tracks, so the write
+    ///     tracks the caller's. The usual request flow reads the row - which tracks it - and then writes an instance
+    ///     mapped from the request: EF Core refuses to track a second instance with the same key, and the write
+    ///     failed with the generic data-access error.
+    /// </summary>
+    private void TrackAsTheCallersInstance(T entity)
+    {
+        if (EqualityComparer<TKey>.Default.Equals(entity.Id, default) || !IsKeyedById())
+        {
+            return;
+        }
+
+        var tracked = Set.Local.FindEntry(entity.Id);
+
+        if (tracked is not null && !ReferenceEquals(tracked.Entity, entity))
+        {
+            tracked.State = EntityState.Detached;
+        }
+    }
+
+    /// <summary>
+    ///     Checks a versioned entity against the stamp the caller holds. For an instance the context loaded, EF Core
+    ///     would check the stamp it read, so a stale stamp the caller set on it - a client's, sent back with its
+    ///     edit - passed, and the write overwrote a change the caller never saw.
+    /// </summary>
+    private void CheckTheCallersStamp(T entity)
+    {
+        if (entity is IVersionedEntity versioned)
+        {
+            context.Entry(entity).Property(nameof(IVersionedEntity.ConcurrencyStamp)).OriginalValue =
+                versioned.ConcurrencyStamp;
+        }
+    }
+
+    private bool IsKeyedById() =>
+        context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties is [{ Name: nameof(Entity<TKey>.Id) }];
 
     /// <summary>
     ///     Maps an exception caught by a guard to an error envelope. Provider text - constraint
