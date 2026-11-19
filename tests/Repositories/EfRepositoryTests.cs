@@ -2,6 +2,7 @@ using System.Linq;
 using ArturRios.Data.Relational.Core.Entities;
 using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Data.Tests.TestSupport;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArturRios.Data.Tests.Repositories;
 
@@ -100,18 +101,57 @@ public class EfRepositoryTests
     }
 
     [Fact]
-    public void GivenSeveralDocuments_WhenDeletingARangeOfIds_ThenOnlyThoseAreRemoved()
+    public void GivenSeveralEntities_WhenDeletingARangeOfIds_ThenOnlyThoseAreRemovedAndOnlyTheirIdsComeBack()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<TestEntity, long>(context);
+        var a = new TestEntity { Name = "a" };
+        var b = new TestEntity { Name = "b" };
+        var c = new TestEntity { Name = "c" };
+        repo.CreateRange([a, b, c]);
+
+        var result = repo.DeleteRange([a.Id, c.Id, 999]);
+
+        Assert.True(result.Success);
+        Assert.Equal([a.Id, c.Id], result.Data!.Order());
+        Assert.Equal("b", Assert.Single(repo.GetAll().Data!).Name);
+    }
+
+    [Fact]
+    public void GivenSeveralExistingEntities_WhenUpdatingTheRange_ThenEveryChangePersists()
     {
         using var context = SqliteTestContextFactory.Create();
         var repo = new EfRepository<TestEntity, long>(context);
         var a = new TestEntity { Name = "a" };
         var b = new TestEntity { Name = "b" };
         repo.CreateRange([a, b]);
+        a.Name = "a2";
+        b.Name = "b2";
 
-        var result = repo.DeleteRange([a.Id, b.Id]);
+        var result = repo.UpdateRange([a, b]);
 
         Assert.True(result.Success);
-        Assert.Empty(repo.GetAll().Data!);
+        Assert.Equal([a, b], result.Data!);
+        context.ChangeTracker.Clear();
+        Assert.Equal(["a2", "b2"], repo.GetAll().Data!.Select(e => e.Name).Order());
+    }
+
+    [Fact]
+    public void GivenARangeWithAnEntityThatDoesNotExist_WhenUpdatingTheRange_ThenAConcurrencyErrorComesBackAndNothingChanges()
+    {
+        using var context = SqliteTestContextFactory.Create();
+        var repo = new EfRepository<TestEntity, long>(context);
+        var a = new TestEntity { Name = "a" };
+        repo.Create(a);
+        a.Name = "a2";
+
+        var result = repo.UpdateRange([a, new TestEntity { Id = 999, Name = "ghost" }]);
+
+        Assert.False(result.Success);
+        Assert.Equal([RelationalErrors.ConcurrencyMessage], result.Errors);
+        Assert.DoesNotContain(context.ChangeTracker.Entries(), e => e.State != EntityState.Unchanged);
+        context.ChangeTracker.Clear();
+        Assert.Equal("a", Assert.Single(repo.GetAll().Data!).Name);
     }
 
     [Fact]

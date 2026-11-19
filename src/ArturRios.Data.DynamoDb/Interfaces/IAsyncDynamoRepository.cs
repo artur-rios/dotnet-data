@@ -20,7 +20,11 @@ public interface IAsyncDynamoRepository<T> where T : class
     /// <summary>Loads an item by partition and sort key, or a successful null when not found.</summary>
     Task<DataOutput<T?>> LoadAsync(object hashKey, object rangeKey, CancellationToken ct = default);
 
-    /// <summary>Deletes the given item (idempotent).</summary>
+    /// <summary>
+    ///     Deletes the given item. Deleting an item that is not there succeeds, except for a <c>[DynamoDBVersion]</c>
+    ///     item, whose version is checked: one already removed, or changed since it was read, is a concurrency
+    ///     conflict.
+    /// </summary>
     Task<ProcessOutput> DeleteAsync(T item, CancellationToken ct = default);
 
     /// <summary>Returns all items with the given partition key.</summary>
@@ -40,7 +44,7 @@ public interface IAsyncDynamoRepository<T> where T : class
     /// </remarks>
     Task<DataOutput<IEnumerable<T>>> SaveManyAsync(IEnumerable<T> items, CancellationToken ct = default);
 
-    /// <summary>Batch-deletes multiple items (idempotent).</summary>
+    /// <summary>Batch-deletes multiple items (idempotent: items that are not there are skipped).</summary>
     /// <remarks>
     ///     Batch writes bypass <c>[DynamoDBVersion]</c> optimistic concurrency, since DynamoDB's batch-write API has no
     ///     conditional-write support; single-item <see cref="DeleteAsync" /> still enforces it.

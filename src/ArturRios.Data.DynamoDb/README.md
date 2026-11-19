@@ -105,7 +105,7 @@ public class ProductService(IAsyncDynamoRepository<Product> repo)
 |---|---|
 | `SaveAsync(item)` | put (create or replace) an item |
 | `LoadAsync(hashKey)` / `LoadAsync(hashKey, rangeKey)` | load by key, or a successful `null` when not found |
-| `DeleteAsync(item)` | delete (idempotent) |
+| `DeleteAsync(item)` | delete (idempotent, except that a `[DynamoDBVersion]` item's version is checked) |
 | `QueryAsync(hashKey)` | all items with a partition key |
 | `QueryAsync(hashKey, op, sortKeyValues)` | partition key plus a sort-key condition |
 | `ScanAsync(conditions)` | full-table scan — use sparingly |

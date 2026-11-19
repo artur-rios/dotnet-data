@@ -5,6 +5,8 @@
 # yggdrasil.yml runs it in the pinned .NET SDK image from the repository's root, with the CI engine's Docker socket
 # (`docker: true`).
 #
+# This is CI's one run of the test suite: the `test` check formats, builds and checks the categories, and runs no
+# test, since yggdrasil runs each check in a container of its own and one check cannot read another's result.
 # Every test category runs, the MySQL integration tests among them: ci/services.sh gives them the workflow's MySQL
 # server (started with the Docker engine unless ARTURRIOS_DATA_MYSQL_TEST_CONNECTION names one) and the DynamoDB
 # tests a Java runtime. As in the workflow, a test that skips fails the check, since it would under-report coverage
@@ -43,6 +45,7 @@ start_mysql
 # Raw results go to coverage/ and the report to coverage-report/: neither is committed.
 rm -rf coverage coverage-report
 dotnet test "$SOLUTION" --configuration Release --collect:"XPlat Code Coverage" \
+  --logger "console;verbosity=normal" \
   --logger "trx;LogFileName=coverage-tests.trx" --results-directory coverage
 fail_if_skipped coverage/coverage-tests.trx "Tests"
 stop_mysql

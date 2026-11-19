@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace ArturRios.Data.Tests.TestSupport;
 
@@ -9,13 +10,15 @@ namespace ArturRios.Data.Tests.TestSupport;
 /// </summary>
 public static class SqliteTestContextFactory
 {
-    public static TestDbContext Create()
+    /// <param name="interceptors">EF Core interceptors to add, e.g. to make a save fail a given way.</param>
+    public static TestDbContext Create(params IInterceptor[] interceptors)
     {
         var connection = new SqliteConnection("Filename=:memory:");
         connection.Open();
 
         var options = new DbContextOptionsBuilder<TestDbContext>()
             .UseSqlite(connection)
+            .AddInterceptors(interceptors)
             .Options;
 
         var context = new TestDbContext(options);

@@ -42,9 +42,14 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
     // server), the work and the commit — runs inside the guard, so a failure is enveloped like any other and
     // the finally always restores the caller's ambient session before the session is disposed. The session is
     // made ambient only once its transaction has started.
+    // The token is checked before the session starts and again before the commit: the driver checks it in
+    // neither place (nor when it commits an empty transaction), so without these an already-canceled token, or
+    // one canceled during work that ignored it, would still commit. The relational unit of work honours both.
     private async Task<TOutput> RunAsync<TOutput>(Func<Task<TOutput>> work, Func<string, TOutput> fail,
         CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
+
         var previousSession = context.Session;
         IClientSessionHandle? session = null;
         try
@@ -53,6 +58,7 @@ public class MongoUnitOfWork(IMongoClient client, MongoContext context) : IMongo
             session.StartTransaction();
             context.Session = session;
             var output = await work().ConfigureAwait(false);
+            ct.ThrowIfCancellationRequested();
             await session.CommitTransactionAsync(ct).ConfigureAwait(false);
             return output;
         }

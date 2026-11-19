@@ -2,10 +2,10 @@ using ArturRios.Data.Relational.Core.Repositories;
 using ArturRios.Data.Tests.TestSupport;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArturRios.Data.Tests.Concurrency;
+namespace ArturRios.Data.Tests.Repositories;
 
 [Trait("Category", "Functional")]
-public class ConcurrencyTests
+public class EfRepositoryConcurrencyTests
 {
     [Fact]
     public void GivenAStaleConcurrencyStamp_WhenUpdating_ThenAConcurrencyErrorIsReturned()

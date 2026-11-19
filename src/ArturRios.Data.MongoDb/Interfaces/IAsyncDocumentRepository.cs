@@ -9,7 +9,12 @@ public interface IAsyncDocumentRepository<T> : IAsyncDocumentReadOnlyRepository<
     /// <summary>Inserts a document and returns its id.</summary>
     Task<DataOutput<string>> CreateAsync(T document, CancellationToken ct = default);
 
-    /// <summary>Inserts multiple documents and returns their ids.</summary>
+    /// <summary>
+    ///     Inserts multiple documents, in order, and returns their ids. A document without an id is given one
+    ///     before the insert. The insert stops at the first document that fails (a duplicate id, say) and keeps
+    ///     the ones before it, which have their ids, so retrying the same list fails on them: run it in a unit of
+    ///     work to make it all-or-nothing.
+    /// </summary>
     Task<DataOutput<IEnumerable<string>>> CreateRangeAsync(IEnumerable<T> documents, CancellationToken ct = default);
 
     /// <summary>

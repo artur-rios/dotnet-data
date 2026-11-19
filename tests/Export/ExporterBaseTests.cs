@@ -40,7 +40,7 @@ public class ExporterBaseTests
     public async Task GivenAWriteThatSucceeds_WhenWritingToAStream_ThenItSucceedsAndTheStreamStaysOpen()
     {
         using var stream = new MemoryStream();
-        var result = await new OkExporter().WriteAsync(["a", "b"], stream);
+        var result = await new OkExporter().WriteAsync(["a", "b"], stream, TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.True(stream.CanWrite); // not disposed
@@ -50,14 +50,14 @@ public class ExporterBaseTests
     public async Task GivenNullData_WhenWritingToAStream_ThenAnErrorEnvelopeComesBack()
     {
         using var stream = new MemoryStream();
-        var result = await new OkExporter().WriteAsync(null!, stream);
+        var result = await new OkExporter().WriteAsync(null!, stream, TestContext.Current.CancellationToken);
         Assert.False(result.Success);
     }
 
     [Fact]
     public async Task GivenANullDestination_WhenWriting_ThenAnErrorEnvelopeComesBack()
     {
-        var result = await new OkExporter().WriteAsync(["a"], null!);
+        var result = await new OkExporter().WriteAsync(["a"], null!, TestContext.Current.CancellationToken);
         Assert.False(result.Success);
     }
 
@@ -65,7 +65,7 @@ public class ExporterBaseTests
     public async Task GivenTheFormatWriterThrows_WhenWritingToAStream_ThenAnErrorEnvelopeComesBack()
     {
         using var stream = new MemoryStream();
-        var result = await new ThrowingExporter().WriteAsync(["a"], stream);
+        var result = await new ThrowingExporter().WriteAsync(["a"], stream, TestContext.Current.CancellationToken);
         Assert.False(result.Success);
         Assert.Equal(["An export error occurred."], result.Errors);
     }
@@ -76,7 +76,7 @@ public class ExporterBaseTests
         var path = Path.Combine(Path.GetTempPath(), $"export-{Guid.NewGuid():N}.txt");
         try
         {
-            var result = await new ThrowingExporter().WriteToFileAsync(["a"], path);
+            var result = await new ThrowingExporter().WriteToFileAsync(["a"], path, TestContext.Current.CancellationToken);
 
             Assert.Equal(["An export error occurred."], result.Errors);
             Assert.All(result.Errors, e => Assert.DoesNotContain(path, e));
@@ -90,7 +90,7 @@ public class ExporterBaseTests
         using var stream = new MemoryStream();
         var logger = new ListLogger<ExporterBase<string>>();
 
-        var result = await new LoggingThrowingExporter(logger).WriteAsync(["a"], stream);
+        var result = await new LoggingThrowingExporter(logger).WriteAsync(["a"], stream, TestContext.Current.CancellationToken);
 
         Assert.Equal(["An export error occurred."], result.Errors);
 
@@ -105,7 +105,7 @@ public class ExporterBaseTests
     {
         using var stream = new MemoryStream();
         await Assert.ThrowsAsync<OperationCanceledException>(
-            () => new CancelExporter().WriteAsync(["a"], stream));
+            () => new CancelExporter().WriteAsync(["a"], stream, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -114,9 +114,9 @@ public class ExporterBaseTests
         var path = Path.Combine(Path.GetTempPath(), $"export-{Guid.NewGuid():N}.txt");
         try
         {
-            var result = await new OkExporter().WriteToFileAsync(["hello"], path);
+            var result = await new OkExporter().WriteToFileAsync(["hello"], path, TestContext.Current.CancellationToken);
             Assert.True(result.Success);
-            Assert.Equal("hello", await File.ReadAllTextAsync(path));
+            Assert.Equal("hello", await File.ReadAllTextAsync(path, TestContext.Current.CancellationToken));
         }
         finally { if (File.Exists(path)) File.Delete(path); }
     }
@@ -128,12 +128,12 @@ public class ExporterBaseTests
         var path = Path.Combine(directory, "out.txt");
         try
         {
-            await File.WriteAllTextAsync(path, "original");
+            await File.WriteAllTextAsync(path, "original", TestContext.Current.CancellationToken);
 
-            var result = await new ThrowingExporter().WriteToFileAsync(["a"], path);
+            var result = await new ThrowingExporter().WriteToFileAsync(["a"], path, TestContext.Current.CancellationToken);
 
             Assert.False(result.Success);
-            Assert.Equal("original", await File.ReadAllTextAsync(path));
+            Assert.Equal("original", await File.ReadAllTextAsync(path, TestContext.Current.CancellationToken));
             Assert.Equal([path], Directory.GetFiles(directory));
         }
         finally { Directory.Delete(directory, recursive: true); }
@@ -146,12 +146,12 @@ public class ExporterBaseTests
         var path = Path.Combine(directory, "out.txt");
         try
         {
-            await File.WriteAllTextAsync(path, "original");
+            await File.WriteAllTextAsync(path, "original", TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAsync<OperationCanceledException>(
-                () => new CancelExporter().WriteToFileAsync(["a"], path));
+                () => new CancelExporter().WriteToFileAsync(["a"], path, TestContext.Current.CancellationToken));
 
-            Assert.Equal("original", await File.ReadAllTextAsync(path));
+            Assert.Equal("original", await File.ReadAllTextAsync(path, TestContext.Current.CancellationToken));
             Assert.Equal([path], Directory.GetFiles(directory));
         }
         finally { Directory.Delete(directory, recursive: true); }
@@ -164,12 +164,12 @@ public class ExporterBaseTests
         var path = Path.Combine(directory, "out.txt");
         try
         {
-            await File.WriteAllTextAsync(path, "a much longer original content");
+            await File.WriteAllTextAsync(path, "a much longer original content", TestContext.Current.CancellationToken);
 
-            var result = await new OkExporter().WriteToFileAsync(["new"], path);
+            var result = await new OkExporter().WriteToFileAsync(["new"], path, TestContext.Current.CancellationToken);
 
             Assert.True(result.Success);
-            Assert.Equal("new", await File.ReadAllTextAsync(path));
+            Assert.Equal("new", await File.ReadAllTextAsync(path, TestContext.Current.CancellationToken));
             Assert.Equal([path], Directory.GetFiles(directory));
         }
         finally { Directory.Delete(directory, recursive: true); }
@@ -180,7 +180,36 @@ public class ExporterBaseTests
     {
         var path = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}", "out.txt");
 
-        var result = await new OkExporter().WriteToFileAsync(["a"], path);
+        var result = await new OkExporter().WriteToFileAsync(["a"], path, TestContext.Current.CancellationToken);
+
+        Assert.Equal(["An export error occurred."], result.Errors);
+    }
+    [Fact]
+    public async Task GivenNullData_WhenWritingToAFile_ThenAnErrorEnvelopeComesBackAndNoFileIsCreated()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"export-{Guid.NewGuid():N}.txt");
+
+        var result = await new OkExporter().WriteToFileAsync(null!, path, TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
+        Assert.False(File.Exists(path));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task GivenNoPath_WhenWritingToAFile_ThenAnErrorEnvelopeComesBack(string? path)
+    {
+        var result = await new OkExporter().WriteToFileAsync(["a"], path!, TestContext.Current.CancellationToken);
+
+        Assert.False(result.Success);
+        Assert.NotEmpty(result.Errors);
+    }
+
+    [Fact]
+    public async Task GivenAPathTheFileSystemRejects_WhenWritingToAFile_ThenTheGenericErrorComesBackWithoutThrowing()
+    {
+        var result = await new OkExporter().WriteToFileAsync(["a"], "bad\0name.txt", TestContext.Current.CancellationToken);
 
         Assert.Equal(["An export error occurred."], result.Errors);
     }

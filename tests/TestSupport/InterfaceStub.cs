@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace ArturRios.Data.Tests.MongoDb.TestSupport;
+namespace ArturRios.Data.Tests.TestSupport;
 
 /// <summary>
 ///     Minimal interface test double built on <see cref="DispatchProxy" />: each call is routed to a handler
