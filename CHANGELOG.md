@@ -10,6 +10,12 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+### Changed
+
+- `ArturRios.Data.DynamoDb`: `AWSSDK.DynamoDBv2` updated from 4.0.110.3 to 4.1.0.2.
+- `ArturRios.Data.Relational.Core`, `ArturRios.Data.MongoDb`, `ArturRios.Data.DynamoDb` and `ArturRios.Data.Export`:
+  `ArturRios.Output` updated from 3.3.1 to 3.3.2.
+
 ### Fixed
 
 - `ArturRios.Data.MongoDb`: `MongoUnitOfWork.ExecuteInTransactionAsync` honours its cancellation token as the
@@ -18,6 +24,31 @@ section, headed `[<PackageId> <version>]`, newest first.
   of committing it. Before, the work ran on an already-canceled token, and the transaction committed wherever the
   MongoDB driver did not check the token itself: it checks none when it starts a session or commits an empty
   transaction.
+- `ArturRios.Data.Relational.Core`: `Update`, `UpdateRange` and `Delete` (and their async forms) write an instance
+  mapped from a request after the row was read on the same context, the usual `GetByIdAsync` then
+  `UpdateAsync(new Product { Id = id, … })`. EF Core refused to track a second instance with the key it already
+  tracked, so the write returned the generic data-access error; the instance the context tracked is now let go and
+  the caller's is written.
+- `ArturRios.Data.Relational.Core`: an update or delete of a `VersionedEntity<TKey>` is checked against the
+  `ConcurrencyStamp` the caller's instance holds. For an instance the context had loaded, the stamp checked was the
+  one it read, so a stale stamp set on it, such as one a client sent back with its edit, passed the check, and the
+  write overwrote another writer's change instead of returning the concurrency-conflict error.
+- `ArturRios.Data.Export.Excel`: `ExcelExporter` writes to a stream that refuses synchronous writes, such as ASP.NET
+  Core's `HttpResponse.Body` (`AllowSynchronousIO` is off by default). ClosedXML saves with synchronous writes, so
+  such an export always returned the generic export error; the workbook is now saved to memory and copied to the
+  stream asynchronously. An already-canceled token also cancels an export with no records.
+- `ArturRios.Data.Export`: CSV and Excel exports leave out a property whose getter is not public, such as
+  `public string PasswordHash { private get; set; }`, as the docs' "public readable properties" say and as the JSON
+  export already did. Its value was written to every export.
+- `ArturRios.Data.Relational.Core` and `ArturRios.Data.MongoDb`: the documentation's transaction examples check each
+  repository call's envelope and throw on a failure. A repository returns a failed write on its envelope instead
+  of throwing, and the unit of work rolls back only when the work throws, so the examples committed the first
+  write when the second failed. The guides say so, and show `BeginTransactionAsync` for keeping the failed write's
+  own message.
+- `ArturRios.Data.DynamoDb`: the docs say a `[DynamoDBVersion]` item's `DeleteAsync` checks its version, instead of
+  calling every delete idempotent, and that `DynamoOptions.Region` is the signing region when `ServiceUrl` is set,
+  instead of ignored.
+- `ArturRios.Data.MongoDb`: `CreateRange` documents that it is not atomic outside a unit of work.
 
 ## [ArturRios.Data.Relational.Core 5.0.2] - 2026-11-14
 
