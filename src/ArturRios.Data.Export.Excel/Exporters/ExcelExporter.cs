@@ -14,8 +14,10 @@ public class ExcelExporter<T>(ExcelExportOptions options, ILogger<ExcelExporter<
     : ExporterBase<T>(logger) where T : class
 {
     /// <inheritdoc />
-    protected override Task WriteCoreAsync(IEnumerable<T> data, Stream destination, CancellationToken ct)
+    protected override async Task WriteCoreAsync(IEnumerable<T> data, Stream destination, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
+
         var columns = ColumnMap.For<T>();
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add(options.SheetName);
@@ -50,8 +52,13 @@ public class ExcelExporter<T>(ExcelExportOptions options, ILogger<ExcelExporter<
             worksheet.Columns().AdjustToContents();
         }
 
-        workbook.SaveAs(destination);
-        return Task.CompletedTask;
+        // ClosedXML saves with synchronous writes, which a stream such as ASP.NET Core's response body refuses
+        // (AllowSynchronousIO is off by default). The workbook is saved to memory, where it is built anyway, and
+        // copied to the destination asynchronously.
+        using var buffer = new MemoryStream();
+        workbook.SaveAs(buffer);
+        buffer.Position = 0;
+        await buffer.CopyToAsync(destination, ct).ConfigureAwait(false);
     }
 
     // Built-in number format 14: the short date in the reader's locale.

@@ -180,4 +180,50 @@ public class ExcelExporterTests
 
         Assert.Equal("Configured", provider.GetRequiredService<ExcelExportOptions>().SheetName);
     }
+
+    public static TheoryData<ExportFormat> Formats =>
+        [ExportFormat.Csv, ExportFormat.Json, ExportFormat.Txt, ExportFormat.MessagePack, ExportFormat.Excel];
+
+    [Theory]
+    [MemberData(nameof(Formats))]
+    public async Task GivenAStreamThatRefusesSynchronousWrites_WhenExporting_ThenTheExportSucceeds(ExportFormat format)
+    {
+        var services = new ServiceCollection();
+        services.AddExport();
+        services.AddExcelExport();
+        var factory = services.BuildServiceProvider().GetRequiredService<IExporterFactory>();
+        var destination = new AsyncOnlyStream();
+
+        var result = await factory.Resolve<Widget>(format)
+            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 2.5m }], destination,
+                TestContext.Current.CancellationToken);
+
+        Assert.True(result.Success, string.Join(", ", result.Errors));
+        Assert.True(destination.Written.Length > 0);
+    }
+
+    [Fact]
+    public async Task GivenAStreamThatRefusesSynchronousWrites_WhenWritingAWorkbook_ThenItIsAWorkbook()
+    {
+        var destination = new AsyncOnlyStream();
+
+        var result = await new ExcelExporter<Widget>(new ExcelExportOptions())
+            .WriteAsync([new Widget { Id = 1, Name = "a", Price = 2.5m }], destination,
+                TestContext.Current.CancellationToken);
+
+        Assert.True(result.Success, string.Join(", ", result.Errors));
+        destination.Written.Position = 0;
+        using var workbook = new XLWorkbook(destination.Written);
+        Assert.Equal("a", workbook.Worksheet(1).Cell(2, 2).GetString());
+    }
+
+    [Fact]
+    public async Task GivenACanceledToken_WhenWritingAnEmptyWorkbook_ThenTheCancellationPropagates()
+    {
+        using var stream = new MemoryStream();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            new ExcelExporter<Widget>(new ExcelExportOptions()).WriteAsync([], stream, new CancellationToken(true)));
+        Assert.Equal(0, stream.Length);
+    }
 }
