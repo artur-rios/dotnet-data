@@ -10,10 +10,59 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+## [ArturRios.Data.Relational.Core 5.0.4] - 2026-11-19
+
 ### Changed
 
-- `ArturRios.Data.Relational.Core`, `ArturRios.Data.MongoDb`, `ArturRios.Data.DynamoDb` and `ArturRios.Data.Export`:
-  `ArturRios.Output` updated from 3.3.2 to 3.3.3.
+- `ArturRios.Output` updated from 3.3.2 to 3.3.3.
+
+## [ArturRios.Data.Sqlite 4.0.3] - 2026-11-19
+
+### Changed
+
+- Depends on `ArturRios.Data.Relational.Core` 5.0.4 instead of 5.0.3.
+
+## [ArturRios.Data.PostgreSql 4.0.3] - 2026-11-19
+
+### Changed
+
+- Depends on `ArturRios.Data.Relational.Core` 5.0.4 instead of 5.0.3.
+
+## [ArturRios.Data.MySql 2.0.3] - 2026-11-19
+
+### Changed
+
+- Depends on `ArturRios.Data.Relational.Core` 5.0.4 instead of 5.0.3.
+
+## [ArturRios.Data.Dapper 5.0.3] - 2026-11-19
+
+### Changed
+
+- Depends on `ArturRios.Data.Relational.Core` 5.0.4 instead of 5.0.3.
+
+## [ArturRios.Data.MongoDb 3.0.3] - 2026-11-19
+
+### Changed
+
+- `ArturRios.Output` updated from 3.3.2 to 3.3.3.
+
+## [ArturRios.Data.DynamoDb 2.0.5] - 2026-11-19
+
+### Changed
+
+- `ArturRios.Output` updated from 3.3.2 to 3.3.3.
+
+## [ArturRios.Data.Export 2.2.3] - 2026-11-19
+
+### Changed
+
+- `ArturRios.Output` updated from 3.3.2 to 3.3.3.
+
+## [ArturRios.Data.Export.Excel 2.1.2] - 2026-11-19
+
+### Changed
+
+- Depends on `ArturRios.Data.Export` 2.2.3 instead of 2.2.2.
 
 ## [ArturRios.Data.Relational.Core 5.0.3] - 2026-11-19
 
@@ -820,7 +869,16 @@ The database schema is unchanged for `long` keys, so no migration is needed.
 - `Entity`, `ICrudRepository`, `IRangeRepository`, `IReadOnlyRepository` and `BaseDbContextOptions`, with XML
   documentation.
 
-[Unreleased]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.3...HEAD
+[Unreleased]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.4...HEAD
+[ArturRios.Data.Relational.Core 5.0.4]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.3...ArturRios.Data.Relational.Core@5.0.4
+[ArturRios.Data.Sqlite 4.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Sqlite@4.0.2...ArturRios.Data.Sqlite@4.0.3
+[ArturRios.Data.PostgreSql 4.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.PostgreSql@4.0.2...ArturRios.Data.PostgreSql@4.0.3
+[ArturRios.Data.MySql 2.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.MySql@2.0.2...ArturRios.Data.MySql@2.0.3
+[ArturRios.Data.Dapper 5.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Dapper@5.0.2...ArturRios.Data.Dapper@5.0.3
+[ArturRios.Data.MongoDb 3.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.MongoDb@3.0.2...ArturRios.Data.MongoDb@3.0.3
+[ArturRios.Data.DynamoDb 2.0.5]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.DynamoDb@2.0.4...ArturRios.Data.DynamoDb@2.0.5
+[ArturRios.Data.Export 2.2.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Export@2.2.2...ArturRios.Data.Export@2.2.3
+[ArturRios.Data.Export.Excel 2.1.2]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Export.Excel@2.1.1...ArturRios.Data.Export.Excel@2.1.2
 [ArturRios.Data.Relational.Core 5.0.3]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Relational.Core@5.0.2...ArturRios.Data.Relational.Core@5.0.3
 [ArturRios.Data.Sqlite 4.0.2]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.Sqlite@4.0.1...ArturRios.Data.Sqlite@4.0.2
 [ArturRios.Data.PostgreSql 4.0.2]: https://github.com/artur-rios/dotnet-data/compare/ArturRios.Data.PostgreSql@4.0.1...ArturRios.Data.PostgreSql@4.0.2
