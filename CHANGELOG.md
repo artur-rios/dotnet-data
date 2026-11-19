@@ -10,6 +10,11 @@ section, headed `[<PackageId> <version>]`, newest first.
 
 ## [Unreleased]
 
+### Changed
+
+- `ArturRios.Data.Relational.Core`, `ArturRios.Data.MongoDb`, `ArturRios.Data.DynamoDb` and `ArturRios.Data.Export`:
+  `ArturRios.Output` updated from 3.3.2 to 3.3.3.
+
 ## [ArturRios.Data.Relational.Core 5.0.3] - 2026-11-19
 
 ### Changed

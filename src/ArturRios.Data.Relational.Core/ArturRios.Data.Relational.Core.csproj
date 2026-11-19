@@ -21,7 +21,7 @@
     <Version>5.0.3</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ArturRios.Output" Version="3.3.2" />
+    <PackageReference Include="ArturRios.Output" Version="3.3.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.15"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.15"/>
