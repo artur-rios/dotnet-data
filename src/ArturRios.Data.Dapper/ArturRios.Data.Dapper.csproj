@@ -21,7 +21,7 @@
     <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.89"/>
+    <PackageReference Include="Dapper" Version="2.1.100"/>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15"/>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15"/>
   </ItemGroup>
